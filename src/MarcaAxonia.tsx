@@ -191,6 +191,9 @@ const Letras: React.FC<{ escala: number; brillo: number }> = ({
 // Letters' baseline and the neuron's center, in logo layer pixels.
 const BASE_Y = 535;
 const NEURONA = { x: 921, y: 325 };
+// The iris opens from the middle of the whole word, so both halves appear
+// at the same time.
+const IRIS = { x: LOGO_W / 2, y: NEURONA.y };
 
 // Frame each short entrance has the logo fully in place.
 const ASENTADO: Record<string, number> = {
@@ -404,9 +407,9 @@ const EntradaVariante: React.FC<{
           style={{
             position: "absolute",
             inset: 0,
-            clipPath: `circle(${r}px at ${NEURONA.x}px ${NEURONA.y}px)`,
+            clipPath: `circle(${r}px at ${IRIS.x}px ${IRIS.y}px)`,
             transform: `scale(${1.06 - 0.06 * interpolate(r, [0, 1300], [0, 1], clamp)})`,
-            transformOrigin: `${NEURONA.x}px ${NEURONA.y}px`,
+            transformOrigin: `${IRIS.x}px ${IRIS.y}px`,
           }}
         >
           {LETRAS.filter((l) => l.id !== "O").map((l) => pieza(l, {}))}
@@ -419,8 +422,8 @@ const EntradaVariante: React.FC<{
         <div
           style={{
             position: "absolute",
-            left: NEURONA.x - r,
-            top: NEURONA.y - r,
+            left: IRIS.x - r,
+            top: IRIS.y - r,
             width: r * 2,
             height: r * 2,
             borderRadius: "50%",
