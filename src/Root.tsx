@@ -98,7 +98,7 @@ export const RemotionRoot: React.FC = () => {
         component={SegmentacionCobranzas}
         schema={segmentacionSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
-        durationInFrames={330}
+        durationInFrames={270}
         fps={30}
         width={1080}
         height={1920}

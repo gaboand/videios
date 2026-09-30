@@ -12,8 +12,8 @@ import "@fontsource/montserrat/800.css";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 
-// Collections segmentation (1080x1920, 11s): a 5x5x3 voxel cube (X debt
-// balance, Y days past due, Z score) builds in and slowly turns, opens up
+// Collections segmentation (1080x1920, 9s): a 5x5x3 voxel cube (X debt
+// balance, Y days past due, Z score), already built, slowly turns, opens up
 // by segment, and each segment in turn lights up while a card with the
 // client segment to manage peels off the cube into a 2x2 grid.
 
@@ -107,9 +107,8 @@ const VOXELES = Array.from({ length: 3 }).flatMap((_, z) =>
 );
 
 // Timeline (frames).
-const ARMADO = 10;
-const APERTURA = 85;
-const PRIMERA_CARD = 115;
+const APERTURA = 30;
+const PRIMERA_CARD = 60;
 const ESCALON_CARD = 38;
 const FIN_FOCO = PRIMERA_CARD + ESCALON_CARD * 4;
 
@@ -129,18 +128,10 @@ const Voxel: React.FC<{
   apertura: number;
   foco: SegId | null;
 }> = ({ x, y, z, seg, apertura, foco }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
   const s = SEGMENTOS[seg];
-  // Drop in, back layer first, bottom rows first.
-  const caida = spring({
-    frame: frame - ARMADO - (2 - z) * 12 - y * 3 - x,
-    fps,
-    config: { damping: 15, stiffness: 140 },
-  });
   const [ox, oy, oz] = s.apertura;
   const px = (x - 2) * LADO + ox * apertura;
-  const py = -(y - 2) * LADO + oy * apertura - (1 - caida) * 700;
+  const py = -(y - 2) * LADO + oy * apertura;
   const pz = -(z - 1) * LADO + oz * apertura;
   // Other segments dim while one is in focus.
   const filtro =
@@ -155,7 +146,6 @@ const Voxel: React.FC<{
     border: "1px solid rgba(0,0,0,0.18)",
     boxSizing: "border-box",
     transform,
-    opacity: caida,
     filter: filtro,
   });
   return (
