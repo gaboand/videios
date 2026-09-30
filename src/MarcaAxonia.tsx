@@ -12,7 +12,7 @@ import {
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 
-// Brand piece (1080x1920, 6s): the white Axonia logo on the animated
+// Brand piece (1080x1920): the white Axonia logo on the animated
 // background with two crossed axons beneath it. The logo comes in, the
 // axons draw out from the crossing, their endpoints light up, and light
 // pulses then travel along them like signals.
@@ -20,6 +20,9 @@ import { FondoAbstracto } from "./FondoAbstracto";
 export const marcaSchema = z.object({
   fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
   paleta: z.enum(["azul", "gris"]),
+  // "zoom": the whole logo springs in. "ola": the letters come in from the
+  // right one behind the other, riding a wave in depth, and settle.
+  entrada: z.enum(["zoom", "ola"]),
 });
 
 // Logo layers (see LogoAxonia) and their size.
@@ -65,19 +68,105 @@ const EXTREMOS = [
 ];
 const COLOR_AXON = "#dbe4ee";
 
+// Logo pieces for the "ola" entrance: x range of each letter in the logo
+// layers (public/letras/*.png are these crops at full logo height). The
+// "O" is the neuron symbol.
+const LETRAS = [
+  { id: "A1", x: 0, w: 411 },
+  { id: "X", x: 411, w: 335 },
+  { id: "O", x: 640, w: 572 },
+  { id: "N", x: 1190, w: 326 },
+  { id: "I", x: 1516, w: 110 },
+  { id: "A2", x: 1626, w: 402 },
+];
+// Wave the word rides on its way in. It is fixed in screen space, so each
+// letter goes through the same crests the letter before it went through,
+// while the whole word keeps its spacing. It fades out near the end.
+const OLA = {
+  desde: 4, // frame the word starts moving
+  duracion: 100, // frames until it settles
+  recorrido: 1350, // start offset to the right, in screen px
+  largo: 520, // wavelength in screen px
+  alto: 70, // vertical amplitude in screen px
+  profundidad: 0.38, // scale swing: away (smaller) and back (bigger)
+  giro: 0.35, // neuron spin, degrees per screen px still to travel
+};
+
 // Timeline (frames).
 const LOGO_DESDE = 6;
-const AXON_DESDE = 28;
 const AXON_DUR = 26;
-const PULSOS_DESDE = 60;
 const PULSO_DUR = 40;
+
+const Letras: React.FC<{ escala: number; brillo: number }> = ({
+  escala,
+  brillo,
+}) => {
+  const frame = useCurrentFrame();
+  const avance = interpolate(
+    frame,
+    [OLA.desde, OLA.desde + OLA.duracion],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.bezier(0.3, 0.1, 0.25, 1),
+    },
+  );
+  // Screen px the word still has to travel, and how much wave is left.
+  const resta = OLA.recorrido * (1 - avance);
+  const envolvente = interpolate(resta, [0, 420], [0, 1], {
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.sin),
+  });
+
+  return (
+    <>
+      {LETRAS.map((l) => {
+        // Where this letter is on screen right now.
+        const xFinal = 540 + (l.x + l.w / 2 - LOGO_W / 2) * escala;
+        const fase = ((xFinal + resta) / OLA.largo) * Math.PI * 2;
+        const y = Math.sin(fase) * OLA.alto * envolvente;
+        const s = 1 + Math.cos(fase) * OLA.profundidad * envolvente;
+        const lejos = Math.max(0, 1 - s);
+        return (
+          <Img
+            key={l.id}
+            src={staticFile(`letras/${l.id}.png`)}
+            style={{
+              position: "absolute",
+              left: l.x,
+              top: 0,
+              width: l.w,
+              height: LOGO_H,
+              zIndex: Math.round(s * 100),
+              transformOrigin: "50% 50%",
+              transform: `translate(${resta / escala}px, ${y / escala}px) scale(${s}) rotate(${
+                l.id === "O" ? -resta * OLA.giro : 0
+              }deg)`,
+              // Farther letters look dimmer and softer.
+              filter: `blur(${lejos * 10}px) brightness(${1 - lejos * 0.6})${
+                l.id === "O"
+                  ? ` drop-shadow(0 0 ${brillo}px rgba(125,211,252,0.85))`
+                  : ""
+              }`,
+            }}
+          />
+        );
+      })}
+    </>
+  );
+};
 
 export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
   fondo,
   paleta,
+  entrada,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  // The axons start once the logo is in place.
+  const AXON_DESDE = entrada === "ola" ? OLA.desde + OLA.duracion - 4 : 28;
+  const PULSOS_DESDE = AXON_DESDE + 32;
 
   const logo = spring({
     frame: frame - LOGO_DESDE,
@@ -123,18 +212,26 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
           top: LOGO_Y,
           width: LOGO_W,
           height: LOGO_H,
-          opacity: logo,
-          transform: `translate(-50%, -50%) scale(${escalaLogo * (0.8 + logo * 0.2)})`,
+          opacity: entrada === "ola" ? 1 : logo,
+          transform: `translate(-50%, -50%) scale(${
+            escalaLogo * (entrada === "ola" ? 1 : 0.8 + logo * 0.2)
+          })`,
         }}
       >
-        <Img src={staticFile("axonia-letras.png")} style={capa} />
-        <Img
-          src={staticFile("axonia-icono.png")}
-          style={{
-            ...capa,
-            filter: `drop-shadow(0 0 ${brillo}px rgba(125,211,252,0.85))`,
-          }}
-        />
+        {entrada === "ola" ? (
+          <Letras escala={escalaLogo} brillo={brillo} />
+        ) : (
+          <>
+            <Img src={staticFile("axonia-letras.png")} style={capa} />
+            <Img
+              src={staticFile("axonia-icono.png")}
+              style={{
+                ...capa,
+                filter: `drop-shadow(0 0 ${brillo}px rgba(125,211,252,0.85))`,
+              }}
+            />
+          </>
+        )}
       </div>
       {/* Crossed axons */}
       <svg
