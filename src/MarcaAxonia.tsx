@@ -31,8 +31,8 @@ const LOGO_Y = 880;
 // Crossed axons: two S-curves that cross at the center, drawn in a box of
 // AXON_W x AXON_H centered under the logo.
 const AXON_W = 440;
-const AXON_H = 220;
-const AXON_Y = 1160;
+const AXON_H = 187;
+const AXON_Y = 1144;
 // Each axon reaches past its endpoints: from the crossing it sweeps out
 // to its highest (or lowest) point, then curls back inward to an endpoint
 // that sits lower (top ends) or higher (bottom ends) than the line itself.
