@@ -43,17 +43,17 @@ const H = AXON_H;
 const PICO = 5; // distance of the line's extreme from the box edge
 const FIN_X = 18; // endpoints pulled inward
 const FIN_Y = 32; // endpoints below the top extreme (above the bottom one)
+// Endpoints nudged outward (top ones up, bottom ones down); the lines end
+// exactly at the center of each endpoint dot.
+const AJUSTE_PUNTO = 13;
 const axon = (y: (v: number) => number) =>
   [
-    `M ${FIN_X} ${y(FIN_Y)}`,
+    `M ${FIN_X} ${y(FIN_Y - AJUSTE_PUNTO)}`,
     `C 4 ${y(16)}, 24 ${y(PICO)}, 70 ${y(PICO)}`,
     `C 170 ${y(PICO)}, ${W - 170} ${y(H - PICO)}, ${W - 70} ${y(H - PICO)}`,
-    `C ${W - 24} ${y(H - PICO)}, ${W - 4} ${y(H - 16)}, ${W - FIN_X} ${y(H - FIN_Y)}`,
+    `C ${W - 24} ${y(H - PICO)}, ${W - 4} ${y(H - 16)}, ${W - FIN_X} ${y(H - FIN_Y + AJUSTE_PUNTO)}`,
   ].join(" ");
 const AXONES = [axon((v) => v), axon((v) => H - v)];
-// Endpoint dots: nudged a little outward (top ones up, bottom ones down)
-// from where the lines end, without moving the lines.
-const AJUSTE_PUNTO = 10;
 const EXTREMOS = [
   [FIN_X, FIN_Y - AJUSTE_PUNTO],
   [W - FIN_X, H - FIN_Y + AJUSTE_PUNTO],
