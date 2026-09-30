@@ -47,26 +47,26 @@ const enPantalla = (x: number, y: number) => ({
 const KPIS = [
   {
     etiqueta: "Altas",
-    valor: 24,
+    valor: 64,
     formato: (n: number) => `${Math.round(n)}`,
     origen: [1390, 110],
   },
   {
     etiqueta: "Monto altas",
-    valor: 3.2,
+    valor: 48.5,
     formato: (n: number) =>
       `$ ${n.toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`,
     origen: [1540, 110],
   },
   {
     etiqueta: "Pagos",
-    valor: 39,
+    valor: 125,
     formato: (n: number) => `${Math.round(n)}`,
     origen: [1670, 110],
   },
   {
     etiqueta: "Monto pagos",
-    valor: 2.7,
+    valor: 18.7,
     formato: (n: number) =>
       `$ ${n.toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`,
     origen: [1815, 110],
@@ -98,10 +98,10 @@ const MODULO_DESDE = 88;
 const MODULO_ESCALON = 6;
 
 // Destination layout.
-const KPI_Y = 920;
+const KPI_Y = 965;
 const KPI_W = 206;
 const KPI_GAP = 12;
-const LISTA_Y = 1080;
+const LISTA_Y = 1125;
 const CHIP_W = 434;
 const CHIP_H = 70;
 const CHIP_GAP = 12;
@@ -160,7 +160,7 @@ const Kpi: React.FC<{ i: number }> = ({ i }) => {
       >
         {k.etiqueta}
       </div>
-      <div style={{ fontSize: 36, fontWeight: 800, color: "white" }}>
+      <div style={{ fontSize: 32, fontWeight: 800, color: "white" }}>
         {k.formato(conteo)}
       </div>
     </div>
@@ -379,6 +379,26 @@ export const CoreHome: React.FC<z.infer<typeof coreHomeSchema>> = ({
           r={24}
         />
       ))}
+      {/* Section title over the indicators */}
+      <div
+        style={{
+          position: "absolute",
+          top: KPI_Y - 52,
+          width: "100%",
+          textAlign: "center",
+          fontSize: 22,
+          fontWeight: 700,
+          letterSpacing: 4,
+          textTransform: "uppercase",
+          color: TEXTO_2,
+          opacity: interpolate(frame, [KPI_DESDE - 10, KPI_DESDE + 5], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          }),
+        }}
+      >
+        Performance de hoy
+      </div>
       {KPIS.map((k, i) => (
         <Kpi key={k.etiqueta} i={i} />
       ))}
