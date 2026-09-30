@@ -48,6 +48,12 @@ type Nodo = {
 };
 
 const CX = 540;
+// The diagram is drawn at full size in 1080x1920 coordinates and shown at
+// ESCALA. Title + scaled diagram (320 to ~1770, i.e. ~870px at 60%) form one
+// block centered vertically.
+const ESCALA = 0.6;
+const TITULO_TOP = 435;
+const DIAGRAMA_TOP = 615;
 const NODOS: Nodo[] = [
   {
     id: "inicio",
@@ -381,7 +387,7 @@ export const WorkflowAxonia: React.FC<z.infer<typeof workflowSchema>> = ({
       <div
         style={{
           position: "absolute",
-          top: 150,
+          top: TITULO_TOP,
           width: "100%",
           textAlign: "center",
           fontFamily: FUENTE,
@@ -405,100 +411,111 @@ export const WorkflowAxonia: React.FC<z.infer<typeof workflowSchema>> = ({
           Estrategia de originación
         </div>
       </div>
-      {/* Connections */}
-      <svg viewBox="0 0 1080 1920" style={{ position: "absolute", inset: 0 }}>
-        {ARISTAS.map((a, i) => {
-          const p = interpolate(
-            frame,
-            [a.desde, a.desde + DUR_ARISTA],
-            [0, 1],
-            {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-            },
-          );
-          const l = getLength(a.d);
-          const fin = getPointAtLength(a.d, l);
-          return (
-            <g key={i}>
-              <path
-                d={a.d}
-                stroke={LINEA}
-                strokeWidth={3}
-                fill="none"
-                strokeDasharray={`${l} ${l}`}
-                strokeDashoffset={l * (1 - p)}
-              />
-              {p >= 1 && fin ? (
-                <Punta x={fin.x} y={fin.y} dir={a.flecha} />
-              ) : null}
-              {a.rotulo ? (
-                <g opacity={p}>
-                  <rect
-                    x={a.rotulo.x - (a.rotulo.texto.length * 9 + 22) / 2}
-                    y={a.rotulo.y - 17}
-                    width={a.rotulo.texto.length * 9 + 22}
-                    height={34}
-                    rx={17}
-                    fill="rgba(22,24,29,0.9)"
-                    stroke="rgba(255,255,255,0.2)"
-                  />
-                  <text
-                    x={a.rotulo.x}
-                    y={a.rotulo.y + 7}
-                    fill="white"
-                    fontFamily={FUENTE}
-                    fontWeight={700}
-                    fontSize={18}
-                    textAnchor="middle"
-                  >
-                    {a.rotulo.texto}
-                  </text>
-                </g>
-              ) : null}
-            </g>
-          );
-        })}
-      </svg>
-      {/* The request running through the flow, behind the nodes */}
-      {enCurso ? (
-        <div
-          style={{
-            position: "absolute",
-            left: punto.x,
-            top: punto.y,
-            width: 26,
-            height: 26,
-            borderRadius: "50%",
-            background: ACENTO,
-            transform: "translate(-50%, -50%)",
-            boxShadow: `0 0 24px 8px rgba(255,140,66,0.7)`,
-          }}
-        />
-      ) : null}
-      {NODOS.map((n) => (
-        <NodoVista key={n.id} n={n} brillo={brillo(n)} />
-      ))}
-      {/* Decision time badge */}
+      {/* Diagram at ESCALA, centered horizontally; its top (the start node,
+          y = 360 - 40) is moved to DIAGRAMA_TOP, just under the title. */}
       <div
         style={{
           position: "absolute",
-          left: CX,
-          top: 1712,
-          transform: `translate(-50%, 0) scale(${badge})`,
-          opacity: badge,
-          fontFamily: FUENTE,
-          fontWeight: 700,
-          fontSize: 26,
-          color: ACENTO,
-          background: "rgba(255,140,66,0.12)",
-          border: `2px solid rgba(255,140,66,0.5)`,
-          borderRadius: 999,
-          padding: "10px 26px",
-          whiteSpace: "nowrap",
+          inset: 0,
+          transformOrigin: `${CX}px 320px`,
+          transform: `translateY(${DIAGRAMA_TOP - 320}px) scale(${ESCALA})`,
         }}
       >
-        Decisión en 0,8 segundos
+        {/* Connections */}
+        <svg viewBox="0 0 1080 1920" style={{ position: "absolute", inset: 0 }}>
+          {ARISTAS.map((a, i) => {
+            const p = interpolate(
+              frame,
+              [a.desde, a.desde + DUR_ARISTA],
+              [0, 1],
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              },
+            );
+            const l = getLength(a.d);
+            const fin = getPointAtLength(a.d, l);
+            return (
+              <g key={i}>
+                <path
+                  d={a.d}
+                  stroke={LINEA}
+                  strokeWidth={3}
+                  fill="none"
+                  strokeDasharray={`${l} ${l}`}
+                  strokeDashoffset={l * (1 - p)}
+                />
+                {p >= 1 && fin ? (
+                  <Punta x={fin.x} y={fin.y} dir={a.flecha} />
+                ) : null}
+                {a.rotulo ? (
+                  <g opacity={p}>
+                    <rect
+                      x={a.rotulo.x - (a.rotulo.texto.length * 9 + 22) / 2}
+                      y={a.rotulo.y - 17}
+                      width={a.rotulo.texto.length * 9 + 22}
+                      height={34}
+                      rx={17}
+                      fill="rgba(22,24,29,0.9)"
+                      stroke="rgba(255,255,255,0.2)"
+                    />
+                    <text
+                      x={a.rotulo.x}
+                      y={a.rotulo.y + 7}
+                      fill="white"
+                      fontFamily={FUENTE}
+                      fontWeight={700}
+                      fontSize={18}
+                      textAnchor="middle"
+                    >
+                      {a.rotulo.texto}
+                    </text>
+                  </g>
+                ) : null}
+              </g>
+            );
+          })}
+        </svg>
+        {/* The request running through the flow, behind the nodes */}
+        {enCurso ? (
+          <div
+            style={{
+              position: "absolute",
+              left: punto.x,
+              top: punto.y,
+              width: 26,
+              height: 26,
+              borderRadius: "50%",
+              background: ACENTO,
+              transform: "translate(-50%, -50%)",
+              boxShadow: `0 0 24px 8px rgba(255,140,66,0.7)`,
+            }}
+          />
+        ) : null}
+        {NODOS.map((n) => (
+          <NodoVista key={n.id} n={n} brillo={brillo(n)} />
+        ))}
+        {/* Decision time badge */}
+        <div
+          style={{
+            position: "absolute",
+            left: CX,
+            top: 1712,
+            transform: `translate(-50%, 0) scale(${badge})`,
+            opacity: badge,
+            fontFamily: FUENTE,
+            fontWeight: 700,
+            fontSize: 26,
+            color: ACENTO,
+            background: "rgba(255,140,66,0.12)",
+            border: `2px solid rgba(255,140,66,0.5)`,
+            borderRadius: 999,
+            padding: "10px 26px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Decisión en 0,8 segundos
+        </div>
       </div>
     </AbsoluteFill>
   );
