@@ -70,7 +70,7 @@ const NODOS: Nodo[] = [
     y: 540,
     w: 450,
     texto: "Consultas Bases y Bureau",
-    aparece: 12,
+    aparece: 11,
   },
   {
     id: "dec1",
@@ -79,7 +79,7 @@ const NODOS: Nodo[] = [
     y: 760,
     w: 240,
     texto: "Situación\n< 2",
-    aparece: 22,
+    aparece: 19,
   },
   {
     id: "rechazo",
@@ -88,7 +88,7 @@ const NODOS: Nodo[] = [
     y: 760,
     w: 230,
     texto: "Rechazo\nautomático",
-    aparece: 31,
+    aparece: 27,
   },
   {
     id: "score",
@@ -97,7 +97,7 @@ const NODOS: Nodo[] = [
     y: 980,
     w: 400,
     texto: "Score de riesgo",
-    aparece: 36,
+    aparece: 32,
   },
   {
     id: "dec2",
@@ -106,7 +106,7 @@ const NODOS: Nodo[] = [
     y: 1200,
     w: 240,
     texto: "¿Score\n≥ 650?",
-    aparece: 45,
+    aparece: 40,
   },
   {
     id: "revision",
@@ -115,7 +115,7 @@ const NODOS: Nodo[] = [
     y: 1200,
     w: 230,
     texto: "Revisión\nanalista",
-    aparece: 55,
+    aparece: 48,
   },
   {
     id: "matriz",
@@ -124,7 +124,7 @@ const NODOS: Nodo[] = [
     y: 1420,
     w: 400,
     texto: "Asignar límite y TNA",
-    aparece: 59,
+    aparece: 52,
   },
   {
     id: "aprobado",
@@ -133,7 +133,7 @@ const NODOS: Nodo[] = [
     y: 1620,
     w: 400,
     texto: "Aprobado · Oferta enviada",
-    aparece: 69,
+    aparece: 61,
   },
 ];
 const RECT_H = 100;
@@ -149,47 +149,47 @@ type Arista = {
 // Orthogonal connections between node edges (rect half-height 50,
 // diamond half-diagonal 120).
 const ARISTAS: Arista[] = [
-  { d: `M ${CX} 400 L ${CX} 490`, desde: 7, flecha: "abajo" },
-  { d: `M ${CX} 590 L ${CX} 640`, desde: 17, flecha: "abajo" },
+  { d: `M ${CX} 400 L ${CX} 490`, desde: 6, flecha: "abajo" },
+  { d: `M ${CX} 590 L ${CX} 640`, desde: 15, flecha: "abajo" },
   {
     d: `M 660 760 L 740 760`,
-    desde: 26,
+    desde: 23,
     flecha: "derecha",
     rotulo: { texto: "No", x: 700, y: 728 },
   },
   {
     d: `M ${CX} 880 L ${CX} 930`,
-    desde: 31,
+    desde: 27,
     flecha: "abajo",
     rotulo: { texto: "Sí", x: 580, y: 905 },
   },
-  { d: `M ${CX} 1030 L ${CX} 1080`, desde: 40, flecha: "abajo" },
+  { d: `M ${CX} 1030 L ${CX} 1080`, desde: 35, flecha: "abajo" },
   {
     d: `M 420 1200 L 340 1200`,
-    desde: 50,
+    desde: 44,
     flecha: "izquierda",
     rotulo: { texto: "No", x: 380, y: 1168 },
   },
   {
     d: `M ${CX} 1320 L ${CX} 1370`,
-    desde: 55,
+    desde: 48,
     flecha: "abajo",
     rotulo: { texto: "Sí", x: 580, y: 1345 },
   },
   {
     d: `M 225 1250 L 225 1420 L 340 1420`,
-    desde: 59,
+    desde: 52,
     flecha: "derecha",
     rotulo: { texto: "Aprueba", x: 225, y: 1335 },
   },
-  { d: `M ${CX} 1470 L ${CX} 1570`, desde: 65, flecha: "abajo" },
+  { d: `M ${CX} 1470 L ${CX} 1570`, desde: 57, flecha: "abajo" },
 ];
 const DUR_ARISTA = 8;
 
 // The request's path through the approved branch, and when it runs.
 const RECORRIDO = `M ${CX} 360 L ${CX} 1620`;
-const RECORRIDO_DESDE = 100;
-const RECORRIDO_DUR = 70;
+const RECORRIDO_DESDE = 84;
+const RECORRIDO_DUR = 35;
 const BADGE = RECORRIDO_DESDE + RECORRIDO_DUR + 5;
 
 const Punta: React.FC<{ x: number; y: number; dir: Arista["flecha"] }> = ({
