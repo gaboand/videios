@@ -24,6 +24,9 @@ export const modulosSchema = z.object({
 
 const FUENTE = "Montserrat, sans-serif";
 const CELESTE = "#38bdf8";
+// Warm accent for the title's second word (icon accents use it too, baked
+// in by scripts/extraer-iconos.py).
+const ACENTO = "#EDE0D0";
 
 const COLUMNAS = [
   { x: 86, w: 442 },
@@ -125,7 +128,7 @@ const Encabezado: React.FC = () => {
         }}
       >
         <span style={{ color: "white" }}>Suite </span>
-        <span style={{ color: CELESTE }}>Modular</span>
+        <span style={{ color: ACENTO }}>Modular</span>
       </div>
     </>
   );

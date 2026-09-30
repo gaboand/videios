@@ -12,6 +12,8 @@ DIR = Path(__file__).resolve().parent.parent / "public" / "modulos"
 CENTROS = [(270, 613), (673, 613), (270, 897), (673, 897),
            (270, 1180), (673, 1180), (270, 1450), (673, 1450)]
 R = 70
+# Color for the icons' accents (dots, $ badge, AI chip), originally blue.
+ACENTO = (237, 224, 208)  # #EDE0D0
 
 img = np.array(Image.open(DIR / "original.webp").convert("RGB")).astype(np.float32)
 for n, (cx, cy) in enumerate(CENTROS, start=1):
@@ -28,7 +30,7 @@ for n, (cx, cy) in enumerate(CENTROS, start=1):
     alpha[alpha < 0.08] = 0
     color = np.zeros_like(c)
     color[:] = (255, 255, 255)
-    color = color * (1 - azul[..., None]) + np.array((56, 189, 248)) * azul[..., None]
+    color = color * (1 - azul[..., None]) + np.array(ACENTO) * azul[..., None]
     out = np.dstack([color, alpha * 255]).astype(np.uint8)
     im = Image.fromarray(out, "RGBA")
     im = im.crop(im.getbbox())
