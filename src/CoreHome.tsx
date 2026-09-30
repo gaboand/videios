@@ -76,7 +76,7 @@ const KPIS = [
 // Modules in screen order, with their icon centers in the screenshot.
 const MODULOS: { nombre: string; x: number; y: number }[] = [
   { nombre: "Consultar Préstamos", x: 218, y: 224 },
-  { nombre: "Cliente", x: 648, y: 224 },
+  { nombre: "Clientes", x: 648, y: 224 },
   { nombre: "Alta de Préstamo", x: 1078, y: 224 },
   { nombre: "Tesorería", x: 1508, y: 214 },
   { nombre: "Operaciones", x: 218, y: 374 },
@@ -85,9 +85,9 @@ const MODULOS: { nombre: string; x: number; y: number }[] = [
   { nombre: "Reportes Operativos", x: 1508, y: 374 },
   { nombre: "Configuración", x: 218, y: 534 },
   { nombre: "Contabilidad", x: 648, y: 534 },
-  { nombre: "Control de Cambios", x: 1078, y: 532 },
+  { nombre: "Auditorías", x: 1078, y: 532 },
   { nombre: "Cesión de Cartera", x: 1508, y: 534 },
-  { nombre: "Admin Sistemas", x: 218, y: 694 },
+  { nombre: "Adm de Roles", x: 218, y: 694 },
 ];
 
 // Timeline (frames).
@@ -179,7 +179,11 @@ const Modulo: React.FC<{ i: number }> = ({ i }) => {
   const o = enPantalla(m.x, m.y);
   const col = i % 2;
   const fila = Math.floor(i / 2);
-  const fx = 540 - CHIP_W - CHIP_GAP / 2 + col * (CHIP_W + CHIP_GAP);
+  // The last module sits alone in its row, so it is centered.
+  const solo = i === MODULOS.length - 1 && MODULOS.length % 2 === 1;
+  const fx = solo
+    ? 540 - CHIP_W / 2
+    : 540 - CHIP_W - CHIP_GAP / 2 + col * (CHIP_W + CHIP_GAP);
   const fy = LISTA_Y + fila * (CHIP_H + CHIP_GAP);
   // The chip starts as the icon on the screen and grows into the list.
   const x = interpolate(t, [0, 1], [o.x - 23, fx]);
