@@ -110,7 +110,7 @@ export const RemotionRoot: React.FC = () => {
         component={CoreHome}
         schema={coreHomeSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
-        durationInFrames={300}
+        durationInFrames={210}
         fps={30}
         width={1080}
         height={1920}

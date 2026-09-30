@@ -13,7 +13,7 @@ import "@fontsource/montserrat/800.css";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 
-// Core de Préstamos home (1080x1920, 10s): the app's home screen sits in a
+// Core de Préstamos home (1080x1920, 7s): the app's home screen sits in a
 // monitor; the day's indicators peel off it with their numbers counting
 // up, then each of the 13 modules peels off from its place on the screen
 // into a two-column list below, its origin glowing as it leaves.
@@ -90,12 +90,12 @@ const MODULOS: { nombre: string; x: number; y: number }[] = [
   { nombre: "Adm de Roles", x: 218, y: 694 },
 ];
 
-// Timeline (frames).
-const MONITOR = 8;
-const KPI_DESDE = 40;
-const KPI_ESCALON = 8;
-const MODULO_DESDE = 88;
-const MODULO_ESCALON = 6;
+// Timeline (frames). Everything is in place by frame 115 (under 4s).
+const MONITOR = 4;
+const KPI_DESDE = 22;
+const KPI_ESCALON = 5;
+const MODULO_DESDE = 52;
+const MODULO_ESCALON = 4;
 
 // Destination layout.
 const KPI_Y = 965;
@@ -113,7 +113,7 @@ const Kpi: React.FC<{ i: number }> = ({ i }) => {
   const t = spring({
     frame: frame - (KPI_DESDE + i * KPI_ESCALON),
     fps,
-    config: { damping: 16, stiffness: 100 },
+    config: { damping: 16, stiffness: 170 },
   });
   const o = enPantalla(k.origen[0], k.origen[1]);
   const fx = 540 - (KPI_W * 4 + KPI_GAP * 3) / 2 + i * (KPI_W + KPI_GAP);
@@ -174,7 +174,7 @@ const Modulo: React.FC<{ i: number }> = ({ i }) => {
   const t = spring({
     frame: frame - (MODULO_DESDE + i * MODULO_ESCALON),
     fps,
-    config: { damping: 16, stiffness: 110 },
+    config: { damping: 16, stiffness: 170 },
   });
   const o = enPantalla(m.x, m.y);
   const col = i % 2;
@@ -279,7 +279,7 @@ export const CoreHome: React.FC<z.infer<typeof coreHomeSchema>> = ({
   const monitor = spring({
     frame: frame - MONITOR,
     fps,
-    config: { damping: 16, stiffness: 90 },
+    config: { damping: 16, stiffness: 130 },
   });
 
   return (
