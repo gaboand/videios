@@ -27,8 +27,7 @@
     "dev": "remotion studio",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc",
-    "audio": "node scripts/generate-audio.mjs"
+    "lint": "eslint src && tsc"
   },
   "sideEffects": [
     "*.css"

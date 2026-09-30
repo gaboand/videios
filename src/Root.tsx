@@ -1,6 +1,6 @@
 import "./index.css";
 import { Composition } from "remotion";
-import { Transicion } from "./Transicion";
+import { Transicion, transicionSchema } from "./Transicion";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -8,10 +8,16 @@ export const RemotionRoot: React.FC = () => {
       // npx remotion render Transicion
       id="Transicion"
       component={Transicion}
+      schema={transicionSchema}
       durationInFrames={180}
       fps={30}
       width={1080}
       height={1350}
+      defaultProps={{
+        frase: "¿Estás preocupado por la mora y los costos?",
+        mostrarSubtitulo: true,
+        voz: "",
+      }}
     />
   );
 };
