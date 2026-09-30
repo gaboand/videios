@@ -121,7 +121,12 @@ export const RemotionRoot: React.FC = () => {
         id="MarcaAxonia"
         component={MarcaAxonia}
         schema={marcaSchema}
-        defaultProps={{ fondo: "geometrico", paleta: "gris", entrada: "ola" }}
+        defaultProps={{
+          fondo: "geometrico",
+          paleta: "gris",
+          entrada: "iris",
+          frase: "Todo conectado y\nen un mismo lugar",
+        }}
         durationInFrames={210}
         fps={30}
         width={1080}

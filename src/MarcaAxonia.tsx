@@ -10,6 +10,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import "@fontsource/montserrat/900.css";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 
@@ -24,6 +25,9 @@ export const marcaSchema = z.object({
   // "zoom": the whole logo springs in. "ola": the letters come in from the
   // right one behind the other, riding a wave in depth, and settle.
   // "revelado", "enfoque", "neurona", "escaneo": see EntradaVariante.
+  // Optional tagline under the axons ("\n" splits lines). When present,
+  // logo and axons move up to make room for it.
+  frase: z.string(),
   entrada: z.enum([
     "zoom",
     "ola",
@@ -43,6 +47,10 @@ const LOGO_W = 2028;
 const LOGO_H = 693;
 const LOGO_ANCHO = 620;
 const LOGO_Y = 880;
+// How much logo and axons move up when there is a tagline, and where the
+// tagline starts.
+const SUBIDA_CON_FRASE = 140;
+const FRASE_Y = 1100;
 
 // Crossed axons: two S-curves that cross at the center, drawn in a box of
 // AXON_W x AXON_H centered under the logo.
@@ -552,9 +560,11 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
   fondo,
   paleta,
   entrada,
+  frase,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const subida = frase ? SUBIDA_CON_FRASE : 0;
   // The axons start once the logo is in place.
   const AXON_DESDE =
     entrada === "ola"
@@ -605,7 +615,7 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
         style={{
           position: "absolute",
           left: 540,
-          top: LOGO_Y,
+          top: LOGO_Y - subida,
           width: LOGO_W,
           height: LOGO_H,
           opacity: entrada === "zoom" ? logo : 1,
@@ -639,7 +649,7 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
         style={{
           position: "absolute",
           left: 540 - (AXON_W + 40) / 2,
-          top: AXON_Y - (AXON_H + 40) / 2,
+          top: AXON_Y - subida - (AXON_H + 40) / 2,
           overflow: "visible",
           transform: `scale(${AXON_ESCALA})`,
         }}
@@ -706,6 +716,44 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
             })
           : null}
       </svg>
+      {/* Tagline: each line rises in after the axons are drawn */}
+      {frase ? (
+        <div
+          style={{
+            position: "absolute",
+            top: FRASE_Y,
+            width: "100%",
+            textAlign: "center",
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 900,
+            fontSize: 64,
+            lineHeight: 1.15,
+            letterSpacing: 1,
+            color: "white",
+            textTransform: "uppercase",
+          }}
+        >
+          {frase.split("\n").map((linea, i) => {
+            const t = spring({
+              frame: frame - (AXON_DESDE + AXON_DUR - 6 + i * 8),
+              fps,
+              config: { damping: 16, stiffness: 120 },
+            });
+            return (
+              <div key={i} style={{ overflow: "hidden" }}>
+                <div
+                  style={{
+                    opacity: t,
+                    transform: `translateY(${(1 - t) * 80}px)`,
+                  }}
+                >
+                  {linea}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
     </AbsoluteFill>
   );
 };
