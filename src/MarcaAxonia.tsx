@@ -31,8 +31,8 @@ const LOGO_Y = 880;
 // Crossed axons: two S-curves that cross at the center, drawn in a box of
 // AXON_W x AXON_H centered under the logo.
 const AXON_W = 440;
-const AXON_H = 110;
-const AXON_Y = 1080;
+const AXON_H = 220;
+const AXON_Y = 1160;
 const AXONES = [
   `M 0 10 C ${AXON_W * 0.4} 10, ${AXON_W * 0.6} ${AXON_H - 10}, ${AXON_W} ${AXON_H - 10}`,
   `M 0 ${AXON_H - 10} C ${AXON_W * 0.4} ${AXON_H - 10}, ${AXON_W * 0.6} 10, ${AXON_W} 10`,
