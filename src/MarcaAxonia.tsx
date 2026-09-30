@@ -53,7 +53,7 @@ const axon = (y: (v: number) => number) =>
 const AXONES = [axon((v) => v), axon((v) => H - v)];
 // Endpoint dots: nudged a little outward (top ones up, bottom ones down)
 // from where the lines end, without moving the lines.
-const AJUSTE_PUNTO = 7;
+const AJUSTE_PUNTO = 10;
 const EXTREMOS = [
   [FIN_X, FIN_Y - AJUSTE_PUNTO],
   [W - FIN_X, H - FIN_Y + AJUSTE_PUNTO],
