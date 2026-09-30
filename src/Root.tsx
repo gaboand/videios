@@ -3,6 +3,10 @@ import { Composition } from "remotion";
 import { DURACION_FIRMA_CONTRATO, FirmaContrato } from "./FirmaContrato";
 import { DashboardAxonia, dashboardSchema } from "./DashboardAxonia";
 import { LogoAxonia } from "./LogoAxonia";
+import {
+  SegmentacionCobranzas,
+  segmentacionSchema,
+} from "./SegmentacionCobranzas";
 import { MatrizRiesgo, matrizSchema } from "./MatrizRiesgo";
 import { WorkflowAxonia, workflowSchema } from "./WorkflowAxonia";
 import { ModulosAxonia, modulosSchema } from "./ModulosAxonia";
@@ -84,6 +88,17 @@ export const RemotionRoot: React.FC = () => {
         schema={matrizSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={270}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render SegmentacionCobranzas
+        id="SegmentacionCobranzas"
+        component={SegmentacionCobranzas}
+        schema={segmentacionSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={330}
         fps={30}
         width={1080}
         height={1920}
