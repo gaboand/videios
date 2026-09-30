@@ -51,11 +51,14 @@ const axon = (y: (v: number) => number) =>
     `C ${W - 24} ${y(H - PICO)}, ${W - 4} ${y(H - 16)}, ${W - FIN_X} ${y(H - FIN_Y)}`,
   ].join(" ");
 const AXONES = [axon((v) => v), axon((v) => H - v)];
+// Endpoint dots: nudged a little outward (top ones up, bottom ones down)
+// from where the lines end, without moving the lines.
+const AJUSTE_PUNTO = 7;
 const EXTREMOS = [
-  [FIN_X, FIN_Y],
-  [W - FIN_X, H - FIN_Y],
-  [FIN_X, H - FIN_Y],
-  [W - FIN_X, FIN_Y],
+  [FIN_X, FIN_Y - AJUSTE_PUNTO],
+  [W - FIN_X, H - FIN_Y + AJUSTE_PUNTO],
+  [FIN_X, H - FIN_Y + AJUSTE_PUNTO],
+  [W - FIN_X, FIN_Y - AJUSTE_PUNTO],
 ];
 const COLOR_AXON = "#dbe4ee";
 
