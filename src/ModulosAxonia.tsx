@@ -23,12 +23,15 @@ const COLUMNAS = [
   { x: 86, w: 442 },
   { x: 552, w: 441 },
 ];
-const FILAS = [
-  { y: 592, h: 309 },
-  { y: 920, h: 301 },
-  { y: 1241, h: 298 },
-  { y: 1557, h: 302 },
-];
+// Four rows packed into the height the top three rows used to take
+// (592 to 1540), leaving a wide margin below the grid.
+const FILA_TOP = 592;
+const FILA_H = 222;
+const FILA_GAP = 20;
+const FILAS = [0, 1, 2, 3].map((i) => ({
+  y: FILA_TOP + i * (FILA_H + FILA_GAP),
+  h: FILA_H,
+}));
 const MODULOS = [
   "Gestión del\nRiesgo",
   "BPM de\nCobranzas",
@@ -170,7 +173,7 @@ export const ModulosAxonia: React.FC = () => {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: 26,
+              gap: 18,
               opacity: opacidad,
               transform: `translateX(${x}px) rotate(${giro}deg)`,
             }}
