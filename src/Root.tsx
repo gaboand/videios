@@ -46,7 +46,7 @@ export const RemotionRoot: React.FC = () => {
         id="ModulosAxonia"
         component={ModulosAxonia}
         schema={modulosSchema}
-        defaultProps={{ fondo: "red" }}
+        defaultProps={{ fondo: "red", paleta: "azul" }}
         durationInFrames={150}
         fps={30}
         width={1080}

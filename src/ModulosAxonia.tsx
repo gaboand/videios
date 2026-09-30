@@ -13,6 +13,7 @@ import { FondoAbstracto } from "./FondoAbstracto";
 
 export const modulosSchema = z.object({
   fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
+  paleta: z.enum(["azul", "gris"]),
 });
 
 // "Suite Modular" (originally "Suite de Módulos") rebuilt for the animated blue background: white logo,
@@ -132,12 +133,13 @@ const Encabezado: React.FC = () => {
 
 export const ModulosAxonia: React.FC<z.infer<typeof modulosSchema>> = ({
   fondo,
+  paleta,
 }) => {
   const frame = useCurrentFrame();
 
   return (
     <AbsoluteFill>
-      <FondoAbstracto paleta="azul" estilo={fondo} />
+      <FondoAbstracto paleta={paleta} estilo={fondo} />
       <Encabezado />
       {MODULOS.map((texto, i) => {
         const col = COLUMNAS[i % 2];
