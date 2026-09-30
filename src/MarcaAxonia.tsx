@@ -22,7 +22,8 @@ export const marcaSchema = z.object({
   paleta: z.enum(["azul", "gris"]),
   // "zoom": the whole logo springs in. "ola": the letters come in from the
   // right one behind the other, riding a wave in depth, and settle.
-  entrada: z.enum(["zoom", "ola"]),
+  // "revelado", "enfoque", "neurona", "escaneo": see EntradaVariante.
+  entrada: z.enum(["zoom", "ola", "revelado", "enfoque", "neurona", "escaneo"]),
 });
 
 // Logo layers (see LogoAxonia) and their size.
@@ -175,6 +176,207 @@ const Letras: React.FC<{ escala: number; brillo: number }> = ({
   );
 };
 
+// Letters' baseline and the neuron's center, in logo layer pixels.
+const BASE_Y = 535;
+const NEURONA = { x: 921, y: 325 };
+
+// Frame each short entrance has the logo fully in place.
+const ASENTADO: Record<string, number> = {
+  revelado: 58,
+  enfoque: 62,
+  neurona: 62,
+  escaneo: 52,
+};
+
+const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+
+// Four short, minimal entrances built from the same letter pieces:
+// - revelado: a light line draws across the baseline and the letters rise
+//   from behind it one after another; the neuron spins in last.
+// - enfoque: letters start spread apart, blurred and faint, and close in
+//   to their spacing while coming into focus.
+// - neurona: the neuron appears first with a flash, then the letters slide
+//   out from behind it to both sides.
+// - escaneo: a vertical beam sweeps left to right and the letters
+//   materialise as it passes, with a bright edge.
+const EntradaVariante: React.FC<{
+  variante: "revelado" | "enfoque" | "neurona" | "escaneo";
+  brillo: number;
+}> = ({ variante, brillo }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const glow = (id: string) =>
+    id === "O" ? ` drop-shadow(0 0 ${brillo}px rgba(125,211,252,0.85))` : "";
+  const pieza = (l: (typeof LETRAS)[number], extra: React.CSSProperties) => (
+    <Img
+      key={l.id}
+      src={staticFile(`letras/${l.id}.png`)}
+      style={{
+        position: "absolute",
+        left: l.x,
+        top: 0,
+        width: l.w,
+        height: LOGO_H,
+        transformOrigin: "50% 50%",
+        ...extra,
+      }}
+    />
+  );
+
+  if (variante === "revelado") {
+    const linea = interpolate(frame, [0, 16], [0, 1], {
+      ...clamp,
+      easing: Easing.out(Easing.cubic),
+    });
+    const lineaFuera = interpolate(frame, [44, 60], [1, 0], clamp);
+    const orden = ["A1", "X", "N", "I", "A2"];
+    return (
+      <>
+        {/* Light line along the baseline */}
+        <div
+          style={{
+            position: "absolute",
+            left: LOGO_W / 2 - (LOGO_W / 2) * linea,
+            top: BASE_Y + 14,
+            width: LOGO_W * linea,
+            height: 10,
+            borderRadius: 5,
+            background:
+              "linear-gradient(90deg, transparent, #ffffff, transparent)",
+            opacity: lineaFuera,
+            boxShadow: "0 0 40px rgba(255,255,255,0.8)",
+          }}
+        />
+        {/* Letters rise from behind the baseline */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: LOGO_W,
+            height: BASE_Y + 12,
+            overflow: "hidden",
+          }}
+        >
+          {LETRAS.filter((l) => l.id !== "O").map((l) => {
+            const i = orden.indexOf(l.id);
+            const t = spring({
+              frame: frame - 12 - i * 4,
+              fps,
+              config: { damping: 13, stiffness: 150 },
+            });
+            return pieza(l, {
+              transform: `translateY(${(1 - t) * (BASE_Y + 40)}px)`,
+            });
+          })}
+        </div>
+        {(() => {
+          const l = LETRAS.find((p) => p.id === "O")!;
+          const t = spring({
+            frame: frame - 34,
+            fps,
+            config: { damping: 11, stiffness: 140 },
+          });
+          return pieza(l, {
+            opacity: Math.min(1, t * 1.5),
+            transform: `scale(${t}) rotate(${(1 - t) * -200}deg)`,
+            transformOrigin: `${NEURONA.x - l.x}px ${NEURONA.y}px`,
+            filter: glow("O"),
+          });
+        })()}
+      </>
+    );
+  }
+
+  if (variante === "enfoque") {
+    const t = interpolate(frame, [0, 60], [0, 1], {
+      ...clamp,
+      easing: Easing.bezier(0.33, 0, 0.2, 1),
+    });
+    return (
+      <>
+        {LETRAS.map((l) => {
+          const centro = l.x + l.w / 2 - LOGO_W / 2;
+          return pieza(l, {
+            opacity: interpolate(t, [0, 0.6], [0, 1], clamp),
+            transform: `translateX(${centro * 0.9 * (1 - t)}px) scale(${1.25 - 0.25 * t}) rotate(${
+              l.id === "O" ? (1 - t) * -90 : 0
+            }deg)`,
+            filter: `blur(${(1 - t) * 40}px)${glow(l.id)}`,
+          });
+        })}
+      </>
+    );
+  }
+
+  if (variante === "neurona") {
+    const n = spring({ frame, fps, config: { damping: 10, stiffness: 120 } });
+    const destello = interpolate(frame, [6, 14, 34], [0, 1, 0], clamp);
+    const salida = interpolate(frame, [20, 58], [0, 1], {
+      ...clamp,
+      easing: Easing.bezier(0.16, 1, 0.3, 1),
+    });
+    const o = LETRAS.find((p) => p.id === "O")!;
+    return (
+      <>
+        {LETRAS.filter((l) => l.id !== "O").map((l) => {
+          // Start hidden behind the neuron, slide out to its place.
+          const desde = NEURONA.x - (l.x + l.w / 2);
+          return pieza(l, {
+            opacity: interpolate(salida, [0, 0.25], [0, 1], clamp),
+            transform: `translateX(${desde * (1 - salida)}px) scale(${0.6 + 0.4 * salida})`,
+          });
+        })}
+        {pieza(o, {
+          transform: `scale(${n}) rotate(${(1 - n) * 180}deg)`,
+          transformOrigin: `${NEURONA.x - o.x}px ${NEURONA.y}px`,
+          filter: `drop-shadow(0 0 ${brillo + destello * 60}px rgba(125,211,252,${0.85 + destello * 0.15}))`,
+        })}
+      </>
+    );
+  }
+
+  // escaneo
+  const haz = interpolate(frame, [4, 46], [-120, LOGO_W + 120], {
+    ...clamp,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const hazFuera = interpolate(frame, [44, 54], [1, 0], clamp);
+  return (
+    <>
+      {LETRAS.map((l) => {
+        // Portion of this letter the beam has already passed.
+        const visto = Math.min(l.w, Math.max(0, haz - l.x));
+        const borde = interpolate(
+          haz - (l.x + l.w),
+          [-l.w, 0, 120],
+          [0.6, 1, 0],
+          clamp,
+        );
+        return pieza(l, {
+          clipPath: `inset(-50% ${l.w - visto}px -50% 0)`,
+          filter: `brightness(${1 + borde * 1.5})${glow(l.id)}`,
+        });
+      })}
+      {/* The beam */}
+      <div
+        style={{
+          position: "absolute",
+          left: haz - 6,
+          top: -120,
+          width: 12,
+          height: LOGO_H + 240,
+          borderRadius: 6,
+          background:
+            "linear-gradient(180deg, transparent, #ffffff 30%, #ffffff 70%, transparent)",
+          boxShadow: "0 0 60px 18px rgba(125,211,252,0.6)",
+          opacity: hazFuera,
+        }}
+      />
+    </>
+  );
+};
+
 export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
   fondo,
   paleta,
@@ -183,7 +385,12 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   // The axons start once the logo is in place.
-  const AXON_DESDE = entrada === "ola" ? OLA.desde + OLA.duracion - 4 : 28;
+  const AXON_DESDE =
+    entrada === "ola"
+      ? OLA.desde + OLA.duracion - 4
+      : entrada === "zoom"
+        ? 28
+        : ASENTADO[entrada] - 4;
   const PULSOS_DESDE = AXON_DESDE + 32;
 
   const logo = spring({
@@ -230,14 +437,16 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
           top: LOGO_Y,
           width: LOGO_W,
           height: LOGO_H,
-          opacity: entrada === "ola" ? 1 : logo,
+          opacity: entrada === "zoom" ? logo : 1,
           transform: `translate(-50%, -50%) scale(${
-            escalaLogo * (entrada === "ola" ? 1 : 0.8 + logo * 0.2)
+            escalaLogo * (entrada === "zoom" ? 0.8 + logo * 0.2 : 1)
           })`,
         }}
       >
         {entrada === "ola" ? (
           <Letras escala={escalaLogo} brillo={brillo} />
+        ) : entrada !== "zoom" ? (
+          <EntradaVariante variante={entrada} brillo={brillo} />
         ) : (
           <>
             <Img src={staticFile("axonia-letras.png")} style={capa} />
