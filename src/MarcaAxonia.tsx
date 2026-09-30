@@ -33,15 +33,29 @@ const LOGO_Y = 880;
 const AXON_W = 440;
 const AXON_H = 220;
 const AXON_Y = 1160;
-const AXONES = [
-  `M 0 10 C ${AXON_W * 0.4} 10, ${AXON_W * 0.6} ${AXON_H - 10}, ${AXON_W} ${AXON_H - 10}`,
-  `M 0 ${AXON_H - 10} C ${AXON_W * 0.4} ${AXON_H - 10}, ${AXON_W * 0.6} 10, ${AXON_W} 10`,
-];
+// Each axon reaches past its endpoints: from the crossing it sweeps out
+// to its highest (or lowest) point, then curls back inward to an endpoint
+// that sits lower (top ends) or higher (bottom ends) than the line itself.
+// The shape is point-symmetric around the crossing; the second axon is
+// the first one mirrored vertically.
+const W = AXON_W;
+const H = AXON_H;
+const PICO = 5; // distance of the line's extreme from the box edge
+const FIN_X = 18; // endpoints pulled inward
+const FIN_Y = 32; // endpoints below the top extreme (above the bottom one)
+const axon = (y: (v: number) => number) =>
+  [
+    `M ${FIN_X} ${y(FIN_Y)}`,
+    `C 4 ${y(16)}, 24 ${y(PICO)}, 70 ${y(PICO)}`,
+    `C 170 ${y(PICO)}, ${W - 170} ${y(H - PICO)}, ${W - 70} ${y(H - PICO)}`,
+    `C ${W - 24} ${y(H - PICO)}, ${W - 4} ${y(H - 16)}, ${W - FIN_X} ${y(H - FIN_Y)}`,
+  ].join(" ");
+const AXONES = [axon((v) => v), axon((v) => H - v)];
 const EXTREMOS = [
-  [0, 10],
-  [AXON_W, AXON_H - 10],
-  [0, AXON_H - 10],
-  [AXON_W, 10],
+  [FIN_X, FIN_Y],
+  [W - FIN_X, H - FIN_Y],
+  [FIN_X, H - FIN_Y],
+  [W - FIN_X, FIN_Y],
 ];
 const COLOR_AXON = "#dbe4ee";
 
