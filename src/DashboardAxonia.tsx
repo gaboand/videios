@@ -40,6 +40,8 @@ const ESTADO = {
 };
 
 const CAMBIO = 165;
+// Scale applied to the whole dashboard to leave margins around it.
+const ESCALA = 0.88;
 const MARGEN = 40;
 const ANCHO = 1080 - MARGEN * 2;
 const GAP = 24;
@@ -511,78 +513,84 @@ export const DashboardAxonia: React.FC<z.infer<typeof dashboardSchema>> = ({
   return (
     <AbsoluteFill>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
-      <Kpi
-        x={MARGEN}
-        y={y0}
-        retraso={0}
-        titulo="Total evaluados"
-        v1={4783}
-        v2={6120}
-        formato={miles}
-        variacion="▲ 28%"
-      />
-      <Kpi
-        x={col2}
-        y={y0}
-        retraso={5}
-        titulo="Tasa de aprobación"
-        v1={63}
-        v2={71.8}
-        formato={(n) => `${decimal(n)}%`}
-        variacion="▲ 8,8 pp"
-      />
-      <Kpi
-        x={MARGEN}
-        y={y0 + 174}
-        retraso={10}
-        titulo="Capital otorgado"
-        v1={594.1}
-        v2={712.6}
-        formato={(n) => `$${decimal(n)} M`}
-        variacion="▲ 20%"
-      />
-      <Kpi
-        x={col2}
-        y={y0 + 174}
-        retraso={15}
-        titulo="Cartera en mora"
-        v1={29.9}
-        v2={18.4}
-        formato={(n) => `${decimal(n)}%`}
-        variacion="▼ 11,5 pp"
-      />
-      <AltasPorMes y={y0 + 348} retraso={22} />
-      <BarrasHorizontales
-        x={MARGEN}
-        y={y0 + 792}
-        retraso={30}
-        titulo="Distribución por riesgo · %"
-        filas={[
-          { etiqueta: "A", v1: 8, v2: 18, color: ESTADO.bueno },
-          { etiqueta: "B", v1: 15, v2: 27, color: ESTADO.alerta },
-          { etiqueta: "C", v1: 22, v2: 25, color: ESTADO.serio },
-          { etiqueta: "D", v1: 55, v2: 30, color: ESTADO.critico },
-        ]}
-        max={60}
-        h={390}
-        formato={(n) => `${Math.round(n)}%`}
-      />
-      <EstadoMora x={col2} y={y0 + 792} retraso={36} />
-      <Aprobacion x={MARGEN} y={y0 + 1206} retraso={44} />
-      <BarrasHorizontales
-        x={col2}
-        y={y0 + 1206}
-        retraso={50}
-        titulo="Rechazos por servicio"
-        filas={[
-          { etiqueta: "BCRA", v1: 793, v2: 520, color: SERIE_NARANJA },
-          { etiqueta: "Nosis", v1: 631, v2: 410, color: SERIE_NARANJA },
-          { etiqueta: "Bases", v1: 343, v2: 260, color: SERIE_NARANJA },
-        ]}
-        max={850}
-        h={340}
-        formato={miles}
-      />
+      {/* Content scaled around the center for wide margins on all sides:
+          ~100px left/right and ~280px top/bottom. */}
+      <AbsoluteFill
+        style={{ transform: `scale(${ESCALA})`, transformOrigin: "50% 50%" }}
+      >
+        <Kpi
+          x={MARGEN}
+          y={y0}
+          retraso={0}
+          titulo="Total evaluados"
+          v1={4783}
+          v2={6120}
+          formato={miles}
+          variacion="▲ 28%"
+        />
+        <Kpi
+          x={col2}
+          y={y0}
+          retraso={5}
+          titulo="Tasa de aprobación"
+          v1={63}
+          v2={71.8}
+          formato={(n) => `${decimal(n)}%`}
+          variacion="▲ 8,8 pp"
+        />
+        <Kpi
+          x={MARGEN}
+          y={y0 + 174}
+          retraso={10}
+          titulo="Capital otorgado"
+          v1={594.1}
+          v2={712.6}
+          formato={(n) => `$${decimal(n)} M`}
+          variacion="▲ 20%"
+        />
+        <Kpi
+          x={col2}
+          y={y0 + 174}
+          retraso={15}
+          titulo="Cartera en mora"
+          v1={29.9}
+          v2={18.4}
+          formato={(n) => `${decimal(n)}%`}
+          variacion="▼ 11,5 pp"
+        />
+        <AltasPorMes y={y0 + 348} retraso={22} />
+        <BarrasHorizontales
+          x={MARGEN}
+          y={y0 + 792}
+          retraso={30}
+          titulo="Distribución por riesgo · %"
+          filas={[
+            { etiqueta: "A", v1: 8, v2: 18, color: ESTADO.bueno },
+            { etiqueta: "B", v1: 15, v2: 27, color: ESTADO.alerta },
+            { etiqueta: "C", v1: 22, v2: 25, color: ESTADO.serio },
+            { etiqueta: "D", v1: 55, v2: 30, color: ESTADO.critico },
+          ]}
+          max={60}
+          h={390}
+          formato={(n) => `${Math.round(n)}%`}
+        />
+        <EstadoMora x={col2} y={y0 + 792} retraso={36} />
+        <Aprobacion x={MARGEN} y={y0 + 1206} retraso={44} />
+        <BarrasHorizontales
+          x={col2}
+          y={y0 + 1206}
+          retraso={50}
+          titulo="Rechazos por servicio"
+          filas={[
+            { etiqueta: "BCRA", v1: 793, v2: 520, color: SERIE_NARANJA },
+            { etiqueta: "Nosis", v1: 631, v2: 410, color: SERIE_NARANJA },
+            { etiqueta: "Bases", v1: 343, v2: 260, color: SERIE_NARANJA },
+          ]}
+          max={850}
+          h={340}
+          formato={miles}
+        />
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
