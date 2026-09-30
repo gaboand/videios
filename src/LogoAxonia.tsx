@@ -12,9 +12,9 @@ import {
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 
-// Logo reveal on an animated abstract blue background, 1080x1920 (9:16).
+// Logo reveal on an animated abstract gray background, 1080x1920 (9:16).
 // The logo is split into two layers generated from the original PNG:
-// white letters and the blue symbol, so the symbol can spin on its own.
+// white letters and the light-blue symbol (the only colored element), so the symbol can spin on its own.
 
 // Size of the layer PNGs and the center of the symbol's ring inside them.
 const LOGO_W = 2028;
@@ -67,7 +67,7 @@ const Pills: React.FC = () => {
               background: "rgba(255,255,255,0.10)",
               border: "2px solid rgba(255,255,255,0.35)",
               boxShadow:
-                "0 8px 32px rgba(3,10,40,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
+                "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
               backdropFilter: "blur(14px)",
               opacity: aparicion,
               transform: `translateY(${(1 - aparicion) * 45}px) scale(${0.9 + aparicion * 0.1})`,
@@ -87,11 +87,11 @@ const Pills: React.FC = () => {
 };
 
 const BLOBS = [
-  { color: "#1d4ed8", size: 900, x: 200, y: 400, speed: 0.013, phase: 0 },
-  { color: "#0ea5e9", size: 700, x: 850, y: 700, speed: 0.017, phase: 2 },
-  { color: "#3b82f6", size: 800, x: 300, y: 1450, speed: 0.011, phase: 4 },
-  { color: "#1e3a8a", size: 1000, x: 900, y: 1700, speed: 0.009, phase: 1 },
-  { color: "#38bdf8", size: 500, x: 540, y: 1000, speed: 0.02, phase: 3 },
+  { color: "#4b5563", size: 900, x: 200, y: 400, speed: 0.013, phase: 0 },
+  { color: "#9ca3af", size: 700, x: 850, y: 700, speed: 0.017, phase: 2 },
+  { color: "#6b7280", size: 800, x: 300, y: 1450, speed: 0.011, phase: 4 },
+  { color: "#374151", size: 1000, x: 900, y: 1700, speed: 0.009, phase: 1 },
+  { color: "#6b7280", size: 500, x: 540, y: 1000, speed: 0.02, phase: 3 },
 ];
 
 const Fondo: React.FC = () => {
@@ -99,7 +99,7 @@ const Fondo: React.FC = () => {
   const { width, height } = useVideoConfig();
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#0b2560", overflow: "hidden" }}>
+    <AbsoluteFill style={{ backgroundColor: "#1f2227", overflow: "hidden" }}>
       {BLOBS.map((b, i) => {
         const x = b.x + Math.sin(frame * b.speed + b.phase) * 180;
         const y = b.y + Math.cos(frame * b.speed * 0.8 + b.phase) * 220;
@@ -133,7 +133,7 @@ const Fondo: React.FC = () => {
             <path
               key={i}
               d={d}
-              stroke="#93c5fd"
+              stroke="#d1d5db"
               strokeWidth={i % 3 === 0 ? 3 : 1.5}
               fill="none"
             />
@@ -156,9 +156,9 @@ const Fondo: React.FC = () => {
               width: r,
               height: r,
               borderRadius: "50%",
-              background: "#e0f2fe",
+              background: "#f3f4f6",
               opacity: 0.25 + random(`o${i}`) * 0.5,
-              boxShadow: "0 0 8px #7dd3fc",
+              boxShadow: "0 0 8px rgba(255,255,255,0.6)",
             }}
           />
         );
@@ -167,7 +167,7 @@ const Fondo: React.FC = () => {
       <AbsoluteFill
         style={{
           background:
-            "radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(3,10,40,0.6) 100%)",
+            "radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(8,8,10,0.6) 100%)",
         }}
       />
     </AbsoluteFill>
@@ -251,10 +251,10 @@ export const LogoAxonia: React.FC = () => {
             width: onda * 1400,
             height: onda * 1400,
             borderRadius: "50%",
-            border: "4px solid #bae6fd",
+            border: "4px solid #e5e7eb",
             transform: "translate(-50%, -50%)",
             opacity: (1 - onda) * 0.8,
-            boxShadow: "0 0 20px #7dd3fc",
+            boxShadow: "0 0 20px rgba(255,255,255,0.5)",
           }}
         />
       ) : null}
@@ -275,7 +275,7 @@ export const LogoAxonia: React.FC = () => {
           style={{
             ...capa,
             opacity: letras,
-            filter: "drop-shadow(0 0 18px rgba(147,197,253,0.55))",
+            filter: "drop-shadow(0 0 18px rgba(255,255,255,0.3))",
           }}
         />
         <Img
