@@ -49,7 +49,7 @@ const LOGO_ANCHO = 620;
 const LOGO_Y = 880;
 // How much logo and axons move up when there is a tagline, and where the
 // tagline starts.
-const SUBIDA_CON_FRASE = 140;
+const SUBIDA_CON_FRASE = 240;
 const FRASE_Y = 1100;
 
 // Crossed axons: two S-curves that cross at the center, drawn in a box of
