@@ -90,6 +90,7 @@ const OLA = {
   alto: 70, // vertical amplitude in screen px
   profundidad: 0.38, // scale swing: away (smaller) and back (bigger)
   giro: 0.35, // neuron spin, degrees per screen px still to travel
+  entradaX: 1100, // screen x where letters come in from the back
 };
 
 // Timeline (frames).
@@ -131,7 +132,10 @@ const Letras: React.FC<{ escala: number; brillo: number }> = ({
       {LETRAS.map((l) => {
         // Where this letter is on screen right now.
         const xFinal = 540 + (l.x + l.w / 2 - LOGO_W / 2) * escala;
-        const fase = ((xFinal + resta) / OLA.largo) * Math.PI * 2;
+        // Phase is set so a letter is at the back of the wave (smallest)
+        // as it crosses the right edge of the screen.
+        const fase =
+          ((xFinal + resta - OLA.entradaX) / OLA.largo) * Math.PI * 2 + Math.PI;
         const y = Math.sin(fase) * OLA.alto * envolvente;
         const s = 1 + Math.cos(fase) * OLA.profundidad * envolvente;
         const lejos = Math.max(0, 1 - s);
