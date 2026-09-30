@@ -8,7 +8,9 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
+import "@fontsource/inter/600.css";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/500.css";
 
@@ -23,7 +25,73 @@ const ICON_CENTER = { x: 921, y: 325 };
 const LOGO_DISPLAY_W = 900;
 
 // Where the logo moves up to, making room for the call to action below it.
-const LOGO_Y_FINAL = 800;
+const LOGO_Y_FINAL = { contacto: 800, pills: 690 };
+
+export const logoSchema = z.object({
+  fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
+  // What appears under the logo once it moves up: the "contactanos" call
+  // to action or the four service pills.
+  cierre: z.enum(["contacto", "pills"]),
+});
+
+// Service pills: glass capsules with orange text.
+const PILLS = [
+  "Gestión del Riesgo",
+  "Automatizaciones",
+  "Herramientas de Cobranzas",
+  "Core Lending",
+];
+const PILL_W = 540;
+const PILL_H = 78;
+const PILL_GAP = 30;
+const PILLS_TOP = 930;
+const ESCALON_PILLS = 8;
+
+const Pills: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps, width } = useVideoConfig();
+  return (
+    <>
+      {PILLS.map((texto, i) => {
+        const aparicion = spring({
+          frame: frame - INICIO_TEXTO - i * ESCALON_PILLS,
+          fps,
+          config: { damping: 14, stiffness: 110 },
+        });
+        return (
+          <div
+            key={texto}
+            style={{
+              position: "absolute",
+              left: (width - PILL_W) / 2,
+              top: PILLS_TOP + i * (PILL_H + PILL_GAP),
+              width: PILL_W,
+              height: PILL_H,
+              borderRadius: PILL_H / 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(255,255,255,0.10)",
+              border: "2px solid rgba(255,255,255,0.35)",
+              boxShadow:
+                "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
+              backdropFilter: "blur(14px)",
+              opacity: aparicion,
+              transform: `translateY(${(1 - aparicion) * 45}px) scale(${0.9 + aparicion * 0.1})`,
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 600,
+              fontSize: 32,
+              letterSpacing: 0.3,
+              color: "#FF8C42",
+            }}
+          >
+            {texto}
+          </div>
+        );
+      })}
+    </>
+  );
+};
 const INICIO_SUBIDA = 80;
 // Call to action: two lines, each sliding in after the previous one.
 const LINEAS = [
@@ -76,7 +144,10 @@ const Llamado: React.FC = () => {
   );
 };
 
-export const LogoAxonia: React.FC = () => {
+export const LogoAxonia: React.FC<z.infer<typeof logoSchema>> = ({
+  fondo,
+  cierre,
+}) => {
   const frame = useCurrentFrame();
   const { fps, width, height, durationInFrames } = useVideoConfig();
 
@@ -106,7 +177,7 @@ export const LogoAxonia: React.FC = () => {
       easing: Easing.inOut(Easing.cubic),
     },
   );
-  const logoY = interpolate(subida, [0, 1], [height / 2, LOGO_Y_FINAL]);
+  const logoY = interpolate(subida, [0, 1], [height / 2, LOGO_Y_FINAL[cierre]]);
   const escala =
     interpolate(llegada, [0, 1], [0.08, 1]) *
     empuje *
@@ -143,7 +214,7 @@ export const LogoAxonia: React.FC = () => {
 
   return (
     <AbsoluteFill>
-      <FondoAbstracto paleta="gris" />
+      <FondoAbstracto paleta="gris" estilo={fondo} />
       {onda > 0 && onda < 1 ? (
         <div
           style={{
@@ -190,7 +261,7 @@ export const LogoAxonia: React.FC = () => {
           }}
         />
       </div>
-      <Llamado />
+      {cierre === "pills" ? <Pills /> : <Llamado />}
     </AbsoluteFill>
   );
 };

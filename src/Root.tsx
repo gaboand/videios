@@ -3,7 +3,7 @@ import { Composition } from "remotion";
 import { DURACION_FIRMA_CONTRATO, FirmaContrato } from "./FirmaContrato";
 import { DashboardAxonia, dashboardSchema } from "./DashboardAxonia";
 import { CoreHome, coreHomeSchema } from "./CoreHome";
-import { LogoAxonia } from "./LogoAxonia";
+import { LogoAxonia, logoSchema } from "./LogoAxonia";
 import { MarcaAxonia, marcaSchema } from "./MarcaAxonia";
 import {
   SegmentacionCobranzas,
@@ -45,6 +45,8 @@ export const RemotionRoot: React.FC = () => {
         // npx remotion render LogoAxonia
         id="LogoAxonia"
         component={LogoAxonia}
+        schema={logoSchema}
+        defaultProps={{ fondo: "ondas", cierre: "contacto" }}
         durationInFrames={210}
         fps={30}
         width={1080}
