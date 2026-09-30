@@ -50,9 +50,9 @@ type Nodo = {
 const CX = 540;
 // The diagram is drawn at full size in 1080x1920 coordinates and shown at
 // ESCALA, centered vertically; the title sits near the top.
-const ESCALA = 0.6;
+const ESCALA = 0.72;
 const TITULO_TOP = 230;
-const DIAGRAMA_TOP = 615;
+const DIAGRAMA_TOP = 528;
 const NODOS: Nodo[] = [
   {
     id: "inicio",
