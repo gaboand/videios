@@ -41,7 +41,10 @@ const ESTADO = {
 
 const CAMBIO = 165;
 // Scale applied to the whole dashboard to leave margins around it.
-const ESCALA = 0.88;
+const ESCALA = 0.74;
+// Content moves down under the title block.
+const BAJADA = 90;
+const ACENTO = "#FF8C42";
 const MARGEN = 40;
 const ANCHO = 1080 - MARGEN * 2;
 const GAP = 24;
@@ -502,6 +505,41 @@ const Aprobacion: React.FC<{ x: number; y: number; retraso: number }> = ({
   );
 };
 
+const Titulo: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const t = spring({ frame, fps, config: { damping: 18 } });
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 190,
+        width: "100%",
+        textAlign: "center",
+        fontFamily: FUENTE,
+        opacity: t,
+        transform: `translateY(${(1 - t) * -30}px)`,
+      }}
+    >
+      <div style={{ fontSize: 62, fontWeight: 800, color: "white" }}>
+        Dashboard y KPIs
+      </div>
+      <div
+        style={{
+          fontSize: 26,
+          fontWeight: 500,
+          letterSpacing: 4,
+          color: ACENTO,
+          textTransform: "uppercase",
+          marginTop: 6,
+        }}
+      >
+        En tiempo real
+      </div>
+    </div>
+  );
+};
+
 export const DashboardAxonia: React.FC<z.infer<typeof dashboardSchema>> = ({
   fondo,
   paleta,
@@ -513,10 +551,14 @@ export const DashboardAxonia: React.FC<z.infer<typeof dashboardSchema>> = ({
   return (
     <AbsoluteFill>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
-      {/* Content scaled around the center for wide margins on all sides:
-          ~100px left/right and ~280px top/bottom. */}
+      <Titulo />
+      {/* Content scaled around the center (and moved down under the title)
+          for wide margins on all sides. */}
       <AbsoluteFill
-        style={{ transform: `scale(${ESCALA})`, transformOrigin: "50% 50%" }}
+        style={{
+          transform: `translateY(${BAJADA}px) scale(${ESCALA})`,
+          transformOrigin: "50% 50%",
+        }}
       >
         <Kpi
           x={MARGEN}
