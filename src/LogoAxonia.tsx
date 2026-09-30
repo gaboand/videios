@@ -30,9 +30,9 @@ const PILLS = [
   "Herramientas de Cobranzas",
   "Core Lending",
 ];
-const PILL_W = 720;
-const PILL_H = 104;
-const PILL_GAP = 30;
+const PILL_W = 360;
+const PILL_H = 52;
+const PILL_GAP = 15;
 const PILLS_TOP = 930;
 // Frames: logo starts moving up, first pill appears, delay between pills.
 const INICIO_SUBIDA = 80;
@@ -64,30 +64,20 @@ const Pills: React.FC = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 22,
               background: "rgba(255,255,255,0.10)",
-              border: "2px solid rgba(255,255,255,0.35)",
+              border: "1.5px solid rgba(255,255,255,0.35)",
               boxShadow:
                 "0 8px 32px rgba(3,10,40,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
               backdropFilter: "blur(14px)",
               opacity: aparicion,
-              transform: `translateY(${(1 - aparicion) * 60}px) scale(${0.9 + aparicion * 0.1})`,
+              transform: `translateY(${(1 - aparicion) * 30}px) scale(${0.9 + aparicion * 0.1})`,
               fontFamily: "Inter, sans-serif",
               fontWeight: 600,
-              fontSize: 42,
+              fontSize: 21,
               letterSpacing: 0.3,
               color: "white",
             }}
           >
-            <div
-              style={{
-                width: 14,
-                height: 14,
-                borderRadius: "50%",
-                background: "#7dd3fc",
-                boxShadow: "0 0 12px #7dd3fc",
-              }}
-            />
             {texto}
           </div>
         );
