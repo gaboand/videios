@@ -26,7 +26,7 @@ const FUENTE = "Montserrat, sans-serif";
 const CELESTE = "#38bdf8";
 // Warm accent for the title's second word (icon accents use it too, baked
 // in by scripts/extraer-iconos.py).
-const ACENTO = "#EDE0D0";
+const ACENTO = "#FF8C42";
 
 const COLUMNAS = [
   { x: 86, w: 442 },

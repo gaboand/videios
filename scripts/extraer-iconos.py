@@ -13,7 +13,7 @@ CENTROS = [(270, 613), (673, 613), (270, 897), (673, 897),
            (270, 1180), (673, 1180), (270, 1450), (673, 1450)]
 R = 70
 # Color for the icons' accents (dots, $ badge, AI chip), originally blue.
-ACENTO = (237, 224, 208)  # #EDE0D0
+ACENTO = (255, 140, 66)  # #FF8C42
 
 img = np.array(Image.open(DIR / "original.webp").convert("RGB")).astype(np.float32)
 for n, (cx, cy) in enumerate(CENTROS, start=1):
