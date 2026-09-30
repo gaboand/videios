@@ -32,7 +32,10 @@ const LOGO_Y = 880;
 // AXON_W x AXON_H centered under the logo.
 const AXON_W = 440;
 const AXON_H = 187;
-const AXON_Y = 1144;
+// The whole axon drawing (lines, dots, stroke) is shown at AXON_ESCALA,
+// centered at AXON_Y, keeping the same gap below the logo.
+const AXON_ESCALA = 0.5;
+const AXON_Y = 1098;
 // Each axon reaches past its endpoints: from the crossing it sweeps out
 // to its highest (or lowest) point, then curls back inward to an endpoint
 // that sits lower (top ends) or higher (bottom ends) than the line itself.
@@ -143,6 +146,7 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
           left: 540 - (AXON_W + 40) / 2,
           top: AXON_Y - (AXON_H + 40) / 2,
           overflow: "visible",
+          transform: `scale(${AXON_ESCALA})`,
         }}
       >
         <defs>
