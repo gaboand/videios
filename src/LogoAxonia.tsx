@@ -9,8 +9,8 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/500.css";
 
 // Logo reveal on an animated abstract gray background, 1080x1920 (9:16).
 // The logo is split into two layers generated from the original PNG:
@@ -22,67 +22,57 @@ const LOGO_H = 693;
 const ICON_CENTER = { x: 921, y: 325 };
 const LOGO_DISPLAY_W = 900;
 
-// Where the logo moves up to, making room for the pills below it.
-const LOGO_Y_FINAL = 690;
-const PILLS = [
-  "Gestión del Riesgo",
-  "Automatizaciones",
-  "Herramientas de Cobranzas",
-  "Core Lending",
-];
-const PILL_W = 540;
-const PILL_H = 78;
-const PILL_GAP = 30;
-const PILLS_TOP = 930;
-// Frames: logo starts moving up, first pill appears, delay between pills.
+// Where the logo moves up to, making room for the call to action below it.
+const LOGO_Y_FINAL = 800;
 const INICIO_SUBIDA = 80;
-const INICIO_PILLS = 100;
-const ESCALON_PILLS = 8;
+// Call to action: two lines, each sliding in after the previous one.
+const LINEAS = [
+  { texto: "TE PODEMOS AYUDAR,", peso: 300 },
+  { texto: "CONTACTANOS", peso: 500 },
+];
+const TEXTO_TOP = 1070;
+const INICIO_TEXTO = 100;
+const ESCALON_TEXTO = 12;
 
-const Pills: React.FC = () => {
+const Llamado: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps, width } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
   return (
-    <>
-      {PILLS.map((texto, i) => {
+    <AbsoluteFill
+      style={{
+        top: TEXTO_TOP,
+        bottom: "auto",
+        alignItems: "center",
+        fontFamily: "Roboto, sans-serif",
+        color: "white",
+        fontSize: 64,
+        lineHeight: 1.35,
+        textAlign: "center",
+      }}
+    >
+      {LINEAS.map(({ texto, peso }, i) => {
         const aparicion = spring({
-          frame: frame - INICIO_PILLS - i * ESCALON_PILLS,
+          frame: frame - INICIO_TEXTO - i * ESCALON_TEXTO,
           fps,
-          config: { damping: 14, stiffness: 110 },
+          config: { damping: 18, stiffness: 90 },
         });
         return (
           <div
             key={texto}
             style={{
-              position: "absolute",
-              left: (width - PILL_W) / 2,
-              top: PILLS_TOP + i * (PILL_H + PILL_GAP),
-              width: PILL_W,
-              height: PILL_H,
-              borderRadius: PILL_H / 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(255,255,255,0.10)",
-              border: "2px solid rgba(255,255,255,0.35)",
-              boxShadow:
-                "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
-              backdropFilter: "blur(14px)",
+              fontWeight: peso,
+              // Wide tracking that tightens slightly as the line settles.
+              letterSpacing: `${0.22 - aparicion * 0.08}em`,
               opacity: aparicion,
-              transform: `translateY(${(1 - aparicion) * 45}px) scale(${0.9 + aparicion * 0.1})`,
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 600,
-              fontSize: 32,
-              letterSpacing: 0.3,
-              color: "white",
+              transform: `translateY(${(1 - aparicion) * 40}px)`,
             }}
           >
             {texto}
           </div>
         );
       })}
-    </>
+    </AbsoluteFill>
   );
 };
 
@@ -288,7 +278,7 @@ export const LogoAxonia: React.FC = () => {
           }}
         />
       </div>
-      <Pills />
+      <Llamado />
     </AbsoluteFill>
   );
 };
