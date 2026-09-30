@@ -71,7 +71,7 @@ export const RemotionRoot: React.FC = () => {
         component={WorkflowAxonia}
         schema={workflowSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
-        durationInFrames={270}
+        durationInFrames={240}
         fps={30}
         width={1080}
         height={1920}

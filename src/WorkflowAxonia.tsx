@@ -61,7 +61,7 @@ const NODOS: Nodo[] = [
     y: 360,
     w: 320,
     texto: "Nueva solicitud",
-    aparece: 5,
+    aparece: 3,
   },
   {
     id: "consulta",
@@ -70,7 +70,7 @@ const NODOS: Nodo[] = [
     y: 540,
     w: 450,
     texto: "Consultas Bases y Bureau",
-    aparece: 20,
+    aparece: 12,
   },
   {
     id: "dec1",
@@ -79,7 +79,7 @@ const NODOS: Nodo[] = [
     y: 760,
     w: 240,
     texto: "Situación\n< 2",
-    aparece: 35,
+    aparece: 22,
   },
   {
     id: "rechazo",
@@ -88,7 +88,7 @@ const NODOS: Nodo[] = [
     y: 760,
     w: 230,
     texto: "Rechazo\nautomático",
-    aparece: 50,
+    aparece: 31,
   },
   {
     id: "score",
@@ -97,7 +97,7 @@ const NODOS: Nodo[] = [
     y: 980,
     w: 400,
     texto: "Score de riesgo",
-    aparece: 58,
+    aparece: 36,
   },
   {
     id: "dec2",
@@ -106,7 +106,7 @@ const NODOS: Nodo[] = [
     y: 1200,
     w: 240,
     texto: "¿Score\n≥ 650?",
-    aparece: 72,
+    aparece: 45,
   },
   {
     id: "revision",
@@ -115,7 +115,7 @@ const NODOS: Nodo[] = [
     y: 1200,
     w: 230,
     texto: "Revisión\nanalista",
-    aparece: 88,
+    aparece: 55,
   },
   {
     id: "matriz",
@@ -124,7 +124,7 @@ const NODOS: Nodo[] = [
     y: 1420,
     w: 400,
     texto: "Asignar límite y TNA",
-    aparece: 95,
+    aparece: 59,
   },
   {
     id: "aprobado",
@@ -133,7 +133,7 @@ const NODOS: Nodo[] = [
     y: 1620,
     w: 400,
     texto: "Aprobado · Oferta enviada",
-    aparece: 112,
+    aparece: 69,
   },
 ];
 const RECT_H = 100;
@@ -149,46 +149,46 @@ type Arista = {
 // Orthogonal connections between node edges (rect half-height 50,
 // diamond half-diagonal 120).
 const ARISTAS: Arista[] = [
-  { d: `M ${CX} 400 L ${CX} 490`, desde: 12, flecha: "abajo" },
-  { d: `M ${CX} 590 L ${CX} 640`, desde: 28, flecha: "abajo" },
+  { d: `M ${CX} 400 L ${CX} 490`, desde: 7, flecha: "abajo" },
+  { d: `M ${CX} 590 L ${CX} 640`, desde: 17, flecha: "abajo" },
   {
     d: `M 660 760 L 740 760`,
-    desde: 42,
+    desde: 26,
     flecha: "derecha",
     rotulo: { texto: "No", x: 700, y: 728 },
   },
   {
     d: `M ${CX} 880 L ${CX} 930`,
-    desde: 50,
+    desde: 31,
     flecha: "abajo",
     rotulo: { texto: "Sí", x: 580, y: 905 },
   },
-  { d: `M ${CX} 1030 L ${CX} 1080`, desde: 65, flecha: "abajo" },
+  { d: `M ${CX} 1030 L ${CX} 1080`, desde: 40, flecha: "abajo" },
   {
     d: `M 420 1200 L 340 1200`,
-    desde: 80,
+    desde: 50,
     flecha: "izquierda",
     rotulo: { texto: "No", x: 380, y: 1168 },
   },
   {
     d: `M ${CX} 1320 L ${CX} 1370`,
-    desde: 88,
+    desde: 55,
     flecha: "abajo",
     rotulo: { texto: "Sí", x: 580, y: 1345 },
   },
   {
     d: `M 225 1250 L 225 1420 L 340 1420`,
-    desde: 95,
+    desde: 59,
     flecha: "derecha",
     rotulo: { texto: "Aprueba", x: 225, y: 1335 },
   },
-  { d: `M ${CX} 1470 L ${CX} 1570`, desde: 105, flecha: "abajo" },
+  { d: `M ${CX} 1470 L ${CX} 1570`, desde: 65, flecha: "abajo" },
 ];
-const DUR_ARISTA = 10;
+const DUR_ARISTA = 8;
 
 // The request's path through the approved branch, and when it runs.
 const RECORRIDO = `M ${CX} 360 L ${CX} 1620`;
-const RECORRIDO_DESDE = 135;
+const RECORRIDO_DESDE = 100;
 const RECORRIDO_DUR = 70;
 const BADGE = RECORRIDO_DESDE + RECORRIDO_DUR + 5;
 
@@ -214,7 +214,7 @@ const NodoVista: React.FC<{ n: Nodo; brillo: number }> = ({ n, brillo }) => {
   const entrada = spring({
     frame: frame - n.aparece,
     fps,
-    config: { damping: 13, stiffness: 120 },
+    config: { damping: 14, stiffness: 180 },
   });
   const halo = `0 0 ${brillo * 34}px rgba(255,140,66,${brillo * 0.8})`;
   const texto: React.CSSProperties = {
