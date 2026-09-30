@@ -10,7 +10,7 @@ import "@fontsource/montserrat/700.css";
 import "@fontsource/montserrat/800.css";
 import { FondoAbstracto } from "./FondoAbstracto";
 
-// "Suite de Módulos" rebuilt for the animated blue background: white logo,
+// "Suite Modular" (originally "Suite de Módulos") rebuilt for the animated blue background: white logo,
 // title, and eight glass cards that fly in and land in the same grid as the
 // original design (public/modulos/original.webp, scaled to 1080 wide).
 // Icons come from scripts/extraer-iconos.py, shown at half their size in
@@ -105,7 +105,7 @@ const Encabezado: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          top: 365,
+          top: 414,
           width: "100%",
           textAlign: "center",
           fontFamily: FUENTE,
@@ -115,8 +115,8 @@ const Encabezado: React.FC = () => {
           letterSpacing: -1,
         }}
       >
-        <div style={{ color: "white" }}>Suite de</div>
-        <div style={{ color: CELESTE }}>Módulos</div>
+        <span style={{ color: "white" }}>Suite </span>
+        <span style={{ color: CELESTE }}>Modular</span>
       </div>
     </>
   );
