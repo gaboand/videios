@@ -35,7 +35,7 @@ export const RemotionRoot: React.FC = () => {
         // npx remotion render LogoAxonia
         id="LogoAxonia"
         component={LogoAxonia}
-        durationInFrames={150}
+        durationInFrames={210}
         fps={30}
         width={1080}
         height={1920}

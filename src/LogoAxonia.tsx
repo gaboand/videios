@@ -1,5 +1,6 @@
 import {
   AbsoluteFill,
+  Easing,
   Img,
   interpolate,
   random,
@@ -8,6 +9,8 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
 
 // Logo reveal on an animated abstract blue background, 1080x1920 (9:16).
 // The logo is split into two layers generated from the original PNG:
@@ -18,6 +21,80 @@ const LOGO_W = 2028;
 const LOGO_H = 693;
 const ICON_CENTER = { x: 921, y: 325 };
 const LOGO_DISPLAY_W = 900;
+
+// Where the logo moves up to, making room for the pills below it.
+const LOGO_Y_FINAL = 690;
+const PILLS = [
+  "Gestión del Riesgo",
+  "Automatizaciones",
+  "Herramientas de Cobranzas",
+  "Core Lending",
+];
+const PILL_W = 720;
+const PILL_H = 104;
+const PILL_GAP = 30;
+const PILLS_TOP = 930;
+// Frames: logo starts moving up, first pill appears, delay between pills.
+const INICIO_SUBIDA = 80;
+const INICIO_PILLS = 100;
+const ESCALON_PILLS = 8;
+
+const Pills: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps, width } = useVideoConfig();
+
+  return (
+    <>
+      {PILLS.map((texto, i) => {
+        const aparicion = spring({
+          frame: frame - INICIO_PILLS - i * ESCALON_PILLS,
+          fps,
+          config: { damping: 14, stiffness: 110 },
+        });
+        return (
+          <div
+            key={texto}
+            style={{
+              position: "absolute",
+              left: (width - PILL_W) / 2,
+              top: PILLS_TOP + i * (PILL_H + PILL_GAP),
+              width: PILL_W,
+              height: PILL_H,
+              borderRadius: PILL_H / 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 22,
+              background: "rgba(255,255,255,0.10)",
+              border: "2px solid rgba(255,255,255,0.35)",
+              boxShadow:
+                "0 8px 32px rgba(3,10,40,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
+              backdropFilter: "blur(14px)",
+              opacity: aparicion,
+              transform: `translateY(${(1 - aparicion) * 60}px) scale(${0.9 + aparicion * 0.1})`,
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 600,
+              fontSize: 42,
+              letterSpacing: 0.3,
+              color: "white",
+            }}
+          >
+            <div
+              style={{
+                width: 14,
+                height: 14,
+                borderRadius: "50%",
+                background: "#7dd3fc",
+                boxShadow: "0 0 12px #7dd3fc",
+              }}
+            />
+            {texto}
+          </div>
+        );
+      })}
+    </>
+  );
+};
 
 const BLOBS = [
   { color: "#1d4ed8", size: 900, x: 200, y: 400, speed: 0.013, phase: 0 },
@@ -123,10 +200,25 @@ export const LogoAxonia: React.FC = () => {
     extrapolateRight: "clamp",
   });
   // After landing, a slow continuous push keeps the shot alive.
-  const empuje = interpolate(frame, [60, durationInFrames], [1, 1.05], {
+  const empuje = interpolate(frame, [60, durationInFrames], [1, 1.04], {
     extrapolateLeft: "clamp",
   });
-  const escala = interpolate(llegada, [0, 1], [0.08, 1]) * empuje;
+  // Once landed, the logo rises and shrinks a little to make room for the pills.
+  const subida = interpolate(
+    frame,
+    [INICIO_SUBIDA, INICIO_SUBIDA + 30],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.inOut(Easing.cubic),
+    },
+  );
+  const logoY = interpolate(subida, [0, 1], [height / 2, LOGO_Y_FINAL]);
+  const escala =
+    interpolate(llegada, [0, 1], [0.08, 1]) *
+    empuje *
+    interpolate(subida, [0, 1], [1, 0.85]);
   const desenfoque = interpolate(entrada, [0, 1], [18, 0]);
 
   // The symbol spins in as it arrives; the letters fade in slightly later.
@@ -147,8 +239,7 @@ export const LogoAxonia: React.FC = () => {
 
   const escalaLogo = LOGO_DISPLAY_W / LOGO_W;
   const iconoX = width / 2 + (ICON_CENTER.x - LOGO_W / 2) * escalaLogo * escala;
-  const iconoY =
-    height / 2 + (ICON_CENTER.y - LOGO_H / 2) * escalaLogo * escala;
+  const iconoY = logoY + (ICON_CENTER.y - LOGO_H / 2) * escalaLogo * escala;
 
   const capa: React.CSSProperties = {
     position: "absolute",
@@ -181,7 +272,7 @@ export const LogoAxonia: React.FC = () => {
         style={{
           position: "absolute",
           left: width / 2,
-          top: height / 2,
+          top: logoY,
           width: LOGO_W,
           height: LOGO_H,
           transform: `translate(-50%, -50%) scale(${escalaLogo * escala})`,
@@ -207,6 +298,7 @@ export const LogoAxonia: React.FC = () => {
           }}
         />
       </div>
+      <Pills />
     </AbsoluteFill>
   );
 };
