@@ -8,7 +8,12 @@ import {
 } from "remotion";
 import "@fontsource/montserrat/700.css";
 import "@fontsource/montserrat/800.css";
+import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
+
+export const modulosSchema = z.object({
+  fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
+});
 
 // "Suite Modular" (originally "Suite de Módulos") rebuilt for the animated blue background: white logo,
 // title, and eight glass cards that fly in and land in the same grid as the
@@ -125,12 +130,14 @@ const Encabezado: React.FC = () => {
   );
 };
 
-export const ModulosAxonia: React.FC = () => {
+export const ModulosAxonia: React.FC<z.infer<typeof modulosSchema>> = ({
+  fondo,
+}) => {
   const frame = useCurrentFrame();
 
   return (
     <AbsoluteFill>
-      <FondoAbstracto paleta="azul" />
+      <FondoAbstracto paleta="azul" estilo={fondo} />
       <Encabezado />
       {MODULOS.map((texto, i) => {
         const col = COLUMNAS[i % 2];
