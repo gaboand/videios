@@ -1,6 +1,7 @@
 import "./index.css";
 import { Composition } from "remotion";
 import { DURACION_FIRMA_CONTRATO, FirmaContrato } from "./FirmaContrato";
+import { DashboardAxonia, dashboardSchema } from "./DashboardAxonia";
 import { LogoAxonia } from "./LogoAxonia";
 import { ModulosAxonia, modulosSchema } from "./ModulosAxonia";
 import { Transicion, transicionSchema } from "./Transicion";
@@ -48,6 +49,17 @@ export const RemotionRoot: React.FC = () => {
         schema={modulosSchema}
         defaultProps={{ fondo: "red", paleta: "azul" }}
         durationInFrames={150}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render DashboardAxonia
+        id="DashboardAxonia"
+        component={DashboardAxonia}
+        schema={dashboardSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={300}
         fps={30}
         width={1080}
         height={1920}
