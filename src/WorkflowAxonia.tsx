@@ -49,10 +49,9 @@ type Nodo = {
 
 const CX = 540;
 // The diagram is drawn at full size in 1080x1920 coordinates and shown at
-// ESCALA. Title + scaled diagram (320 to ~1770, i.e. ~870px at 60%) form one
-// block centered vertically.
+// ESCALA, centered vertically; the title sits near the top.
 const ESCALA = 0.6;
-const TITULO_TOP = 435;
+const TITULO_TOP = 230;
 const DIAGRAMA_TOP = 615;
 const NODOS: Nodo[] = [
   {
@@ -62,7 +61,7 @@ const NODOS: Nodo[] = [
     y: 360,
     w: 320,
     texto: "Nueva solicitud",
-    aparece: 10,
+    aparece: 5,
   },
   {
     id: "consulta",
@@ -71,7 +70,7 @@ const NODOS: Nodo[] = [
     y: 540,
     w: 450,
     texto: "Consultas Bases y Bureau",
-    aparece: 40,
+    aparece: 20,
   },
   {
     id: "dec1",
@@ -80,7 +79,7 @@ const NODOS: Nodo[] = [
     y: 760,
     w: 240,
     texto: "Situación\n< 2",
-    aparece: 70,
+    aparece: 35,
   },
   {
     id: "rechazo",
@@ -89,7 +88,7 @@ const NODOS: Nodo[] = [
     y: 760,
     w: 230,
     texto: "Rechazo\nautomático",
-    aparece: 100,
+    aparece: 50,
   },
   {
     id: "score",
@@ -98,7 +97,7 @@ const NODOS: Nodo[] = [
     y: 980,
     w: 400,
     texto: "Score de riesgo",
-    aparece: 115,
+    aparece: 58,
   },
   {
     id: "dec2",
@@ -107,7 +106,7 @@ const NODOS: Nodo[] = [
     y: 1200,
     w: 240,
     texto: "¿Score\n≥ 650?",
-    aparece: 145,
+    aparece: 72,
   },
   {
     id: "revision",
@@ -116,7 +115,7 @@ const NODOS: Nodo[] = [
     y: 1200,
     w: 230,
     texto: "Revisión\nanalista",
-    aparece: 175,
+    aparece: 88,
   },
   {
     id: "matriz",
@@ -125,7 +124,7 @@ const NODOS: Nodo[] = [
     y: 1420,
     w: 400,
     texto: "Asignar límite y TNA",
-    aparece: 190,
+    aparece: 95,
   },
   {
     id: "aprobado",
@@ -134,7 +133,7 @@ const NODOS: Nodo[] = [
     y: 1620,
     w: 400,
     texto: "Aprobado · Oferta enviada",
-    aparece: 225,
+    aparece: 112,
   },
 ];
 const RECT_H = 100;
@@ -150,46 +149,46 @@ type Arista = {
 // Orthogonal connections between node edges (rect half-height 50,
 // diamond half-diagonal 120).
 const ARISTAS: Arista[] = [
-  { d: `M ${CX} 400 L ${CX} 490`, desde: 25, flecha: "abajo" },
-  { d: `M ${CX} 590 L ${CX} 640`, desde: 55, flecha: "abajo" },
+  { d: `M ${CX} 400 L ${CX} 490`, desde: 12, flecha: "abajo" },
+  { d: `M ${CX} 590 L ${CX} 640`, desde: 28, flecha: "abajo" },
   {
     d: `M 660 760 L 740 760`,
-    desde: 85,
+    desde: 42,
     flecha: "derecha",
     rotulo: { texto: "No", x: 700, y: 728 },
   },
   {
     d: `M ${CX} 880 L ${CX} 930`,
-    desde: 100,
+    desde: 50,
     flecha: "abajo",
     rotulo: { texto: "Sí", x: 580, y: 905 },
   },
-  { d: `M ${CX} 1030 L ${CX} 1080`, desde: 130, flecha: "abajo" },
+  { d: `M ${CX} 1030 L ${CX} 1080`, desde: 65, flecha: "abajo" },
   {
     d: `M 420 1200 L 340 1200`,
-    desde: 160,
+    desde: 80,
     flecha: "izquierda",
     rotulo: { texto: "No", x: 380, y: 1168 },
   },
   {
     d: `M ${CX} 1320 L ${CX} 1370`,
-    desde: 175,
+    desde: 88,
     flecha: "abajo",
     rotulo: { texto: "Sí", x: 580, y: 1345 },
   },
   {
     d: `M 225 1250 L 225 1420 L 340 1420`,
-    desde: 190,
+    desde: 95,
     flecha: "derecha",
     rotulo: { texto: "Aprueba", x: 225, y: 1335 },
   },
-  { d: `M ${CX} 1470 L ${CX} 1570`, desde: 210, flecha: "abajo" },
+  { d: `M ${CX} 1470 L ${CX} 1570`, desde: 105, flecha: "abajo" },
 ];
-const DUR_ARISTA = 15;
+const DUR_ARISTA = 10;
 
 // The request's path through the approved branch, and when it runs.
 const RECORRIDO = `M ${CX} 360 L ${CX} 1620`;
-const RECORRIDO_DESDE = 250;
+const RECORRIDO_DESDE = 135;
 const RECORRIDO_DUR = 70;
 const BADGE = RECORRIDO_DESDE + RECORRIDO_DUR + 5;
 
