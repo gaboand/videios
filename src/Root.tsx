@@ -2,6 +2,7 @@ import "./index.css";
 import { Composition } from "remotion";
 import { DURACION_FIRMA_CONTRATO, FirmaContrato } from "./FirmaContrato";
 import { DashboardAxonia, dashboardSchema } from "./DashboardAxonia";
+import { CoreHome, coreHomeSchema } from "./CoreHome";
 import { LogoAxonia } from "./LogoAxonia";
 import {
   SegmentacionCobranzas,
@@ -99,6 +100,17 @@ export const RemotionRoot: React.FC = () => {
         schema={segmentacionSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={270}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render CoreHome
+        id="CoreHome"
+        component={CoreHome}
+        schema={coreHomeSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={300}
         fps={30}
         width={1080}
         height={1920}
