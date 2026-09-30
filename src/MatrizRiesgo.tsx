@@ -49,15 +49,16 @@ const SCORES = [
   "901-1000",
 ];
 // Income bands, highest to lowest (they replace the NSE classes A..D2 of
-// the original matrix, so risk still grows to the right).
+// the original matrix, so risk still grows to the right). M = miles,
+// MM = millones.
 const INGRESOS = [
-  "+3M",
-  "2-3M",
-  "1,5-2M",
-  "1-1,5M",
-  "700K-1M",
-  "400-700K",
-  "-400K",
+  "> 6 MM",
+  "> 4 MM",
+  "> 2 MM",
+  "> 1 MM",
+  "> 700M",
+  "> 500M",
+  "> 100M",
 ];
 
 // Starting matrix, transcribed from the original (rows = score bands).
@@ -79,7 +80,6 @@ const AJUSTES = [
   {
     desde: 80,
     a: "C" as Nivel,
-    rotulo: "Ajuste 1 · Rojo → Naranja",
     celdas: [
       [2, 4],
       [2, 5],
@@ -90,7 +90,6 @@ const AJUSTES = [
   {
     desde: 135,
     a: "B" as Nivel,
-    rotulo: "Ajuste 2 · Naranja → Amarillo",
     celdas: [
       [4, 2],
       [4, 3],
@@ -101,7 +100,6 @@ const AJUSTES = [
   {
     desde: 190,
     a: "A" as Nivel,
-    rotulo: "Ajuste 3 · Amarillo → Verde",
     celdas: [
       [6, 1],
       [6, 2],
@@ -224,14 +222,6 @@ export const MatrizRiesgo: React.FC<z.infer<typeof matrizSchema>> = ({
     previo = aj.aprobacion;
   }
 
-  // Current adjustment label.
-  const actual = [...AJUSTES].reverse().find((aj) => frame >= aj.desde - 6);
-  const rotuloOpacidad = actual
-    ? interpolate(frame, [actual.desde - 6, actual.desde + 4], [0, 1], {
-        extrapolateRight: "clamp",
-      })
-    : 0;
-
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
@@ -260,31 +250,6 @@ export const MatrizRiesgo: React.FC<z.infer<typeof matrizSchema>> = ({
           }}
         >
           Score × Ingresos
-        </div>
-      </div>
-      {/* Adjustment label */}
-      <div
-        style={{
-          position: "absolute",
-          top: 350,
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          opacity: rotuloOpacidad,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: "white",
-            background: "rgba(22,24,29,0.8)",
-            border: "2px solid rgba(255,255,255,0.2)",
-            borderRadius: 999,
-            padding: "10px 26px",
-          }}
-        >
-          {actual?.rotulo ?? ""}
         </div>
       </div>
       {/* Matrix card */}
