@@ -125,7 +125,7 @@ export const RemotionRoot: React.FC = () => {
           fondo: "geometrico",
           paleta: "gris",
           entrada: "iris",
-          frase: "Todo conectado y\nen un mismo lugar",
+          frase: "Todo *conectado* y\nen un *mismo lugar*",
         }}
         durationInFrames={210}
         fps={30}

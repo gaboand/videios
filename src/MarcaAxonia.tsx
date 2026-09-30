@@ -25,7 +25,8 @@ export const marcaSchema = z.object({
   // "zoom": the whole logo springs in. "ola": the letters come in from the
   // right one behind the other, riding a wave in depth, and settle.
   // "revelado", "enfoque", "neurona", "escaneo": see EntradaVariante.
-  // Optional tagline under the axons ("\n" splits lines). When present,
+  // Optional tagline under the axons ("\n" splits lines, *words* are
+  // highlighted in orange). When present,
   // logo and axons move up to make room for it.
   frase: z.string(),
   entrada: z.enum([
@@ -747,7 +748,15 @@ export const MarcaAxonia: React.FC<z.infer<typeof marcaSchema>> = ({
                     transform: `translateY(${(1 - t) * 80}px)`,
                   }}
                 >
-                  {linea}
+                  {/* Words between *asterisks* go in the brand orange */}
+                  {linea.split("*").map((parte, j) => (
+                    <span
+                      key={j}
+                      style={{ color: j % 2 ? "#FF8C42" : undefined }}
+                    >
+                      {parte}
+                    </span>
+                  ))}
                 </div>
               </div>
             );
