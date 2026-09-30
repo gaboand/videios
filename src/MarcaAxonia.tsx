@@ -114,6 +114,13 @@ const Letras: React.FC<{ escala: number; brillo: number }> = ({
   );
   // Screen px the word still has to travel, and how much wave is left.
   const resta = OLA.recorrido * (1 - avance);
+  // 0 while moving, then 0 -> 1 right after the word settles.
+  const asentado = interpolate(
+    frame,
+    [OLA.desde + OLA.duracion, OLA.desde + OLA.duracion + 20],
+    [0, 1],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  );
   const envolvente = interpolate(resta, [0, 420], [0, 1], {
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.sin),
@@ -128,6 +135,12 @@ const Letras: React.FC<{ escala: number; brillo: number }> = ({
         const y = Math.sin(fase) * OLA.alto * envolvente;
         const s = 1 + Math.cos(fase) * OLA.profundidad * envolvente;
         const lejos = Math.max(0, 1 - s);
+        // See-through while travelling: 70% transparent at the back of the
+        // wave, 40% at the front; 40% as the wave fades, then solid once
+        // the word has settled.
+        const enViaje = interpolate(Math.cos(fase), [-1, 1], [0.3, 0.6]);
+        const opacidad =
+          (0.6 + (enViaje - 0.6) * envolvente) * (1 - asentado) + asentado;
         return (
           <Img
             key={l.id}
@@ -139,6 +152,7 @@ const Letras: React.FC<{ escala: number; brillo: number }> = ({
               width: l.w,
               height: LOGO_H,
               zIndex: Math.round(s * 100),
+              opacity: opacidad,
               transformOrigin: "50% 50%",
               transform: `translate(${resta / escala}px, ${y / escala}px) scale(${s}) rotate(${
                 l.id === "O" ? -resta * OLA.giro : 0
