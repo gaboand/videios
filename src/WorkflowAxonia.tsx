@@ -69,8 +69,8 @@ const NODOS: Nodo[] = [
     tipo: "funcion",
     x: CX,
     y: 540,
-    w: 400,
-    texto: "Consulta BCRA + Nosis",
+    w: 450,
+    texto: "Consultas Bases y Bureau",
     aparece: 40,
   },
   {
@@ -79,7 +79,7 @@ const NODOS: Nodo[] = [
     x: CX,
     y: 760,
     w: 240,
-    texto: "¿Situación\nBCRA ≤ 2?",
+    texto: "Situación\n< 2",
     aparece: 70,
   },
   {
