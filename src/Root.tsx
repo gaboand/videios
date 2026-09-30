@@ -1,6 +1,7 @@
 import "./index.css";
 import { Composition } from "remotion";
 import { DURACION_FIRMA_CONTRATO, FirmaContrato } from "./FirmaContrato";
+import { LogoAxonia } from "./LogoAxonia";
 import { Transicion, transicionSchema } from "./Transicion";
 
 export const RemotionRoot: React.FC = () => {
@@ -26,6 +27,15 @@ export const RemotionRoot: React.FC = () => {
         id="FirmaContrato"
         component={FirmaContrato}
         durationInFrames={DURACION_FIRMA_CONTRATO}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render LogoAxonia
+        id="LogoAxonia"
+        component={LogoAxonia}
+        durationInFrames={150}
         fps={30}
         width={1080}
         height={1920}
