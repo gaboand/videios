@@ -4,6 +4,7 @@ import {
   Easing,
   Img,
   interpolate,
+  random,
   spring,
   staticFile,
   useCurrentFrame,
@@ -23,7 +24,18 @@ export const marcaSchema = z.object({
   // "zoom": the whole logo springs in. "ola": the letters come in from the
   // right one behind the other, riding a wave in depth, and settle.
   // "revelado", "enfoque", "neurona", "escaneo": see EntradaVariante.
-  entrada: z.enum(["zoom", "ola", "revelado", "enfoque", "neurona", "escaneo"]),
+  entrada: z.enum([
+    "zoom",
+    "ola",
+    "revelado",
+    "enfoque",
+    "neurona",
+    "escaneo",
+    "giro",
+    "iris",
+    "ensamble",
+    "expansiva",
+  ]),
 });
 
 // Logo layers (see LogoAxonia) and their size.
@@ -186,6 +198,10 @@ const ASENTADO: Record<string, number> = {
   enfoque: 62,
   neurona: 62,
   escaneo: 52,
+  giro: 58,
+  iris: 48,
+  ensamble: 60,
+  expansiva: 66,
 };
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -199,8 +215,23 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 //   out from behind it to both sides.
 // - escaneo: a vertical beam sweeps left to right and the letters
 //   materialise as it passes, with a bright edge.
+// - giro: letters flip in on their horizontal axis, left to right.
+// - iris: the neuron pulses and a circle of light opens from it,
+//   revealing the whole logo.
+// - ensamble: letters fly in from scattered places in space (depth,
+//   rotation, blur) and converge together.
+// - expansiva: the neuron appears and sends out a ring; each letter pops
+//   in as the ring reaches it.
 const EntradaVariante: React.FC<{
-  variante: "revelado" | "enfoque" | "neurona" | "escaneo";
+  variante:
+    | "revelado"
+    | "enfoque"
+    | "neurona"
+    | "escaneo"
+    | "giro"
+    | "iris"
+    | "ensamble"
+    | "expansiva";
   brillo: number;
 }> = ({ variante, brillo }) => {
   const frame = useCurrentFrame();
@@ -332,6 +363,143 @@ const EntradaVariante: React.FC<{
           transformOrigin: `${NEURONA.x - o.x}px ${NEURONA.y}px`,
           filter: `drop-shadow(0 0 ${brillo + destello * 60}px rgba(125,211,252,${0.85 + destello * 0.15}))`,
         })}
+      </>
+    );
+  }
+
+  if (variante === "giro") {
+    return (
+      <>
+        {LETRAS.map((l, i) => {
+          const t = spring({
+            frame: frame - 6 - i * 5,
+            fps,
+            config: { damping: 14, stiffness: 120 },
+          });
+          return pieza(l, {
+            opacity: Math.min(1, t * 2),
+            transformOrigin: `50% ${BASE_Y}px`,
+            transform: `perspective(1600px) rotateX(${(1 - t) * -100}deg) translateY(${(1 - t) * -80}px)`,
+            filter: glow(l.id),
+          });
+        })}
+      </>
+    );
+  }
+
+  if (variante === "iris") {
+    const r = interpolate(frame, [8, 42], [0, 1300], {
+      ...clamp,
+      easing: Easing.bezier(0.5, 0, 0.2, 1),
+    });
+    const anillo = interpolate(r, [0, 200, 1300], [0, 1, 0], clamp);
+    const pulso = spring({
+      frame,
+      fps,
+      config: { damping: 12, stiffness: 160 },
+    });
+    return (
+      <>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            clipPath: `circle(${r}px at ${NEURONA.x}px ${NEURONA.y}px)`,
+            transform: `scale(${1.06 - 0.06 * interpolate(r, [0, 1300], [0, 1], clamp)})`,
+            transformOrigin: `${NEURONA.x}px ${NEURONA.y}px`,
+          }}
+        >
+          {LETRAS.filter((l) => l.id !== "O").map((l) => pieza(l, {}))}
+        </div>
+        {pieza(LETRAS.find((p) => p.id === "O")!, {
+          transform: `scale(${pulso})`,
+          transformOrigin: `${NEURONA.x - 640}px ${NEURONA.y}px`,
+          filter: glow("O"),
+        })}
+        <div
+          style={{
+            position: "absolute",
+            left: NEURONA.x - r,
+            top: NEURONA.y - r,
+            width: r * 2,
+            height: r * 2,
+            borderRadius: "50%",
+            border: "12px solid rgba(255,255,255,0.95)",
+            boxShadow:
+              "0 0 50px rgba(125,211,252,0.8), inset 0 0 50px rgba(125,211,252,0.5)",
+            opacity: anillo,
+          }}
+        />
+      </>
+    );
+  }
+
+  if (variante === "ensamble") {
+    return (
+      <>
+        {LETRAS.map((l, i) => {
+          const t = interpolate(frame, [4 + i * 2, 52 + i * 2], [0, 1], {
+            ...clamp,
+            easing: Easing.bezier(0.16, 1, 0.3, 1),
+          });
+          const dx = (random(`dx${l.id}`) - 0.5) * 1800;
+          const dy = (random(`dy${l.id}`) - 0.5) * 1100;
+          const esc = 0.3 + random(`s${l.id}`) * 2.2;
+          const rot = (random(`r${l.id}`) - 0.5) * 120;
+          return pieza(l, {
+            opacity: interpolate(t, [0, 0.3], [0, 1], clamp),
+            transform: `translate(${dx * (1 - t)}px, ${dy * (1 - t)}px) scale(${esc + (1 - esc) * t}) rotate(${rot * (1 - t)}deg)`,
+            filter: `blur(${(1 - t) * 30}px)${glow(l.id)}`,
+          });
+        })}
+      </>
+    );
+  }
+
+  if (variante === "expansiva") {
+    const onda = interpolate(frame, [14, 46], [0, 1300], {
+      ...clamp,
+      easing: Easing.out(Easing.quad),
+    });
+    const n = spring({ frame, fps, config: { damping: 10, stiffness: 150 } });
+    return (
+      <>
+        {LETRAS.map((l) => {
+          if (l.id === "O") {
+            return pieza(l, {
+              transform: `scale(${n})`,
+              transformOrigin: `${NEURONA.x - l.x}px ${NEURONA.y}px`,
+              filter: glow("O"),
+            });
+          }
+          // Pops when the ring reaches the letter's center.
+          const d = Math.abs(l.x + l.w / 2 - NEURONA.x);
+          // Inverse of the ring's ease-out, so the pop matches the ring.
+          const llega = 14 + 32 * (1 - Math.sqrt(1 - d / 1300));
+          const t = spring({
+            frame: frame - llega,
+            fps,
+            config: { damping: 9, stiffness: 170 },
+          });
+          return pieza(l, {
+            opacity: Math.min(1, t * 3),
+            transform: `scale(${t})`,
+            transformOrigin: `50% ${BASE_Y - 180}px`,
+          });
+        })}
+        <div
+          style={{
+            position: "absolute",
+            left: NEURONA.x - onda,
+            top: NEURONA.y - onda,
+            width: onda * 2,
+            height: onda * 2,
+            borderRadius: "50%",
+            border: "12px solid rgba(125,211,252,0.95)",
+            boxShadow: "0 0 40px rgba(125,211,252,0.7)",
+            opacity: interpolate(onda, [0, 150, 1300], [0, 1, 0], clamp),
+          }}
+        />
       </>
     );
   }
