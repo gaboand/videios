@@ -176,51 +176,137 @@ const Dato: React.FC<{ k: string; v: React.ReactNode; o?: number }> = ({ k, v, o
 
 // Generic ID card (front and back) and a drawn selfie for the onboarding
 // documents.
-// Drawn portrait (60 x 70 box) used in the ID photo and the selfie.
-const Persona: React.FC<{ fondo: string }> = ({ fondo }) => (
-  <g>
-    <rect width={60} height={70} fill={fondo} />
-    {/* Jacket, shirt and lapels */}
-    <path d="M5 70 C6 59 15 53.5 24.5 52.5 L35.5 52.5 C45 53.5 54 59 55 70 Z" fill="#2c4d75" />
-    <path d="M24.5 52.5 L30 63 L35.5 52.5 Z" fill="#e3edf8" />
-    <path d="M24.5 52.5 L28.5 70 M35.5 52.5 L31.5 70" stroke="#1f3a5c" strokeWidth={1} />
-    <path d="M24.5 52.5 L27.5 58 L30 55 Z M35.5 52.5 L32.5 58 L30 55 Z" fill="#f7fafd" />
-    {/* Neck */}
-    <path d="M25.5 43 L25.5 53 C27.5 55 32.5 55 34.5 53 L34.5 43 Z" fill="#c98f6c" />
-    <path d="M25.5 46 C28 49 32 49 34.5 46 L34.5 43 L25.5 43 Z" fill="#b57b59" />
-    {/* Ears */}
-    <ellipse cx={18.6} cy={34} rx={2.2} ry={3.6} fill="#d39a77" />
-    <ellipse cx={41.4} cy={34} rx={2.2} ry={3.6} fill="#d39a77" />
-    {/* Face */}
-    <path d="M19 29 C19 19.5 41 19.5 41 29 L41 36 C41 43.5 36 48.5 30 48.5 C24 48.5 19 43.5 19 36 Z" fill="#e0a986" />
-    <path d="M22 41 C24.5 46.5 35.5 46.5 38 41 C37 46 33.5 48.5 30 48.5 C26.5 48.5 23 46 22 41 Z" fill="#cf9572" opacity={0.6} />
-    {/* Hair with side part */}
-    <path d="M18.4 32 C16.5 18.5 24 12.5 31 13 C38.5 13 44 18.5 41.6 32 C40.8 27.5 39.5 24.5 36.5 22.8 C31 25.5 25 25.2 21.5 23.8 C20 26 19 28.8 18.4 32 Z" fill="#3a2a20" />
-    <path d="M24 16.5 C28 14.5 34 14.8 37.5 17.5 C33.5 16.6 28.5 16.4 24 16.5 Z" fill="#5a4334" />
-    {/* Brows, eyes, nose, mouth */}
-    <path d="M22.8 29.4 C24.2 28.4 26.4 28.4 27.6 29.2 M32.4 29.2 C33.6 28.4 35.8 28.4 37.2 29.4" stroke="#3a2a20" strokeWidth={1.1} strokeLinecap="round" fill="none" />
-    <ellipse cx={25.2} cy={32.6} rx={1.9} ry={1.3} fill="white" />
-    <ellipse cx={34.8} cy={32.6} rx={1.9} ry={1.3} fill="white" />
-    <circle cx={25.4} cy={32.7} r={1} fill="#3b2a20" />
-    <circle cx={34.6} cy={32.7} r={1} fill="#3b2a20" />
-    <path d="M30 33.5 C29.6 36 29 37.5 28.6 38.2 C29.4 38.8 30.6 38.8 31.4 38.4" stroke="#b57b59" strokeWidth={0.8} fill="none" strokeLinecap="round" />
-    <path d="M26.4 41.2 C28.4 43 31.6 43 33.6 41.2 C31.6 42 28.4 42 26.4 41.2 Z" fill="#9c4f3f" stroke="#9c4f3f" strokeWidth={0.6} strokeLinejoin="round" />
-    <ellipse cx={23} cy={38} rx={1.8} ry={1} fill="#e8907a" opacity={0.35} />
-    <ellipse cx={37} cy={38} rx={1.8} ry={1} fill="#e8907a" opacity={0.35} />
-  </g>
-);
+// Drawn portrait (60 x 70 box) used in the ID photo and the selfie. `id`
+// keeps the gradient ids unique per copy.
+const Persona: React.FC<{ id: string; fondo?: string }> = ({ id, fondo }) => {
+  const u = (n: string) => `url(#${id}-${n})`;
+  return (
+    <g>
+      <defs>
+        <radialGradient id={`${id}-piel`} cx="0.45" cy="0.38" r="0.7">
+          <stop offset="0" stopColor="#f3c8a8" />
+          <stop offset="0.65" stopColor="#e2a985" />
+          <stop offset="1" stopColor="#c98d6b" />
+        </radialGradient>
+        <linearGradient id={`${id}-cuello`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#b47755" />
+          <stop offset="0.45" stopColor="#d49b78" />
+          <stop offset="1" stopColor="#dca382" />
+        </linearGradient>
+        <linearGradient id={`${id}-pelo`} x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0" stopColor="#4d382b" />
+          <stop offset="1" stopColor="#23180f" />
+        </linearGradient>
+        <linearGradient id={`${id}-saco`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3a5f8a" />
+          <stop offset="1" stopColor="#1e3453" />
+        </linearGradient>
+        <radialGradient id={`${id}-iris`} cx="0.4" cy="0.4" r="0.6">
+          <stop offset="0" stopColor="#8a6440" />
+          <stop offset="1" stopColor="#4a3220" />
+        </radialGradient>
+      </defs>
+      {fondo ? <rect width={60} height={70} fill={fondo} /> : null}
+      {/* Jacket, shirt, tie */}
+      <path d="M4 70 C5 60 13.5 54.2 24 52.8 L36 52.8 C46.5 54.2 55 60 56 70 Z" fill={u("saco")} />
+      <path d="M24.2 52.8 L30 64 L35.8 52.8 Z" fill="#eef4fb" />
+      <path d="M28.6 55.6 L31.4 55.6 L32.2 58 L31 67 L30 68.5 L29 67 L27.8 58 Z" fill="#8f3b2c" />
+      <path d="M28.6 55.6 L31.4 55.6 L30.9 57.4 L29.1 57.4 Z" fill="#a8483a" />
+      <path d="M24.2 52.8 L26.4 59.5 L30 55.2 Z M35.8 52.8 L33.6 59.5 L30 55.2 Z" fill="white" />
+      <path d="M24 52.8 L22.2 56 L27.2 70 L28.4 70 L26.4 59.5 Z M36 52.8 L37.8 56 L32.8 70 L31.6 70 L33.6 59.5 Z" fill="#2b4a70" />
+      <path d="M22.2 56 L27.2 70 M37.8 56 L32.8 70" stroke="#5b80aa" strokeWidth={0.4} opacity={0.7} />
+      {/* Neck */}
+      <path d="M25.2 42 L25.2 52.6 C27.3 54.8 32.7 54.8 34.8 52.6 L34.8 42 Z" fill={u("cuello")} />
+      {/* Ears */}
+      <path d="M19.6 31 C17 30 15.8 32.5 16.4 35.2 C17 38 18.4 39.6 20 39 Z" fill="#d89e7b" />
+      <path d="M40.4 31 C43 30 44.2 32.5 43.6 35.2 C43 38 41.6 39.6 40 39 Z" fill="#d89e7b" />
+      <path d="M18.6 33 C17.8 34 18 36 19.2 37.4" stroke="#b77a58" strokeWidth={0.6} fill="none" />
+      <path d="M41.4 33 C42.2 34 42 36 40.8 37.4" stroke="#b77a58" strokeWidth={0.6} fill="none" />
+      {/* Face */}
+      <path
+        d="M19.6 28 C19.6 19 40.4 19 40.4 28 L40.6 35 C40.6 40 38.5 44.4 35 46.9 C33.2 48.2 31.6 48.8 30 48.8 C28.4 48.8 26.8 48.2 25 46.9 C21.5 44.4 19.4 40 19.4 35 Z"
+        fill={u("piel")}
+      />
+      {/* Light stubble along the jaw */}
+      <path
+        d="M21 38 C22 44 26 48.4 30 48.4 C34 48.4 38 44 39 38 C38 42.5 35 45 30 45.4 C25 45 22 42.5 21 38 Z"
+        fill="#6b5244"
+        opacity={0.16}
+      />
+      {/* Hair */}
+      <path
+        d="M18.8 33 C16.8 24 18 15.4 25 12.5 C29 10.9 35.2 11.2 38.8 13.6 C43.6 16.8 43.6 25 41.2 33 C40.9 29 40.2 26 38.6 24 C37.8 22.7 36.6 21.8 35 21.3 C31.4 23.7 26.4 24.3 22.4 23.6 C20.8 25.8 19.5 29 18.8 33 Z"
+        fill={u("pelo")}
+      />
+      <path d="M22.4 23.6 C25 19.4 30 17.4 35 21.3" stroke="#6b5040" strokeWidth={0.7} fill="none" opacity={0.8} />
+      <path d="M24.5 15 C28.5 13.2 34 13.6 37.6 16.2 M22 18 C25.5 15.6 31 15.3 34.5 16.8" stroke="#6e5343" strokeWidth={0.6} fill="none" opacity={0.7} />
+      <path d="M19.6 30 L19.4 34 C19.2 32.4 19.3 31 19.6 30 Z M40.4 30 L40.6 34 C40.8 32.4 40.7 31 40.4 30 Z" fill="#2e2019" />
+      {/* Brows */}
+      <path d="M22.4 29.6 C23.6 28.2 26 27.9 27.9 28.8 L27.7 29.7 C26 29.2 24 29.4 22.4 29.6 Z" fill="#2e2019" />
+      <path d="M37.6 29.6 C36.4 28.2 34 27.9 32.1 28.8 L32.3 29.7 C34 29.2 36 29.4 37.6 29.6 Z" fill="#2e2019" />
+      {/* Eyes */}
+      {[25.1, 34.9].map((cx) => (
+        <g key={cx}>
+          <path d={`M${cx - 2.6} 32.8 C${cx - 1.4} 31.2 ${cx + 1.4} 31.2 ${cx + 2.6} 32.8 C${cx + 1.4} 34.1 ${cx - 1.4} 34.1 ${cx - 2.6} 32.8 Z`} fill="white" />
+          <circle cx={cx} cy={32.75} r={1.25} fill={u("iris")} />
+          <circle cx={cx} cy={32.75} r={0.55} fill="#1a120c" />
+          <circle cx={cx + 0.45} cy={32.3} r={0.35} fill="white" />
+          <path d={`M${cx - 2.7} 32.8 C${cx - 1.4} 31 ${cx + 1.4} 31 ${cx + 2.7} 32.8`} stroke="#3a2a20" strokeWidth={0.7} fill="none" strokeLinecap="round" />
+          <path d={`M${cx - 2} 34.4 C${cx - 0.8} 35 ${cx + 0.8} 35 ${cx + 2} 34.4`} stroke="#c48a68" strokeWidth={0.35} fill="none" />
+        </g>
+      ))}
+      {/* Nose */}
+      <path d="M29.2 33.4 C28.8 35.6 28 37.2 27.9 38.1 C28.6 39 31.4 39 32.1 38.1 C31.6 37.6 31.2 37.4 30.8 37.5" stroke="#b47755" strokeWidth={0.65} fill="none" strokeLinecap="round" />
+      <path d="M30.6 34 C31.6 35.6 32.2 36.8 32.2 37.8 C31.4 37.2 30.8 36 30.6 34 Z" fill="#c98d6b" opacity={0.45} />
+      <ellipse cx={29} cy={38.1} rx={0.5} ry={0.3} fill="#8e5640" />
+      <ellipse cx={31} cy={38.1} rx={0.5} ry={0.3} fill="#8e5640" />
+      {/* Mouth */}
+      <path d="M26.4 41.4 C27.8 40.8 29 41 30 41.3 C31 41 32.2 40.8 33.6 41.4 C32.4 41.8 31.2 42 30 42 C28.8 42 27.6 41.8 26.4 41.4 Z" fill="#b5675a" />
+      <path d="M26.4 41.4 C27.6 43.4 32.4 43.4 33.6 41.4 C32.2 42.2 27.8 42.2 26.4 41.4 Z" fill="#c97a6a" />
+      <path d="M26.2 41.3 C28 42.3 32 42.3 33.8 41.3" stroke="#7d3d33" strokeWidth={0.45} fill="none" strokeLinecap="round" />
+      <ellipse cx={30} cy={42.9} rx={1.2} ry={0.35} fill="white" opacity={0.25} />
+      {/* Cheeks and highlights */}
+      <ellipse cx={22.8} cy={37.6} rx={2} ry={1.1} fill="#e98d78" opacity={0.28} />
+      <ellipse cx={37.2} cy={37.6} rx={2} ry={1.1} fill="#e98d78" opacity={0.28} />
+      <ellipse cx={26} cy={25.5} rx={3.5} ry={1.2} fill="white" opacity={0.18} />
+    </g>
+  );
+};
 
 const DniFrente: React.FC = () => (
   <svg viewBox="0 0 86 54" width="94%">
-    <rect x={0.5} y={0.5} width={85} height={53} rx={4} fill="#dfe9f3" stroke="#9fb3c8" />
-    <rect x={0.5} y={0.5} width={85} height={9} rx={4} fill="#5f86b3" />
-    <rect x={0.5} y={5} width={85} height={4.5} fill="#5f86b3" />
+    <defs>
+      <linearGradient id="dniFondo" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#e7eff7" />
+        <stop offset="0.5" stopColor="#d6e3f0" />
+        <stop offset="1" stopColor="#e9eef5" />
+      </linearGradient>
+      <radialGradient id="dniHolo" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stopColor="#f6d77a" stopOpacity={0.7} />
+        <stop offset="0.5" stopColor="#9fd3e8" stopOpacity={0.5} />
+        <stop offset="1" stopColor="#c7a6e8" stopOpacity={0.15} />
+      </radialGradient>
+      <filter id="dniGris">
+        <feColorMatrix type="saturate" values="0.55" />
+      </filter>
+    </defs>
+    <rect x={0.5} y={0.5} width={85} height={53} rx={4} fill="url(#dniFondo)" stroke="#9fb3c8" />
+    {/* Guilloche lines */}
+    <g stroke="#b7c9dc" strokeWidth={0.25} fill="none" opacity={0.8}>
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <path key={i} d={`M28 ${20 + i * 5} C45 ${14 + i * 5} 60 ${28 + i * 5} 85 ${18 + i * 5}`} />
+      ))}
+    </g>
+    <rect x={0.5} y={0.5} width={85} height={9} rx={4} fill="#4f78a8" />
+    <rect x={0.5} y={5} width={85} height={4.5} fill="#4f78a8" />
     <text x={43} y={6.6} fontSize={4} fontWeight={700} fill="white" textAnchor="middle" fontFamily="Montserrat">
       DOCUMENTO DE IDENTIDAD
     </text>
-    <rect x={5} y={14} width={22} height={28} rx={2} fill="#eef2f6" stroke="#b9c7d6" strokeWidth={0.4} />
-    <svg x={5} y={14} width={22} height={28} viewBox="9 9 42 54" preserveAspectRatio="xMidYMid slice">
-      <Persona fondo="#eef2f6" />
+    {/* Photo */}
+    <rect x={5} y={13.5} width={22} height={28.5} rx={1.5} fill="#f2f4f7" stroke="#a9b9cb" strokeWidth={0.4} />
+    <svg x={5.3} y={13.8} width={21.4} height={27.9} viewBox="10 9 40 52" preserveAspectRatio="xMidYMid slice" filter="url(#dniGris)">
+      <rect x={0} y={0} width={60} height={70} fill="#f2f4f7" />
+      <Persona id="dni" />
     </svg>
     {[
       ["APELLIDO", "PEREZ"],
@@ -233,7 +319,12 @@ const DniFrente: React.FC = () => (
         <text x={31} y={19.6 + i * 8} fontSize={3.6} fontWeight={700} fill="#1f2d4d" fontFamily="Montserrat">{v}</text>
       </g>
     ))}
-    <path d="M60 46 C64 42 67 49 71 45 S78 43 80 46" fill="none" stroke="#1f2d4d" strokeWidth={0.8} />
+    {/* Ghost photo and hologram */}
+    <svg x={66} y={14} width={13} height={17} viewBox="10 9 40 52" preserveAspectRatio="xMidYMid slice" opacity={0.28} filter="url(#dniGris)">
+      <Persona id="dniFantasma" />
+    </svg>
+    <circle cx={72.5} cy={37} r={4.2} fill="url(#dniHolo)" />
+    <path d="M58 47 C62 43 65 50 69 46 S76 44 79 47" fill="none" stroke="#1f2d4d" strokeWidth={0.8} />
   </svg>
 );
 
@@ -257,14 +348,23 @@ const DniDorso: React.FC = () => (
 
 const Selfie: React.FC = () => (
   <svg viewBox="0 0 60 70" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
-    <Persona fondo="url(#fondoSelfie)" />
     <defs>
-      <linearGradient id="fondoSelfie" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#dbe8f2" />
-        <stop offset="1" stopColor="#b9cfe0" />
+      <linearGradient id="fondoSelfie" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#e6eef5" />
+        <stop offset="1" stopColor="#b8cadb" />
       </linearGradient>
     </defs>
-    <ellipse cx={30} cy={33} rx={17} ry={21} fill="none" stroke="white" strokeWidth={1.1} strokeDasharray="3 2" opacity={0.95} />
+    {/* Soft blurred room behind */}
+    <rect width={60} height={70} fill="url(#fondoSelfie)" />
+    <rect x={38} y={4} width={18} height={26} rx={2} fill="white" opacity={0.45} />
+    <rect x={3} y={10} width={10} height={40} rx={2} fill="#a9bccd" opacity={0.35} />
+    <circle cx={47} cy={44} r={9} fill="#9fb5c9" opacity={0.25} />
+    <Persona id="selfie" />
+    {/* Face capture guide */}
+    <ellipse cx={30} cy={33} rx={16.5} ry={20.5} fill="none" stroke="white" strokeWidth={1.1} strokeDasharray="3 2" opacity={0.95} />
+    <g stroke="white" strokeWidth={1.4} fill="none" strokeLinecap="round">
+      <path d="M5 11 V5 H11 M49 5 H55 V11 M5 59 V65 H11 M49 65 H55 V59" />
+    </g>
   </svg>
 );
 
