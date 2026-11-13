@@ -26,7 +26,7 @@ export const contactFlowSchema = z.object({
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const CONTACTFLOW_FRAMES = 900;
+export const CONTACTFLOW_FRAMES = 1024;
 
 const FUENTE = "Montserrat, sans-serif";
 const NAVY = "#14284b";
@@ -44,21 +44,24 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const ESC = {
   home: [0, 150],
   flujo: [146, 290],
-  campana: [286, 420],
-  segmentacion: [416, 600],
-  franja: [596, 740],
-  dashboard: [736, CONTACTFLOW_FRAMES + 10],
+  plantillas: [286, 414],
+  campana: [410, 544],
+  segmentacion: [540, 724],
+  franja: [720, 864],
+  dashboard: [860, CONTACTFLOW_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
 const INICIO_CAMPANA = 10;
 const TAP_ESTRATEGIAS = 134;
-const TAP_CAMPANAS = 276;
-const TAP_REPORTES = 406;
-const TAP_CATEGORIA = 470;
-const TAP_DESENLACE = 520;
-const TAP_FRANJA = 584;
-const TAP_DASH = 724;
-const TAPS = [TAP_ESTRATEGIAS, TAP_CAMPANAS, TAP_REPORTES, TAP_CATEGORIA, TAP_DESENLACE, TAP_FRANJA, TAP_DASH];
+const TAP_PLANTILLAS = 276;
+const NUEVA_PLANTILLA = 340;
+const TAP_CAMPANAS = 400;
+const TAP_REPORTES = 530;
+const TAP_CATEGORIA = 594;
+const TAP_DESENLACE = 644;
+const TAP_FRANJA = 708;
+const TAP_DASH = 848;
+const TAPS = [TAP_ESTRATEGIAS, TAP_PLANTILLAS, TAP_CAMPANAS, TAP_REPORTES, TAP_CATEGORIA, TAP_DESENLACE, TAP_FRANJA, TAP_DASH];
 
 const num = (n: number) => n.toLocaleString("es-AR");
 const pesos = (n: number) => `$ ${n.toLocaleString("es-AR")}`;
@@ -96,7 +99,7 @@ const SIDE_ICONOS = [
   "M12 8 V12 L15 15 M4 12 A8 8 0 1 0 6.5 6.3 M4 4 V8 H8",
   "M4 7 H20 M4 12 H20 M4 17 H20 M8 5 V9 M15 10 V14 M10 15 V19",
 ];
-const ACTIVO: Record<Escena, number> = { home: 0, flujo: 2, campana: 1, segmentacion: 5, franja: 6, dashboard: 4 };
+const ACTIVO: Record<Escena, number> = { home: 0, flujo: 2, plantillas: 3, campana: 1, segmentacion: 5, franja: 6, dashboard: 4 };
 
 // ---------- Home: call room ----------
 const ESTADOS = [
@@ -341,6 +344,96 @@ const Flujo: React.FC<{ frame: number }> = ({ frame }) => {
           );
         })}
       </div>
+    </div>
+  );
+};
+
+
+// ---------- Message templates ----------
+type Plantilla = [string, string, string, string[], number];
+const PLANTILLAS: Plantilla[] = [
+  ["Email", "aviso_vencimiento", "Aviso de vencimiento", ["contact.firstName", "contact.lastName", "link"], 1284],
+  ["WhatsApp", "recordatorio_cuota", "Recordatorio de cuota", ["contact.firstName", "monto", "vencimiento"], 3920],
+  ["SMS", "aviso_corto", "Aviso de vencimiento corto", ["contact.firstName", "monto"], 2215],
+  ["Email", "primer_reclamo", "Primer reclamo", ["contact.firstName", "contact.lastName", "empresa", "link"], 642],
+  ["WhatsApp", "link_bot_pago", "Link al bot de pago", ["contact.firstName", "link"], 1873],
+  ["SMS", "promesa_confirmada", "Confirmación de promesa", ["contact.firstName", "fecha", "monto"], 318],
+  ["Email", "plan_refinanciacion", "Oferta de refinanciación", ["contact.firstName", "cuotas", "link"], 205],
+];
+const NUEVA: Plantilla = ["WhatsApp", "aviso_mora_temprana", "Aviso de mora temprana", ["contact.firstName", "monto", "link"], 0];
+const COLOR_CANAL: Record<string, [string, string]> = {
+  Email: ["#f3e8ff", "#7e22ce"],
+  SMS: ["#dbeafe", "#1d4ed8"],
+  WhatsApp: ["#dcfce7", "#15803d"],
+};
+const Plantillas: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const f0 = ESC.plantillas[0];
+  const nueva = spring({ frame: frame - NUEVA_PLANTILLA, fps, config: { damping: 15 } });
+  const brillo = interpolate(frame, [NUEVA_PLANTILLA, NUEVA_PLANTILLA + 10, NUEVA_PLANTILLA + 60], [0, 1, 0.3], clamp);
+  const fila = (p: Plantilla, i: number, t: number, destacada = false) => {
+    const [bg, fg] = COLOR_CANAL[p[0]];
+    return (
+      <div key={p[1]} style={{ display: "flex", alignItems: "center", height: 46, padding: "0 14px", borderBottom: `1px solid ${BORDE}`, fontSize: 12, color: TINTA, background: destacada ? `rgba(30,138,76,${0.06 + brillo * 0.12})` : "white", opacity: t, transform: `translateX(${(1 - t) * 30}px)` }}>
+        <div style={{ width: 96 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: fg, background: bg, borderRadius: 5, padding: "3px 8px" }}>{p[0]}</span>
+        </div>
+        <div style={{ width: 170, fontWeight: 700 }}>{p[1]}</div>
+        <div style={{ width: 200 }}>{p[2]}</div>
+        <div style={{ flex: 1, display: "flex", gap: 5, flexWrap: "wrap" }}>
+          {p[3].map((v) => (
+            <span key={v} style={{ fontSize: 9.5, fontWeight: 700, color: "#374151", background: "#f1f3f6", borderRadius: 9, padding: "3px 8px" }}>
+              {v}
+            </span>
+          ))}
+        </div>
+        <div style={{ width: 80 }}>{num(p[4])}</div>
+        <div style={{ width: 80 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: VERDE, background: "#dcf3e3", borderRadius: 9, padding: "3px 8px" }}>{destacada ? "Nueva" : "Activa"}</span>
+        </div>
+        <div style={{ width: 60 }}>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: "white", background: NAVY, borderRadius: 5, padding: "5px 10px" }}>Editar</span>
+        </div>
+      </div>
+    );
+  };
+  return (
+    <div style={{ position: "absolute", left: SIDE, top: HEADER, right: 0, bottom: 0, background: "#eef1f5" }}>
+      <div style={{ position: "absolute", left: 60, top: 28, fontSize: 22, fontWeight: 800, color: TINTA }}>Plantillas de mensajes</div>
+      <div style={{ position: "absolute", right: 60, top: 24, background: NAVY, color: "white", fontSize: 12.5, fontWeight: 700, borderRadius: 7, padding: "10px 16px", transform: `scale(${1 - interpolate(frame, [NUEVA_PLANTILLA - 14, NUEVA_PLANTILLA - 10, NUEVA_PLANTILLA - 4], [0, 1, 0], clamp) * 0.06})` }}>+ Nueva plantilla</div>
+      <div style={{ position: "absolute", left: 60, top: 74, width: 600, fontSize: 11.5, color: TINTA_2, lineHeight: 1.55 }}>
+        Los nodos “Enviar SMS”, “Enviar email” y “Enviar WhatsApp” de un flujo mandan una de estas plantillas. El texto puede llevar variables entre llaves
+        dobles, por ejemplo {"{{contact.firstName}}"}, que se reemplazan por los datos del contacto en el momento del envío.
+      </div>
+      <div style={{ position: "absolute", left: 60, top: 150, display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: TINTA }}>
+        <b>Canal</b>
+        <div style={{ width: 110, height: 30, background: "white", border: `1px solid ${BORDE}`, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", boxSizing: "border-box" }}>
+          Todos <span style={{ fontSize: 9 }}>▾</span>
+        </div>
+        <div style={{ width: 13, height: 13, border: "1.5px solid #9aa3b2", borderRadius: 3, marginLeft: 8 }} />
+        <span style={{ fontSize: 11, color: TINTA_2 }}>Sólo activas</span>
+      </div>
+      <div style={{ position: "absolute", left: 60, right: 60, top: 196, background: "white", borderRadius: 10, overflow: "hidden", boxShadow: "0 2px 8px rgba(20,30,50,0.05)" }}>
+        <div style={{ display: "flex", alignItems: "center", height: 40, padding: "0 14px", background: "#f6f7fa", fontSize: 10.5, fontWeight: 700, color: TINTA, letterSpacing: 0.4, borderBottom: `1px solid ${BORDE}` }}>
+          <div style={{ width: 96 }}>CANAL</div>
+          <div style={{ width: 170 }}>CÓDIGO</div>
+          <div style={{ width: 200 }}>NOMBRE</div>
+          <div style={{ flex: 1 }}>VARIABLES</div>
+          <div style={{ width: 80 }}>ENVIADOS</div>
+          <div style={{ width: 80 }}>ESTADO</div>
+          <div style={{ width: 60 }} />
+        </div>
+        {nueva > 0.01 ? <div style={{ height: 46 * Math.min(1, nueva), overflow: "hidden" }}>{fila(NUEVA, 0, Math.min(1, nueva), true)}</div> : null}
+        {PLANTILLAS.map((p, i) => fila(p, i, interpolate(frame, [f0 + 8 + i * 3, f0 + 18 + i * 3], [0, 1], clamp)))}
+      </div>
+      {nueva > 0.01 ? (
+        <div style={{ position: "absolute", right: 60, top: 630, width: 340, background: "white", borderRadius: 12, boxShadow: "0 10px 26px rgba(20,30,50,0.15)", padding: "14px 16px", boxSizing: "border-box", opacity: Math.min(1, nueva), transform: `translateY(${(1 - nueva) * 20}px)` }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#15803d" }}>Vista previa · WhatsApp</div>
+          <div style={{ marginTop: 8, background: "#dcf8c6", borderRadius: "10px 10px 10px 2px", padding: "10px 12px", fontSize: 11.5, color: TINTA, lineHeight: 1.45 }}>
+            Hola <b>Javier</b>, tu cuota de <b>$ 196.180</b> está vencida. Podés regularizarla desde acá: <span style={{ color: "#1d4ed8" }}>pagar.axonia.app/j82k</span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -854,6 +947,7 @@ const Dashboard: React.FC<{ frame: number }> = ({ frame }) => {
 const DEDO: [number, number, number][] = [
   [0, 700, 700],
   [TAP_ESTRATEGIAS - 2, SIDE + 60 + 258 + 121, HEADER + 110],
+  [TAP_PLANTILLAS - 2, SIDE / 2, HEADER + 22 + 3 * 40 + 9],
   [TAP_CAMPANAS - 2, SIDE / 2, HEADER + 22 + 1 * 40 + 9],
   [TAP_REPORTES - 2, SIDE / 2, HEADER + 22 + 5 * 40 + 9],
   [TAP_CATEGORIA - 2, SIDE + 30 + 128, HEADER + 360],
@@ -884,6 +978,7 @@ const Pagina: React.FC<{ frame: number }> = ({ frame }) => {
   const escenas: [Escena, React.FC<{ frame: number }>][] = [
     ["home", Home],
     ["flujo", Flujo],
+    ["plantillas", Plantillas],
     ["campana", Campana],
     ["segmentacion", Segmentacion],
     ["franja", Franja],
@@ -922,7 +1017,7 @@ const Pagina: React.FC<{ frame: number }> = ({ frame }) => {
       </div>
       <div style={{ position: "absolute", left: 0, top: HEADER, width: SIDE, bottom: 0, background: NAVY_SIDE, display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 22, gap: 22, zIndex: 5 }}>
         {SIDE_ICONOS.map((d, i) => {
-          const tapIdx: Record<number, number> = { 1: TAP_CAMPANAS, 5: TAP_REPORTES, 6: TAP_FRANJA, 4: TAP_DASH };
+          const tapIdx: Record<number, number> = { 3: TAP_PLANTILLAS, 1: TAP_CAMPANAS, 5: TAP_REPORTES, 6: TAP_FRANJA, 4: TAP_DASH };
           return (
             <div key={i} style={{ transform: `scale(${i in tapIdx ? 1 - pulsado(frame, tapIdx[i]) * 0.2 : 1})` }}>
               <Icono d={d} s={18} c={i === ACTIVO[actual] ? "#FF8C42" : "#e5e7eb"} />
