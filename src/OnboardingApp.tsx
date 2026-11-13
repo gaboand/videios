@@ -74,11 +74,11 @@ const VALIDA = 26; // frames the service takes to answer each capture
 const TAP_WA = 654;
 const TEL_OK = 712;
 const TAP_FIRMA = 836;
-const TRAZO = [872, 932];
-const TAP_FIRMA_CONT = 946;
-const MODAL_FIRMA = 950;
-const TAP_CONFIRMAR = 986;
-const FIRMA_OK = 1016;
+const TRAZO = [872, 902];
+const TAP_FIRMA_CONT = 916;
+const MODAL_FIRMA = 920;
+const TAP_CONFIRMAR = 954;
+const FIRMA_OK = 984;
 
 
 const tapsDe = [
@@ -96,19 +96,14 @@ const tapsDe = [
   TAP_CONFIRMAR,
 ];
 
-// Signature drawn with the finger, cursive like a real one: a big "C"
-// loop running into small letters and a tall stroke, then a crossing
-// flourish. Catmull-Rom through a few points per stroke, in signature-pad
+// Signature drawn with the finger, traced from the reference: a tall narrow
+// loop that runs into a long rising flourish, small letters inside and a
+// vertical stroke the flourish crosses. Catmull-Rom through a few points per stroke, in signature-pad
 // coordinates (330 x 230).
 const TRAZOS: [number, number][][] = [
-  [
-    [132, 60], [104, 60], [78, 88], [60, 132], [54, 172], [66, 190], [94, 180], [118, 156],
-    [134, 134], [138, 120], [140, 150], [150, 136], [164, 126], [154, 150], [168, 152],
-    [182, 128], [180, 154], [198, 142], [214, 102], [228, 44], [224, 108], [220, 180],
-  ],
-  [
-    [168, 122], [214, 112], [262, 98], [292, 92],
-  ],
+  [[106.0, 149.5], [120.0, 113.6], [142.0, 70.2], [160.0, 36.7], [168.0, 28.0], [162.0, 37.9], [150.0, 49.1], [124.0, 71.4], [92.0, 103.6], [66.0, 137.1], [46.0, 170.6], [36.0, 195.4], [44.0, 205.3], [80.0, 197.9], [146.0, 175.6], [220.0, 142.1], [294.0, 91.2]],
+  [[98.0, 160.7], [116.0, 130.9], [124.0, 161.9], [140.0, 143.3], [158.0, 129.7], [164.0, 158.2], [182.0, 143.3]],
+  [[242.0, 37.9], [241.0, 91.2], [242.0, 142.1], [237.0, 157.0], [251.0, 151.4]],
 ];
 const muestrear = (P: [number, number][]) => {
   const out: [number, number][] = [];
@@ -180,7 +175,7 @@ const DEDO: [number, number, number][] = [
   [TAP_WA + 40, 300, 700],
   [TAP_FIRMA - 2, 195, 604],
   [TRAZO[0], PAD.x + TRAZOS[0][0][0], PAD.y + TRAZOS[0][0][1]],
-  [TRAZO[1] + 2, PAD.x + 292, PAD.y + 92],
+  [TRAZO[1] + 2, PAD.x + TRAZOS[2][TRAZOS[2].length - 1][0], PAD.y + TRAZOS[2][TRAZOS[2].length - 1][1]],
   [TAP_FIRMA_CONT - 2, 280, 534],
   [TAP_CONFIRMAR - 2, 274, 534],
   [TAP_CONFIRMAR + 40, 320, 720],
@@ -902,7 +897,7 @@ const Firma: React.FC<{ frame: number }> = ({ frame }) => {
         d={firmaD(progreso)}
         fill="none"
         stroke="#1a3fbf"
-        strokeWidth={4.2}
+        strokeWidth={3.4}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
