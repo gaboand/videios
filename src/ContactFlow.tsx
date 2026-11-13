@@ -50,7 +50,7 @@ const ESC = {
   dashboard: [736, CONTACTFLOW_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
-const INICIO_CAMPANA = 36;
+const INICIO_CAMPANA = 10;
 const TAP_ESTRATEGIAS = 134;
 const TAP_CAMPANAS = 276;
 const TAP_REPORTES = 406;
@@ -106,39 +106,40 @@ const ESTADOS = [
   { n: "Reintento", c: "#fbbf24" },
   { n: "A búsqueda", c: "#f97316" },
 ];
-// Seat states once the campaign runs: mostly calling, a few in other states;
-// only three seats change during the shot.
-const estadoAsiento = (i: number, frame: number) => {
-  const base = [0, 0, 1, 0, 3, 0, 0, 0, 4, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0, 0, 4, 0, 0, 1, 0, 0, 0][i % 30];
-  const cambios: Record<number, [number, number]> = { 5: [80, 1], 17: [100, 2], 21: [118, 1] };
-  if (i in cambios && frame >= cambios[i][0]) {
-    return cambios[i][1];
-  }
-  return base;
+// Seat states: -1 idle (gray), 0 calling (blue), 1 in conversation
+// (green). Fixed during the shot except for two seats: one green goes idle
+// and one idle starts calling.
+const BASE_ASIENTOS = [
+  -1, 0, 1, -1, -1, 1, 0, -1, 1, -1, -1, 1, 0, -1, 1,
+  1, -1, -1, 0, 1, -1, 1, -1, -1, 0, 1, -1, -1, 1, -1,
+  -1, 1, 0, -1, 1, -1, -1, 0,
+  1, -1, -1, 1, 0, -1, 1, -1,
+];
+const CAMBIOS_ASIENTOS: Record<number, [number, number]> = { 8: [70, -1], 16: [104, 0] };
+const estadoAsiento = (i: number, frame: number) =>
+  i in CAMBIOS_ASIENTOS && frame >= CAMBIOS_ASIENTOS[i][0] ? CAMBIOS_ASIENTOS[i][1] : BASE_ASIENTOS[i];
+const colorAsiento = (i: number, frame: number) => {
+  const e = estadoAsiento(i, frame);
+  return e < 0 ? null : ESTADOS[e].c;
 };
-const Puesto: React.FC<{ color: string | null; vertical?: boolean; arriba?: boolean }> = ({ color, vertical, arriba }) => {
+// Desk with a monitor and a chair. Top-row desks have the chair above, the
+// lower row below; side desks are the same desk turned 90 degrees.
+const Puesto: React.FC<{ color: string | null; giro?: number; arriba?: boolean }> = ({ color, giro = 0, arriba }) => {
   const pantalla = color ?? "#9aa3b2";
-  return vertical ? (
-    <svg width={34} height={50} viewBox="0 0 34 50">
-      <rect x={3} y={4} width={28} height={42} rx={5} fill="#eef1f5" stroke="#c3cad5" />
-      <rect x={11} y={12} width={10} height={26} rx={2} fill={pantalla} />
-      <rect x={24} y={20} width={3} height={10} rx={1.5} fill="#c3cad5" />
-    </svg>
-  ) : (
-    <svg width={50} height={44} viewBox="0 0 50 44">
-      {arriba ? <rect x={12} y={0} width={26} height={8} rx={4} fill="#c9cfd8" /> : null}
-      <rect x={2} y={arriba ? 8 : 4} width={46} height={30} rx={5} fill="#eef1f5" stroke="#c3cad5" />
-      <rect x={13} y={arriba ? 13 : 9} width={24} height={13} rx={2} fill={pantalla} />
-      <rect x={18} y={arriba ? 28 : 24} width={14} height={3} rx={1.5} fill="#9aa3b2" />
-      {!arriba ? <rect x={12} y={36} width={26} height={8} rx={4} fill="#c9cfd8" /> : null}
-    </svg>
+  return (
+    <div style={{ width: giro ? 44 : 44, height: giro ? 44 : 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg width={44} height={44} viewBox="0 0 44 44" style={{ transform: `rotate(${giro}deg)` }}>
+        {arriba ? <rect x={11} y={1} width={22} height={7} rx={3.5} fill="#c9cfd8" /> : <rect x={11} y={36} width={22} height={7} rx={3.5} fill="#c9cfd8" />}
+        <rect x={2} y={arriba ? 9 : 7} width={40} height={27} rx={5} fill="#eef1f5" stroke="#c3cad5" />
+        <rect x={11} y={arriba ? 13 : 11} width={22} height={12} rx={2} fill={pantalla} />
+        <rect x={16} y={arriba ? 28 : 26} width={12} height={3} rx={1.5} fill="#9aa3b2" />
+      </svg>
+    </div>
   );
 };
 
 const Home: React.FC<{ frame: number }> = ({ frame }) => {
   const { fps } = useVideoConfig();
-  const activa = frame >= INICIO_CAMPANA;
-  const enciende = (i: number) => frame >= INICIO_CAMPANA + 6 + (i % 15) * 2;
   const panel = spring({ frame: frame - INICIO_CAMPANA, fps, config: { damping: 16 } });
   const llamados = Math.round(interpolate(frame, [INICIO_CAMPANA, 150], [0, 186], clamp));
   const tiles: [string, string, string][] = [
@@ -149,10 +150,10 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
   ];
   const fila = (y: number, desde: number, arriba: boolean) =>
     [0, 1, 2].map((g) => (
-      <div key={`${y}-${g}`} style={{ position: "absolute", left: 172 + g * 252, top: y, display: "flex", gap: 2 }}>
+      <div key={`${y}-${g}`} style={{ position: "absolute", left: 119 + g * 290, top: y, display: "flex", gap: 8 }}>
         {[0, 1, 2, 3, 4].map((k) => {
           const i = desde + g * 5 + k;
-          return <Puesto key={k} arriba={arriba} color={activa && enciende(i) ? ESTADOS[estadoAsiento(i, frame)].c : null} />;
+          return <Puesto key={k} arriba={arriba} color={colorAsiento(i, frame)} />;
         })}
       </div>
     ));
@@ -169,29 +170,29 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
         </div>
       ))}
       {/* Room */}
-      <div style={{ position: "absolute", left: 30, top: 176, width: 1070, height: 500, background: "#6b7280", borderRadius: 16 }}>
+      <div style={{ position: "absolute", left: 30, top: 186, width: 1070, height: 424, background: "#6b7280", borderRadius: 16 }}>
         {fila(18, 0, true)}
         {[0, 1, 2].map((g) => (
-          <div key={g} style={{ position: "absolute", left: 174 + g * 252, top: 72, width: 244, height: 3, background: "#1f2937", borderRadius: 2 }} />
+          <div key={g} style={{ position: "absolute", left: 119 + g * 290, top: 70, width: 252, height: 3, background: "#1f2937", borderRadius: 2 }} />
         ))}
         {fila(84, 15, false)}
         {[0, 1].map((lado) => (
-          <div key={lado} style={{ position: "absolute", left: lado ? 960 : 26, top: 150, display: "flex", gap: 22 }}>
+          <div key={lado} style={{ position: "absolute", left: lado ? 958 : 24, top: 156, display: "flex", gap: 22 }}>
             {[0, 1].map((col) => (
-              <div key={col} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div key={col} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[0, 1, 2, 3].map((r) => {
                   const i = 30 + lado * 8 + col * 4 + r;
-                  return <Puesto key={r} vertical color={activa && enciende(i) ? ESTADOS[estadoAsiento(i, frame)].c : null} />;
+                  return <Puesto key={r} giro={col === 0 ? -90 : 90} arriba color={colorAsiento(i, frame)} />;
                 })}
               </div>
             ))}
-            <div style={{ position: "absolute", left: 47, top: 0, width: 3, height: 230, background: "#1f2937", borderRadius: 2 }} />
+            <div style={{ position: "absolute", left: 53, top: 0, width: 3, height: 212, background: "#1f2937", borderRadius: 2 }} />
           </div>
         ))}
         {/* Center panel */}
         <div style={{ position: "absolute", left: 160, top: 152, width: 750, height: 236, background: "#4b5563", borderRadius: 12, overflow: "hidden" }}>
           <div style={{ position: "absolute", right: 14, top: 10, fontSize: 9, color: "#d1d5db", display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: activa ? "#4ade80" : "#9aa3b2" }} />
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ade80" }} />
             Estado en vivo · Actualizado 10:{String(15 + Math.floor(frame / 30)).padStart(2, "0")}
           </div>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: 1 - panel }}>
@@ -208,7 +209,7 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
                 {[
                   ["Llamados", num(llamados)],
                   ["En conversación", num(estadoContador(frame, 1))],
-                  ["Agendados", num(estadoContador(frame, 2))],
+                  ["Llamando", num(estadoContador(frame, 0))],
                   ["Contactabilidad", pct(interpolate(frame, [INICIO_CAMPANA, 150], [0, 21.3], clamp))],
                 ].map(([k, v]) => (
                   <div key={k} style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 9, padding: "12px 14px" }}>
@@ -225,8 +226,8 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
           ) : null}
         </div>
       </div>
-      <div style={{ position: "absolute", left: 0, right: 0, top: 690, display: "flex", justifyContent: "center", gap: 22 }}>
-        {ESTADOS.map((e) => (
+      <div style={{ position: "absolute", left: 0, right: 0, top: 628, display: "flex", justifyContent: "center", gap: 22 }}>
+        {[{ n: "Disponible", c: "#9aa3b2" }, ...ESTADOS].map((e) => (
           <div key={e.n} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10.5, color: TINTA }}>
             <div style={{ width: 14, height: 12, borderRadius: 3, background: e.c }} />
             {e.n}
@@ -239,7 +240,7 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
 const estadoContador = (frame: number, estado: number) => {
   let n = 0;
   for (let i = 0; i < 46; i++) {
-    if (frame >= INICIO_CAMPANA + 6 + (i % 15) * 2 && estadoAsiento(i, frame) === estado) {
+    if (estadoAsiento(i, frame) === estado) {
       n++;
     }
   }
