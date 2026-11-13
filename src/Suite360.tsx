@@ -117,7 +117,7 @@ const VERTICAL: Escena = {
     { d: "M 950 1282 C 966 1320 934 1352 950 1393" },
     { d: "M 625 1540 L 457 1540", doble: true },
   ],
-  general: { x: 540, y: 965, z: 1 },
+  general: { x: 540, y: 965, z: 0.86 },
 };
 
 // Timeline (frames).
