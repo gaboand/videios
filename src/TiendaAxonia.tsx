@@ -1155,9 +1155,9 @@ const DEDO: [number, number, number][] = [
   [TAP_AGREGAR - 2, 978, 512],
   [TAP_IR_CARRITO - 2, 910, 590],
   [TAP_PRESTAMO - 2, 300, 507],
-  [TAP_CONTINUAR - 2, 678, 648],
-  [TAP_CONFIRMAR - 2, 420, 648],
-  [TAP_CONFIRMAR + 40, 760, 760],
+  [TAP_CONTINUAR - 2, 650, 769],
+  [TAP_CONFIRMAR - 2, 420, 765],
+  [TAP_CONFIRMAR + 40, 780, 700],
 ];
 const posDedo = (frame: number) => {
   let p = { x: DEDO[0][1], y: DEDO[0][2] };
