@@ -34,7 +34,7 @@ const NAVY = "#1f2d4d";
 const BOTON = "#2c5a8c";
 const FILA_ALT = "#f5f7fa";
 
-// Layout for each format. Vertical (1080x1920): data in 2 columns,
+// Layout for each format. Vertical (1080x1920, inside a phone): data in 2 columns,
 // buttons in 2 rows of 3, compact table. Horizontal (1920x1080): data in 4
 // columns, buttons in a single row, table with capital and interest.
 const HEADER_H = 84;
@@ -42,12 +42,12 @@ const SIDEBAR_W = 72;
 const layout = (horizontal: boolean) => {
   const VENTANA = horizontal
     ? { x: 80, y: 50, w: 1760, h: 980 }
-    : { x: 50, y: 270, w: 980, h: 1380 };
+    : { x: 50, y: 60, w: 980, h: 1800 };
   const CX = SIDEBAR_W + (horizontal ? 50 : 34);
   const CW = VENTANA.w - SIDEBAR_W - (horizontal ? 100 : 68);
   const TITULO_Y = HEADER_H + (horizontal ? 28 : 40);
-  const DATOS_Y = HEADER_H + (horizontal ? 92 : 120);
-  const DATOS_H = horizontal ? 150 : 300;
+  const DATOS_Y = HEADER_H + (horizontal ? 92 : 150);
+  const DATOS_H = horizontal ? 150 : 340;
   const ACC_Y = DATOS_Y + DATOS_H + (horizontal ? 24 : 40);
   const BTN_COLS = horizontal ? 6 : 3;
   const BTN_H = horizontal ? 52 : 58;
@@ -75,7 +75,7 @@ const layout = (horizontal: boolean) => {
     BTN_GAP,
     BTN_W,
     PLAN_Y,
-    FILA_H: horizontal ? 52 : 78,
+    FILA_H: horizontal ? 52 : 110,
     COL: horizontal
       ? {
           n: 90,
@@ -271,7 +271,7 @@ const Ventana: React.FC<{ L: Layout }> = ({ L }) => {
             letterSpacing: 1,
           }}
         >
-          DATOS DEL CLIENTE
+          {L.horizontal ? "DATOS DEL CLIENTE" : ""}
         </div>
         <div
           style={{
@@ -692,26 +692,8 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
     fps,
     config: { damping: 16, stiffness: 90 },
   });
-  const pulsado = interpolate(
-    frame,
-    [CLIC, CLIC + 4, CLIC + 12],
-    [0, 1, 0],
-    clamp,
-  );
-
-  // Cursor travels to the center of the "Cobranza" button.
-  const objetivo = {
-    x: L.VENTANA.x + L.CX + L.BTN_W / 2,
-    y: L.VENTANA.y + L.ACC_Y + 40 + L.BTN_H / 2,
-  };
-  const llega = interpolate(frame, [CLIC - 30, CLIC], [0, 1], {
-    ...clamp,
-    easing: Easing.inOut(Easing.cubic),
-  });
-  const sale = interpolate(frame, [PAGO + 20, PAGO + 35], [1, 0], clamp);
-
-  // Window-local point of the "Cobranza" button, for the tablet tap.
-  const toque = { x: objetivo.x - L.VENTANA.x, y: objetivo.y - L.VENTANA.y };
+  // Window-local center of the "Cobranza" button, where the finger taps.
+  const toque = { x: L.CX + L.BTN_W / 2, y: L.ACC_Y + 40 + L.BTN_H / 2 };
   const onda = interpolate(frame, [CLIC, CLIC + 18], [0, 1], clamp);
 
   const pantalla = (
@@ -720,15 +702,14 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
         position: "relative",
         width: L.VENTANA.w,
         height: L.VENTANA.h,
-        borderRadius: L.horizontal ? 14 : 22,
+        borderRadius: L.horizontal ? 14 : 44,
         overflow: "hidden",
         background: "white",
-        boxShadow: L.horizontal ? "none" : "0 30px 80px rgba(0,0,0,0.55)",
       }}
     >
       <Ventana L={L} />
       {/* Finger tap on the tablet */}
-      {L.horizontal && onda > 0 && onda < 1 ? (
+      {onda > 0 && onda < 1 ? (
         <div
           style={{
             position: "absolute",
@@ -746,91 +727,67 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
     </div>
   );
 
-  if (L.horizontal) {
-    // Landscape tablet, tilted in 3D, floating gently.
-    const BISEL = 34;
-    const flota = Math.sin(frame / 40) * 6;
-    const giro = interpolate(t, [0, 1], [-30, -16]);
-    return (
-      <AbsoluteFill style={{ fontFamily: FUENTE }}>
-        <FondoAbstracto paleta={paleta} estilo={fondo} />
-        <AbsoluteFill
-          style={{
-            alignItems: "center",
-            justifyContent: "center",
-            perspective: 2400,
-          }}
-        >
-          <div
-            style={{
-              padding: BISEL,
-              borderRadius: 52,
-              background: "linear-gradient(145deg, #2b2e35, #0d0e11)",
-              border: "3px solid #3a3e46",
-              boxShadow:
-                "0 60px 120px rgba(0,0,0,0.65), inset 0 0 0 2px rgba(255,255,255,0.05)",
-              position: "relative",
-              opacity: t,
-              transform: `translateY(${flota + (1 - t) * 120}px) scale(0.78) rotateY(${giro}deg) rotateX(10deg) rotateZ(-2deg)`,
-            }}
-          >
-            {/* Front camera */}
-            <div
-              style={{
-                position: "absolute",
-                left: 13,
-                top: "50%",
-                width: 10,
-                height: 10,
-                marginTop: -5,
-                borderRadius: "50%",
-                background: "#1b2a3a",
-                boxShadow: "inset 0 0 3px rgba(125,211,252,0.6)",
-              }}
-            />
-            {pantalla}
-          </div>
-        </AbsoluteFill>
-      </AbsoluteFill>
-    );
-  }
-
+  // Landscape tablet (16:9) or phone (9:16), tilted in 3D and floating.
+  const BISEL = L.horizontal ? 34 : 26;
+  const flota = Math.sin(frame / 40) * 6;
+  const giro = interpolate(t, [0, 1], L.horizontal ? [-30, -16] : [-28, -14]);
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
-      <div
+      <AbsoluteFill
         style={{
-          position: "absolute",
-          left: L.VENTANA.x,
-          top: L.VENTANA.y,
-          opacity: t,
-          transform: `translateY(${(1 - t) * 80}px) scale(${0.95 + t * 0.05})`,
+          alignItems: "center",
+          justifyContent: "center",
+          perspective: 2400,
         }}
       >
-        {pantalla}
-      </div>
-      {llega > 0 ? (
-        <svg
-          width={44}
-          height={52}
-          viewBox="0 0 22 26"
+        <div
           style={{
-            position: "absolute",
-            left: interpolate(llega, [0, 1], [width * 0.76, objetivo.x]),
-            top: interpolate(llega, [0, 1], [height * 0.8, objetivo.y]),
-            opacity: Math.min(llega * 3, sale),
-            transform: `scale(${1 - pulsado * 0.15})`,
-            filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
+            padding: BISEL,
+            borderRadius: L.horizontal ? 52 : 74,
+            background: "linear-gradient(145deg, #2b2e35, #0d0e11)",
+            border: "3px solid #3a3e46",
+            boxShadow:
+              "0 60px 120px rgba(0,0,0,0.65), inset 0 0 0 2px rgba(255,255,255,0.05)",
+            position: "relative",
+            opacity: t,
+            transform: `translateY(${flota + (1 - t) * 120}px) scale(${
+              L.horizontal ? 0.78 : 0.82
+            }) rotateY(${giro}deg) rotateX(${L.horizontal ? 10 : 8}deg) rotateZ(${
+              L.horizontal ? -2 : 3
+            }deg)`,
           }}
         >
-          <path
-            d="M2 1 L2 20 L7 15.5 L10.5 23.5 L13.5 22 L10 14.5 L17 14.5 Z"
-            fill="white"
-            stroke="#111"
-            strokeWidth={1.2}
+          {/* Camera: side dot on the tablet, top pill on the phone */}
+          <div
+            style={
+              L.horizontal
+                ? {
+                    position: "absolute",
+                    left: 13,
+                    top: "50%",
+                    width: 10,
+                    height: 10,
+                    marginTop: -5,
+                    borderRadius: "50%",
+                    background: "#1b2a3a",
+                  }
+                : {
+                    position: "absolute",
+                    left: "50%",
+                    top: BISEL + 14,
+                    width: 150,
+                    height: 40,
+                    marginLeft: -75,
+                    borderRadius: 20,
+                    background: "#0a0b0d",
+                    zIndex: 5,
+                  }
+            }
           />
-        </svg>
-      ) : null}
+          {pantalla}
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
