@@ -134,8 +134,8 @@ export const Reloj: Producto = ({ id }) => (
     </defs>
     <Sombra rx={34} y={133} />
     {/* Upper and lower band, tapering into the case */}
-    <path d="M83 2 L117 2 C118 14 118 26 116 38 L84 38 C82 26 82 14 83 2 Z" fill={`url(#${id}c)`} />
-    <path d="M84 102 L116 102 C118 114 118 126 117 138 L83 138 C82 126 82 114 84 102 Z" fill={`url(#${id}c)`} />
+    <path d="M84 2 L116 2 C117 14 119 24 124 32 C126 35 126 38 124 40 L76 40 C74 38 74 35 76 32 C81 24 83 14 84 2 Z" fill={`url(#${id}c)`} />
+    <path d="M76 100 L124 100 C126 102 126 105 124 108 C119 116 117 126 116 138 L84 138 C83 126 81 116 76 108 C74 105 74 102 76 100 Z" fill={`url(#${id}c)`} />
     {[116, 123, 130].map((y) => (
       <circle key={y} cx={100} cy={y} r={1.6} fill="#050506" />
     ))}
