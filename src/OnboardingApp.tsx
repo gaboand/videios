@@ -16,18 +16,19 @@ import { FondoAbstracto } from "./FondoAbstracto";
 import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
 import { DniDorso, DniFrente, Persona } from "./Suite360";
 
-// Digital onboarding on a phone held straight (9:16, 24s): the client enters
+// Digital onboarding on a phone held straight (9:16, 39s): the client enters
 // their details, the engine looks for an offer (spinner), picks one of four
 // offers, validates the email code, captures ID front, back and a selfie
 // (each validated by the service, with a spinner) and ends on the WhatsApp
-// confirmation step.
+// confirmation, phone verification, operation summary, finger signature
+// (with its confirmation modal) and the final confirmation.
 
 export const onboardingSchema = z.object({
   fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const ONBOARDING_FRAMES = 720;
+export const ONBOARDING_FRAMES = 1170;
 
 const FUENTE = "Montserrat, sans-serif";
 const TINTA = "#1f2430";
@@ -48,7 +49,10 @@ const ESC = {
   ofertas: [202, 304],
   email: [300, 408],
   identidad: [404, 606],
-  whatsapp: [602, ONBOARDING_FRAMES + 10],
+  whatsapp: [602, 760],
+  resumen: [756, 860],
+  firma: [856, 1060],
+  final: [1056, ONBOARDING_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
 
@@ -68,6 +72,14 @@ const EMAIL_OK = 384;
 const CAPTURAS = [430, 492, 554];
 const VALIDA = 26; // frames the service takes to answer each capture
 const TAP_WA = 654;
+const TEL_OK = 712;
+const TAP_FIRMA = 836;
+const TRAZO = [872, 932];
+const TAP_FIRMA_CONT = 946;
+const MODAL_FIRMA = 950;
+const TAP_CONFIRMAR = 986;
+const FIRMA_OK = 1016;
+
 
 const tapsDe = [
   TAP_CONSULTAR,
@@ -79,7 +91,47 @@ const tapsDe = [
   TAP_VALIDAR,
   ...CAPTURAS,
   TAP_WA,
+  TAP_FIRMA,
+  TAP_FIRMA_CONT,
+  TAP_CONFIRMAR,
 ];
+
+// Signature drawn with the finger: Catmull-Rom through a few points, in
+// signature-pad coordinates (330 x 230).
+const PUNTOS_FIRMA: [number, number][] = [
+  [48, 150], [70, 92], [92, 160], [78, 188], [60, 172], [104, 128], [140, 72], [176, 64],
+  [164, 112], [126, 148], [176, 126], [222, 74], [252, 86], [234, 136], [184, 170], [252, 148], [296, 104],
+];
+const FIRMA: [number, number][] = (() => {
+  const out: [number, number][] = [];
+  const P = PUNTOS_FIRMA;
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[Math.max(0, i - 1)];
+    const p1 = P[i];
+    const p2 = P[i + 1];
+    const p3 = P[Math.min(P.length - 1, i + 2)];
+    for (let k = 0; k < 10; k++) {
+      const t = k / 10;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      const c = (a: number, b: number, cc: number, d: number) =>
+        0.5 * (2 * b + (-a + cc) * t + (2 * a - 5 * b + 4 * cc - d) * t2 + (-a + 3 * b - 3 * cc + d) * t3);
+      out.push([c(p0[0], p1[0], p2[0], p3[0]), c(p0[1], p1[1], p2[1], p3[1])]);
+    }
+  }
+  out.push(P[P.length - 1]);
+  return out;
+})();
+const FIRMA_D = FIRMA.map(([x, y], i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+const PAD = { x: 30, y: 262, w: 330, h: 230 };
+const puntoFirma = (frame: number) => {
+  const t = interpolate(frame, TRAZO, [0, FIRMA.length - 1], clamp);
+  const i = Math.floor(t);
+  const a = FIRMA[i];
+  const b = FIRMA[Math.min(FIRMA.length - 1, i + 1)];
+  const f = t - i;
+  return { x: PAD.x + a[0] + (b[0] - a[0]) * f, y: PAD.y + a[1] + (b[1] - a[1]) * f };
+};
 
 // Finger path: [arrival frame, x, y] in screen coordinates.
 const DEDO: [number, number, number][] = [
@@ -95,10 +147,19 @@ const DEDO: [number, number, number][] = [
   [CAPTURAS[0] - 2, 195, 452],
   [CAPTURAS[2] + 30, 195, 452],
   [TAP_WA - 2, 195, 452],
-  [TAP_WA + 40, 300, 640],
+  [TAP_WA + 40, 300, 700],
+  [TAP_FIRMA - 2, 195, 604],
+  [TRAZO[0], PAD.x + PUNTOS_FIRMA[0][0], PAD.y + PUNTOS_FIRMA[0][1]],
+  [TRAZO[1] + 2, PAD.x + 296, PAD.y + 104],
+  [TAP_FIRMA_CONT - 2, 280, 534],
+  [TAP_CONFIRMAR - 2, 274, 534],
+  [TAP_CONFIRMAR + 40, 320, 720],
 ];
 
 const posDedo = (frame: number) => {
+  if (frame >= TRAZO[0] && frame <= TRAZO[1]) {
+    return puntoFirma(frame);
+  }
   let p = { x: DEDO[0][1], y: DEDO[0][2] };
   for (let i = 1; i < DEDO.length; i++) {
     const [f, x, y] = DEDO[i];
@@ -721,6 +782,254 @@ const WhatsApp: React.FC<{ frame: number }> = ({ frame }) => {
           <div style={{ fontSize: 11.5, color: TINTA, marginTop: 4 }}>Revisá tu WhatsApp al 11 5555-0123</div>
         </div>
       ) : null}
+      {frame >= TAP_WA + 14 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 30,
+            top: 588,
+            width: 330,
+            height: 56,
+            borderRadius: 10,
+            border: `1px solid ${frame >= TEL_OK ? "#b9e0c8" : BORDE}`,
+            background: frame >= TEL_OK ? "#eef8f1" : "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+          }}
+        >
+          {frame < TEL_OK ? (
+            <>
+              <Spinner size={26} frame={frame} />
+              <span style={{ fontSize: 12.5, color: TINTA_2 }}>Esperando confirmación del cliente…</span>
+            </>
+          ) : (
+            <span style={{ fontSize: 14, fontWeight: 800, color: VERDE }}>✓ Teléfono verificado</span>
+          )}
+        </div>
+      ) : null}
+    </>
+  );
+};
+
+const Resumen: React.FC<{ frame: number }> = ({ frame }) => (
+  <>
+    <Pasos actual={6} />
+    <Titulo y={194} s={19}>¡Ya está todo listo!</Titulo>
+    <div style={{ position: "absolute", top: 232, left: 30, right: 30, textAlign: "center", fontSize: 12, color: TINTA, lineHeight: 1.5 }}>
+      Este es el resumen de la operación. Para finalizar el proceso tenés que aceptarlo y firmarlo.
+    </div>
+    <div
+      style={{
+        position: "absolute",
+        left: 40,
+        top: 296,
+        width: 310,
+        borderRadius: 10,
+        background: "#dfe9f2",
+        border: "1px solid #b7c8da",
+        boxShadow: "0 6px 14px rgba(20,40,70,0.15)",
+        padding: "18px 16px",
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        alignItems: "center",
+        fontSize: 12.5,
+        color: TINTA,
+      }}
+    >
+      {[
+        ["Monto otorgado", pesos(850000) + ",00"],
+        ["Plan", "6 cuotas de " + pesos(196180) + ",00"],
+        ["Primer vencimiento", "10/12/2026"],
+        ["TNA", "120,00%"],
+      ].map(([k, v], i) => (
+        <div key={k} style={{ opacity: interpolate(frame, [ESC.resumen[0] + 8 + i * 4, ESC.resumen[0] + 16 + i * 4], [0, 1], clamp) }}>
+          {k}: <b>{v}</b>
+        </div>
+      ))}
+    </div>
+    <div style={{ position: "absolute", top: 494, left: 30, right: 30, textAlign: "center", fontSize: 12, color: TINTA, lineHeight: 1.5 }}>
+      En el siguiente paso vas a firmar digitalmente usando tu dedo.
+    </div>
+    <Boton x={70} y={582} w={250} texto="Pasar a la firma" press={pulsado(frame, TAP_FIRMA)} />
+  </>
+);
+
+const Firma: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const trazo = interpolate(frame, TRAZO, [0, 1], clamp);
+  const modal = spring({ frame: frame - MODAL_FIRMA, fps, config: { damping: 16, stiffness: 140 } });
+  const cierre = interpolate(frame, [FIRMA_OK, FIRMA_OK + 10], [0, 1], clamp);
+  const vModal = modal * (1 - cierre);
+  const enviando = frame >= TAP_CONFIRMAR + 2 && frame < FIRMA_OK;
+  const recibida = spring({ frame: frame - FIRMA_OK - 4, fps, config: { damping: 15 } });
+  const firma = (w: number, h: number, progreso = 1) => (
+    <svg width={w} height={h} viewBox="0 0 330 230">
+      <path
+        d={FIRMA_D}
+        fill="none"
+        stroke="#1e3f8a"
+        strokeWidth={3.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        pathLength={1}
+        strokeDasharray={1}
+        strokeDashoffset={1 - progreso}
+      />
+    </svg>
+  );
+  return (
+    <>
+      <Pasos actual={7} />
+      <Titulo y={194}>Firma Digital</Titulo>
+      <div style={{ position: "absolute", top: 226, width: "100%", textAlign: "center", fontSize: 11.5, color: TINTA_2 }}>
+        Firmá en el recuadro usando tu dedo.
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: PAD.x,
+          top: PAD.y,
+          width: PAD.w,
+          height: PAD.h,
+          borderRadius: 12,
+          border: "1.5px solid #1e3a5f",
+          background: "#f7f9fc",
+          overflow: "hidden",
+        }}
+      >
+        {firma(PAD.w, PAD.h, trazo)}
+        <div style={{ position: "absolute", left: 24, right: 24, bottom: 34, borderBottom: "1px dashed #b9c4d2" }} />
+      </div>
+      <Boton x={30} y={512} w={160} texto="Borrar" color="#e9edf2" />
+      <div style={{ position: "absolute", left: 30, top: 512, width: 160, height: 44, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13.5, fontWeight: 700, color: "#3d4350" }}>
+        Borrar
+      </div>
+      <Boton x={200} y={512} w={160} texto="Continuar" color="#1e3a5f" press={pulsado(frame, TAP_FIRMA_CONT)} opacity={trazo >= 1 ? 1 : 0.5} />
+      {recibida > 0.01 ? (
+        <div style={{ position: "absolute", top: 584, left: 0, right: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: recibida, transform: `scale(${0.9 + 0.1 * recibida})` }}>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: VERDE, color: "white", fontSize: 22, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>✓</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: VERDE }}>¡Firma recibida!</div>
+          <div style={{ border: `1px solid ${BORDE}`, borderRadius: 8, background: "white", padding: 4 }}>{firma(120, 84)}</div>
+        </div>
+      ) : null}
+      {vModal > 0.001 ? (
+        <>
+          <div style={{ position: "absolute", inset: 0, background: `rgba(40,44,52,${0.55 * vModal})` }} />
+          <div
+            style={{
+              position: "absolute",
+              left: 30,
+              top: 250,
+              width: 330,
+              height: 320,
+              borderRadius: 16,
+              background: "white",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+              opacity: vModal,
+              transform: `scale(${0.9 + 0.1 * vModal})`,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              paddingTop: 22,
+              boxSizing: "border-box",
+            }}
+          >
+            <div style={{ fontSize: 17, fontWeight: 800, color: TINTA }}>¿Confirmar firma?</div>
+            <div style={{ fontSize: 11.5, color: TINTA_2, marginTop: 6 }}>Verificá que tu firma sea legible antes de enviar.</div>
+            <div style={{ marginTop: 16, border: `1px solid ${BORDE}`, borderRadius: 10, padding: 6 }}>{firma(200, 140)}</div>
+          </div>
+          <div style={{ opacity: vModal }}>
+            {enviando ? (
+              <div style={{ position: "absolute", left: 46, top: 512, width: 298, height: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                <Spinner size={26} frame={frame} />
+                <span style={{ fontSize: 13, color: TINTA_2 }}>Enviando firma…</span>
+              </div>
+            ) : (
+              <>
+                <Boton x={46} y={512} w={140} texto="Corregir" color="#e9edf2" />
+                <div style={{ position: "absolute", left: 46, top: 512, width: 140, height: 44, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13.5, fontWeight: 700, color: "#3d4350" }}>
+                  Corregir
+                </div>
+                <Boton x={204} y={512} w={140} texto="Confirmar" color="#1e3a5f" press={pulsado(frame, TAP_CONFIRMAR)} />
+              </>
+            )}
+          </div>
+        </>
+      ) : null}
+    </>
+  );
+};
+
+const Final: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const t = spring({ frame: frame - ESC.final[0] - 4, fps, config: { damping: 12, stiffness: 120 } });
+  return (
+    <>
+      <Pasos actual={8} />
+      <div style={{ position: "absolute", top: 200, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+        <div
+          style={{
+            width: 76,
+            height: 76,
+            borderRadius: "50%",
+            background: VERDE,
+            color: "white",
+            fontSize: 42,
+            fontWeight: 800,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: `scale(${t})`,
+            boxShadow: `0 0 0 ${10 * t}px rgba(30,138,76,0.15)`,
+          }}
+        >
+          ✓
+        </div>
+      </div>
+      <Titulo y={298} s={20}>¡Onboarding completo!</Titulo>
+      <div style={{ position: "absolute", top: 334, left: 34, right: 34, textAlign: "center", fontSize: 12.5, color: TINTA_2, lineHeight: 1.5 }}>
+        Tu préstamo fue aprobado. El dinero se acreditará en tu cuenta en minutos.
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: 30,
+          top: 396,
+          width: 330,
+          borderRadius: 12,
+          border: `1px solid ${BORDE}`,
+          padding: "6px 16px",
+          boxSizing: "border-box",
+        }}
+      >
+        {[
+          ["Cliente", "Javier Perez"],
+          ["Operación", "2026111300002"],
+          ["Monto", pesos(850000)],
+          ["Plan", "6 cuotas de " + pesos(196180)],
+          ["Primer vencimiento", "10/12/2026"],
+        ].map(([k, v], i) => (
+          <div
+            key={k}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 0",
+              borderTop: i ? `1px solid ${BORDE}` : "none",
+              fontSize: 12.5,
+              opacity: interpolate(frame, [ESC.final[0] + 14 + i * 4, ESC.final[0] + 22 + i * 4], [0, 1], clamp),
+            }}
+          >
+            <span style={{ color: TINTA_2 }}>{k}</span>
+            <b style={{ color: TINTA }}>{v}</b>
+          </div>
+        ))}
+      </div>
+      <Boton x={70} y={640} w={250} texto="Volver al inicio" color={AZUL_OSCURO} />
     </>
   );
 };
@@ -731,7 +1040,10 @@ const TITULOS: Record<Escena, string> = {
   ofertas: "OFERTAS DISPONIBLES",
   email: "VALIDACIÓN DE EMAIL",
   identidad: "VERIFICACIÓN DE IDENTIDAD",
-  whatsapp: "CONFIRMACIÓN",
+  whatsapp: "VERIFICACIÓN TELEFÓNICA",
+  resumen: "TÉRMINOS Y CONDICIONES",
+  firma: "FIRMA DIGITAL",
+  final: "ONBOARDING COMPLETO",
 };
 
 const LOGO_W = 2028;
@@ -759,6 +1071,9 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
     ["email", Email],
     ["identidad", Identidad],
     ["whatsapp", WhatsApp],
+    ["resumen", Resumen],
+    ["firma", Firma],
+    ["final", Final],
   ];
   const actual = (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "datos";
   const buscando = vis("buscando");
@@ -768,7 +1083,7 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
   const dedoVis =
     interpolate(frame, [6, 14], [0, 1], clamp) *
     (1 - interpolate(frame, [ESC.buscando[0], ESC.buscando[0] + 6, ESC.buscando[1] - 6, ESC.buscando[1]], [0, 1, 1, 0], clamp)) *
-    interpolate(frame, [TAP_WA + 30, TAP_WA + 44], [1, 0], clamp);
+    interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
 
   return (
     <div style={{ position: "relative", width: W, height: H, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden" }}>
