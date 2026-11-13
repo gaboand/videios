@@ -27,7 +27,7 @@ import {
   onboardingSchema,
 } from "./OnboardingApp";
 import { OfertasOpciones } from "./OfertasOpciones";
-import { BACKOFFICE_FRAMES, BackOffice, backOfficeSchema } from "./BackOffice";
+import { BACKOFFICE_FRAMES, BackOffice, BackOfficeMovil, backOfficeSchema } from "./BackOffice";
 import { Reloj, TIENDA_FRAMES, TiendaAxonia, TiendaMovil, tiendaSchema } from "./TiendaAxonia";
 
 export const RemotionRoot: React.FC = () => {
@@ -330,6 +330,17 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        // npx remotion render BackOfficeMovil
+        id="BackOfficeMovil"
+        component={BackOfficeMovil}
+        schema={backOfficeSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={BACKOFFICE_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
       />
     </>
   );
