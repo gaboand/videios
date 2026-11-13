@@ -26,6 +26,7 @@ import {
   OnboardingApp,
   onboardingSchema,
 } from "./OnboardingApp";
+import { OfertasOpciones } from "./OfertasOpciones";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -272,6 +273,15 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        // Still: npx remotion still OfertasOpciones
+        id="OfertasOpciones"
+        component={OfertasOpciones}
+        durationInFrames={1}
+        fps={30}
+        width={2000}
+        height={1500}
       />
     </>
   );
