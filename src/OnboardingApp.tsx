@@ -948,7 +948,7 @@ const Firma: React.FC<{ frame: number }> = ({ frame }) => {
       ) : null}
       {vModal > 0.001 ? (
         <>
-          <div style={{ position: "absolute", inset: 0, background: `rgba(40,44,52,${0.55 * vModal})` }} />
+          <div style={{ position: "absolute", inset: -1500, background: `rgba(40,44,52,${0.55 * vModal})` }} />
           <div
             style={{
               position: "absolute",
@@ -1188,7 +1188,59 @@ const Logo: React.FC<{ w: number }> = ({ w }) => (
   </div>
 );
 
-const App: React.FC<{ frame: number }> = ({ frame }) => {
+const escenaActual = (frame: number) =>
+  (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "datos";
+
+// Finger/cursor visibility: hidden while the offer search runs and once the
+// contract is open.
+const punteroVisible = (frame: number) =>
+  interpolate(frame, [6, 14], [0, 1], clamp) *
+  (1 - interpolate(frame, [ESC.buscando[0], ESC.buscando[0] + 6, ESC.buscando[1] - 6, ESC.buscando[1]], [0, 1, 1, 0], clamp)) *
+  interpolate(frame, [TAP_CONTRATO + 30, TAP_CONTRATO + 44], [1, 0], clamp);
+
+const visBuscando = (frame: number) => {
+  const [a, b] = ESC.buscando;
+  return interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
+};
+
+const Buscando: React.FC<{ frame: number; grande?: boolean }> = ({ frame, grande }) => {
+  const v = visBuscando(frame);
+  if (v <= 0.001) {
+    return null;
+  }
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        background: `rgba(10,12,16,${0.82 * v})`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: grande ? 34 : 26,
+        color: "white",
+        textAlign: "center",
+        padding: "0 28px",
+        zIndex: 5,
+      }}
+    >
+      <div style={{ fontSize: grande ? 28 : 17, fontWeight: 700, lineHeight: 1.35, opacity: v }}>
+        Estamos analizando los datos y buscando una oferta.
+      </div>
+      <div style={{ fontSize: grande ? 24 : 14, lineHeight: 1.4, opacity: v * 0.9 }}>
+        Por favor aguardá, puede demorar hasta 60 segundos.
+      </div>
+      <div style={{ opacity: v }}>
+        <Spinner size={grande ? 110 : 86} frame={frame} claro />
+      </div>
+    </div>
+  );
+};
+
+// `escritorio`: only the page content, for the notebook page that draws its
+// own header, card, overlay and mouse cursor around it.
+const App: React.FC<{ frame: number; escritorio?: boolean }> = ({ frame, escritorio }) => {
   const vis = (e: Escena) => {
     const [a, b] = ESC[e];
     return interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp) * (a === 0 ? 1 : 1);
@@ -1208,18 +1260,16 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
     ["final", Final],
     ["contrato", Contrato],
   ];
-  const actual = (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "datos";
-  const buscando = vis("buscando");
+  const actual = escenaActual(frame);
   const dedo = posDedo(frame);
   const tap = tapsDe.find((f) => frame >= f && frame < f + 16);
   const onda = tap === undefined ? 0 : (frame - tap) / 16;
-  const dedoVis =
-    interpolate(frame, [6, 14], [0, 1], clamp) *
-    (1 - interpolate(frame, [ESC.buscando[0], ESC.buscando[0] + 6, ESC.buscando[1] - 6, ESC.buscando[1]], [0, 1, 1, 0], clamp)) *
-    interpolate(frame, [TAP_CONTRATO + 30, TAP_CONTRATO + 44], [1, 0], clamp);
+  const dedoVis = punteroVisible(frame);
 
   return (
-    <div style={{ position: "relative", width: W, height: H, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden" }}>
+    <div style={{ position: "relative", width: W, height: H, background: escritorio ? "transparent" : "#f4f6f9", fontFamily: FUENTE, overflow: escritorio ? "visible" : "hidden" }}>
+      {escritorio ? null : (
+      <>
       {/* Header */}
       <div
         style={{
@@ -1256,6 +1306,8 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
           boxShadow: "0 4px 18px rgba(20,30,50,0.08)",
         }}
       />
+      </>
+      )}
       <div style={{ position: "absolute", top: 100, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
         {/* Dark-lettered logo for the white page */}
         <Img
@@ -1274,36 +1326,9 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         );
       })}
-      {/* Looking for an offer */}
-      {buscando > 0.001 ? (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: `rgba(10,12,16,${0.82 * buscando})`,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 26,
-            color: "white",
-            textAlign: "center",
-            padding: "0 28px",
-          }}
-        >
-          <div style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.35, opacity: buscando }}>
-            Estamos analizando los datos y buscando una oferta.
-          </div>
-          <div style={{ fontSize: 14, lineHeight: 1.4, opacity: buscando * 0.9 }}>
-            Por favor aguardá, puede demorar hasta 60 segundos.
-          </div>
-          <div style={{ opacity: buscando }}>
-            <Spinner size={86} frame={frame} claro />
-          </div>
-        </div>
-      ) : null}
+      {escritorio ? null : <Buscando frame={frame} />}
       {/* Finger */}
-      {tap !== undefined ? (
+      {tap !== undefined && !escritorio ? (
         <div
           style={{
             position: "absolute",
@@ -1330,19 +1355,105 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
           background: "rgba(255,255,255,0.55)",
           border: "2px solid rgba(40,48,64,0.35)",
           boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-          opacity: dedoVis * 0.9,
+          opacity: escritorio ? 0 : dedoVis * 0.9,
         }}
       />
     </div>
   );
 };
 
+// Notebook page (1280 x 800): full-width header, centered white card with
+// the onboarding content, full-page spinner overlay and a mouse cursor.
+const ESC_PAGINA = 0.96;
+const Escritorio: React.FC<{ frame: number }> = ({ frame }) => {
+  const PW = 1280;
+  const PH = 800;
+  const HEADER = 58;
+  const CARD = { x: 260, y: HEADER + 14, w: 760, h: PH - HEADER - 26 };
+  const ox = PW / 2 - (W / 2) * ESC_PAGINA;
+  const oy = CARD.y + 4 - 86 * ESC_PAGINA;
+  const actual = escenaActual(frame);
+  const p = posDedo(frame);
+  const cx = ox + p.x * ESC_PAGINA;
+  const cy = oy + p.y * ESC_PAGINA;
+  const tap = tapsDe.find((f) => frame >= f && frame < f + 16);
+  const onda = tap === undefined ? 0 : (frame - tap) / 16;
+  const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
+  return (
+    <div style={{ position: "relative", width: PW, height: PH, background: "#f1f3f6", fontFamily: FUENTE, overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: PW, height: HEADER, background: "#4a4a4a", display: "flex", alignItems: "center" }}>
+        <div style={{ marginLeft: 24 }}>
+          <Logo w={110} />
+        </div>
+        <div style={{ position: "absolute", left: 0, right: 0, textAlign: "center", color: "white", fontSize: 13, fontWeight: 700, letterSpacing: 1 }}>
+          {TITULOS[actual]}
+        </div>
+        <div style={{ flex: 1 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 26 }}>
+          <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#d6d9de" }} />
+          <div style={{ color: "white", fontSize: 13, fontWeight: 700 }}>Delfina Martinez</div>
+        </div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: CARD.x,
+          top: CARD.y,
+          width: CARD.w,
+          height: CARD.h,
+          background: "white",
+          borderRadius: 14,
+          boxShadow: "0 6px 24px rgba(20,30,50,0.1)",
+        }}
+      />
+      <div style={{ position: "absolute", left: ox, top: oy, transform: `scale(${ESC_PAGINA})`, transformOrigin: "0 0" }}>
+        <App frame={frame} escritorio />
+      </div>
+      <Buscando frame={frame} grande />
+      {tap !== undefined ? (
+        <div
+          style={{
+            position: "absolute",
+            left: cx,
+            top: cy,
+            width: 14 + onda * 46,
+            height: 14 + onda * 46,
+            transform: "translate(-50%, -50%)",
+            borderRadius: "50%",
+            border: `3px solid rgba(255,140,66,${1 - onda})`,
+            background: `rgba(255,140,66,${(1 - onda) * 0.2})`,
+            zIndex: 6,
+          }}
+        />
+      ) : null}
+      <svg
+        width={26}
+        height={26}
+        viewBox="0 0 24 24"
+        style={{
+          position: "absolute",
+          left: cx - 4,
+          top: cy - 2,
+          opacity: punteroVisible(frame),
+          transform: `scale(${1 - presion * 0.15})`,
+          filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.35))",
+          zIndex: 7,
+        }}
+      >
+        <path d="M4 2 L4 19 L8.5 15 L11.5 21.5 L14.5 20 L11.5 13.8 L17.5 13.5 Z" fill="white" stroke="#111" strokeWidth={1.4} strokeLinejoin="round" />
+      </svg>
+    </div>
+  );
+};
+
 export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fondo, paleta }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const { w, h } = pantallaDe("celular", true);
-  const { W: EW, H: EH } = exteriorDe("celular", w, h);
-  const esc = Math.min(980 / EW, 1560 / EH);
+  const { fps, width, height } = useVideoConfig();
+  const vertical = height > width;
+  const tipo = vertical ? "celular" : "notebook";
+  const { w, h } = pantallaDe(tipo, vertical);
+  const { W: EW, H: EH } = exteriorDe(tipo, w, h);
+  const esc = vertical ? Math.min(980 / EW, 1560 / EH) : Math.min(1640 / EW, 960 / EH);
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   const flota = Math.sin(frame / 45) * 5;
   return (
@@ -1351,14 +1462,14 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
       <div
         style={{
           position: "absolute",
-          left: 540,
-          top: 960,
+          left: width / 2,
+          top: height / 2,
           opacity: t,
           transform: `translate(-50%, -50%) translateY(${flota + (1 - t) * 120}px) scale(${esc})`,
         }}
       >
-        <Dispositivo tipo="celular" w={w} h={h}>
-          <App frame={frame} />
+        <Dispositivo tipo={tipo} w={w} h={h}>
+          {vertical ? <App frame={frame} /> : <Escritorio frame={frame} />}
         </Dispositivo>
       </div>
     </AbsoluteFill>

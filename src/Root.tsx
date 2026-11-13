@@ -262,6 +262,17 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
       />
+      <Composition
+        // npx remotion render OnboardingApp169
+        id="OnboardingApp169"
+        component={OnboardingApp}
+        schema={onboardingSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={ONBOARDING_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
     </>
   );
 };
