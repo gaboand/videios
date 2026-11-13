@@ -33,7 +33,7 @@ export const SUITE_FRAMES = 480;
 
 type Id = "canales" | "funnel" | "riesgo" | "marketplace" | "core" | "crm" | "contact";
 const MODULOS: { id: Id; nombre: string; x: number; y: number; w: number; h: number }[] = [
-  { id: "canales", nombre: "Canales", x: 70, y: 250, w: 330, h: 240 },
+  { id: "canales", nombre: "Onboarding", x: 70, y: 250, w: 330, h: 240 },
   { id: "funnel", nombre: "Lead Funnel", x: 90, y: 660, w: 290, h: 230 },
   { id: "riesgo", nombre: "Gestor de Riesgo", x: 500, y: 470, w: 400, h: 190 },
   { id: "marketplace", nombre: "Marketplace de Préstamos", x: 960, y: 120, w: 440, h: 210 },
@@ -75,7 +75,7 @@ const camara = (frame: number): Cam => {
   const c0 = camDe(0);
   const claves: { f: number; c: Cam }[] = [
     { f: 0, c: { ...c0, z: c0.z * 0.8 } },
-    { f: aparicion(0) + 30, c: c0 },
+    { f: aparicion(0) + 40, c: c0 },
   ];
   for (let i = 1; i < MODULOS.length; i++) {
     claves.push({ f: aparicion(i) + 4, c: camDe(i) });
@@ -174,6 +174,69 @@ const Dato: React.FC<{ k: string; v: React.ReactNode; o?: number }> = ({ k, v, o
   </div>
 );
 
+// Generic ID card (front and back) and a drawn selfie for the onboarding
+// documents.
+const DniFrente: React.FC = () => (
+  <svg viewBox="0 0 86 54" width="94%">
+    <rect x={0.5} y={0.5} width={85} height={53} rx={4} fill="#dfe9f3" stroke="#9fb3c8" />
+    <rect x={0.5} y={0.5} width={85} height={9} rx={4} fill="#5f86b3" />
+    <rect x={0.5} y={5} width={85} height={4.5} fill="#5f86b3" />
+    <text x={43} y={6.6} fontSize={4} fontWeight={700} fill="white" textAnchor="middle" fontFamily="Montserrat">
+      DOCUMENTO DE IDENTIDAD
+    </text>
+    <rect x={5} y={14} width={22} height={28} rx={2} fill="#c9d6e4" />
+    <circle cx={16} cy={24} r={5.5} fill="#8c6b52" />
+    <path d="M10.5 22 C11 16.5 21 16.5 21.5 22 C19 19.5 13 19.5 10.5 22 Z" fill="#3b2a20" />
+    <path d="M6.5 42 C7.5 33 24.5 33 25.5 42 Z" fill="#2c4d75" />
+    {[
+      ["APELLIDO", "PEREZ"],
+      ["NOMBRE", "JAVIER"],
+      ["NACIMIENTO", "14 MAY 1985"],
+      ["VENCIMIENTO", "10 JUN 2034"],
+    ].map(([k, v], i) => (
+      <g key={k}>
+        <text x={31} y={16 + i * 8} fontSize={2.6} fill="#6b7f96" fontFamily="Montserrat">{k}</text>
+        <text x={31} y={19.6 + i * 8} fontSize={3.6} fontWeight={700} fill="#1f2d4d" fontFamily="Montserrat">{v}</text>
+      </g>
+    ))}
+    <path d="M60 46 C64 42 67 49 71 45 S78 43 80 46" fill="none" stroke="#1f2d4d" strokeWidth={0.8} />
+  </svg>
+);
+
+const DniDorso: React.FC = () => (
+  <svg viewBox="0 0 86 54" width="94%">
+    <rect x={0.5} y={0.5} width={85} height={53} rx={4} fill="#e6edf4" stroke="#9fb3c8" />
+    <g fill="none" stroke="#7d93b6" strokeWidth={0.7}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <ellipse key={i} cx={72} cy={16} rx={2 + i * 1.6} ry={3 + i * 1.9} />
+      ))}
+    </g>
+    {Array.from({ length: 34 }).map((_, i) => (
+      <rect key={i} x={6 + i * 1.6} y={6} width={i % 3 === 0 ? 1 : 0.5} height={14} fill="#1f2430" />
+    ))}
+    <rect x={4} y={34} width={78} height={16} rx={1.5} fill="white" />
+    {["IDARG004512<<<<<<<<<<<<", "8505148M3406106ARG<<<<<", "PEREZ<<JAVIER<<<<<<<<<<"].map((l, i) => (
+      <text key={i} x={6} y={39 + i * 4.6} fontSize={3.4} fill="#1f2430" fontFamily="monospace">{l}</text>
+    ))}
+  </svg>
+);
+
+const Selfie: React.FC = () => (
+  <svg viewBox="0 0 60 70" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+    <rect width={60} height={70} fill="#d9e6ef" />
+    <circle cx={46} cy={14} r={9} fill="#f6e3c4" opacity={0.8} />
+    <path d="M8 70 C10 50 50 50 52 70 Z" fill="#2c4d75" />
+    <path d="M24 50 L30 58 L36 50 Z" fill="white" />
+    <rect x={26} y={40} width={8} height={10} fill="#c69273" />
+    <ellipse cx={30} cy={32} rx={11} ry={13} fill="#d9a382" />
+    <path d="M18.5 30 C17 15 43 15 41.5 30 C39 23 33 22 30 22.5 C26 22 21 23 18.5 30 Z" fill="#3b2a20" />
+    <circle cx={25.5} cy={32} r={1.3} fill="#2b2f38" />
+    <circle cx={34.5} cy={32} r={1.3} fill="#2b2f38" />
+    <path d="M25.5 38.5 C28 41 32 41 34.5 38.5" fill="none" stroke="#8a4f3d" strokeWidth={1.2} strokeLinecap="round" />
+    <rect x={4} y={4} width={52} height={62} rx={26} fill="none" stroke="white" strokeWidth={1.2} strokeDasharray="3 2" opacity={0.9} />
+  </svg>
+);
+
 const Canales: React.FC<{ t: number }> = ({ t }) => {
   const col = [
     {
@@ -213,8 +276,8 @@ const Canales: React.FC<{ t: number }> = ({ t }) => {
   return (
     <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 7, height: "100%", boxSizing: "border-box" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <T s={9} b c={NAVY} style={{ flex: 1 }}>Gestión del Cliente</T>
-        {["Simular", "Legajo", "Préstamos", "Cobranzas"].map((b, i) => (
+        <T s={9} b c={NAVY} style={{ flex: 1 }}>Análisis del Cliente</T>
+        {["Simular", "Legajo", "Contrato", "Factura"].map((b, i) => (
           <div key={b} style={{ opacity: progreso(t, 4, i) }}>
             <Pill fondo={i === 3 ? "#5b6b85" : NAVY} s={5.8}>{b}</Pill>
           </div>
@@ -233,17 +296,22 @@ const Canales: React.FC<{ t: number }> = ({ t }) => {
         <Caja titulo="Documentación" style={{ flex: 1.6 }}>
           <div style={{ display: "flex", gap: 5, flex: 1 }}>
             {["DNI frente", "DNI dorso", "Selfie"].map((d, i) => {
-              const p = progreso(t, 26, i, 3);
+              const p = progreso(t, 16, i, 3);
               return (
                 <div key={d} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2, opacity: p, transform: `scale(${0.8 + 0.2 * p})` }}>
                   <div
                     style={{
                       flex: 1,
                       borderRadius: 3,
-                      background: ["linear-gradient(160deg,#9fb3c8,#e8edf3)", "linear-gradient(160deg,#b7c2cf,#eef1f5)", "linear-gradient(160deg,#c9b8a6,#f1ece6)"][i],
+                      background: "#eef1f5",
                       position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
                     }}
                   >
+                    {[<DniFrente key="f" />, <DniDorso key="d" />, <Selfie key="s" />][i]}
                     <div style={{ position: "absolute", right: 2, top: 2, width: 9, height: 9, borderRadius: "50%", background: VERDE, color: "white", fontSize: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>✓</div>
                   </div>
                   <T s={5.8} c={TINTA_2} style={{ textAlign: "center" }}>{d}</T>
@@ -258,7 +326,7 @@ const Canales: React.FC<{ t: number }> = ({ t }) => {
             ["WhatsApp", "13/11"],
             ["Sucursal", "08/10"],
           ].map(([c, f], i) => (
-            <div key={c} style={{ display: "flex", alignItems: "center", gap: 4, opacity: progreso(t, 30, i, 3) }}>
+            <div key={c} style={{ display: "flex", alignItems: "center", gap: 4, opacity: progreso(t, 20, i, 3) }}>
               <T s={6.2} b style={{ flex: 1 }}>{c}</T>
               <T s={6} c={TINTA_2}>{f}</T>
               <Pill fondo="#3a3f48" s={5.5}>Ver</Pill>
