@@ -11,6 +11,7 @@ import {
 import "@fontsource/montserrat/500.css";
 import "@fontsource/montserrat/700.css";
 import "@fontsource/montserrat/800.css";
+import { createContext, useContext } from "react";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
@@ -44,6 +45,15 @@ const H = 844;
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 // Timeline (frames).
+// Landscape tablet layout. Screens are drawn in a 390-wide column centered on
+// the page (so logo, steps and titles stay centered) and, in tablet mode,
+// forms, offer cards and panels spread to both sides of it (negative x and
+// x beyond 390 are used).
+const Tab = createContext(false);
+// Logical tablet page, scaled up to the 1180 x 820 screen so type reads
+// at a comfortable size.
+const TAB = { W: 960, H: 667, ox: (960 - 390) / 2, oy: -20 };
+
 const ESC = {
   datos: [0, 150],
   buscando: [146, 206],
@@ -154,45 +164,84 @@ const firmaD = (progreso: number) => {
   }
   return d;
 };
-const PAD = { x: 30, y: 262, w: 330, h: 230 };
-const puntoFirma = (frame: number) => {
+const PAD_CEL = { x: 30, y: 262, w: 330, h: 230 };
+const PAD_TAB = { x: 15, y: 250, w: 360, h: 251 };
+const FIRMA_DY_TAB = 18; // matches DY.firma
+const padDe = (t: boolean) => (t ? PAD_TAB : PAD_CEL);
+const puntoFirma = (frame: number, tab: boolean) => {
+  const PAD = padDe(tab);
+  const k = PAD.w / 330;
   const t = interpolate(frame, TRAZO, [0, FIRMA.length - 1], clamp);
   const i = Math.floor(t);
   const a = FIRMA[i];
   const b = FIRMA[Math.min(FIRMA.length - 1, i + 1)];
   const f = t - i;
-  return { x: PAD.x + a.x + (b.x - a.x) * f, y: PAD.y + a.y + (b.y - a.y) * f };
+  return { x: PAD.x + (a.x + (b.x - a.x) * f) * k, y: PAD.y + (a.y + (b.y - a.y) * f) * k + (tab ? FIRMA_DY_TAB : 0) };
 };
 
-// Finger path: [arrival frame, x, y] in screen coordinates.
-const DEDO: [number, number, number][] = [
-  [0, 300, 760],
-  [12, 195, 315],
-  [TAP_CONSULTAR - 2, 195, 439],
-  [TAP_PRODUCTO - 2, 195, 671],
-  [TAP_CONSUMO - 2, 195, 739],
-  [TAP_CONTINUAR - 2, 195, 744],
-  [TAP_OFERTA - 2, 286, 400],
-  [TAP_OFERTA_CONT - 2, 103, 704],
-  [TAP_VALIDAR - 2, 195, 402],
-  [CAPTURAS[0] - 2, 195, 452],
-  [CAPTURAS[2] + 30, 195, 452],
-  [TAP_WA - 2, 195, 452],
-  [TAP_WA + 40, 300, 700],
-  [TAP_FIRMA - 2, 195, 604],
-  [TRAZO[0], PAD.x + TRAZOS[0][0][0], PAD.y + TRAZOS[0][0][1]],
-  [TRAZO[1] + 2, PAD.x + TRAZOS[2][TRAZOS[2].length - 1][0], PAD.y + TRAZOS[2][TRAZOS[2].length - 1][1]],
-  [TAP_FIRMA_CONT - 2, 280, 534],
-  [TAP_CONFIRMAR - 2, 274, 534],
-  [TAP_CONFIRMAR + 40, 320, 760],
-  [TAP_CONTRATO - 2, 195, 662],
-  [TAP_CONTRATO + 40, 320, 780],
-];
+// Finger path: [arrival frame, x, y] in screen-column coordinates.
+const ultimoTrazo = TRAZOS[2][TRAZOS[2].length - 1];
+const dedoDe = (tab: boolean): [number, number, number][] => {
+  const PAD = padDe(tab);
+  const k = PAD.w / 330;
+  const firma: [number, number, number][] = [
+    [TRAZO[0], PAD.x + TRAZOS[0][0][0] * k, PAD.y + TRAZOS[0][0][1] * k + (tab ? FIRMA_DY_TAB : 0)],
+    [TRAZO[1] + 2, PAD.x + ultimoTrazo[0] * k, PAD.y + ultimoTrazo[1] * k + (tab ? FIRMA_DY_TAB : 0)],
+  ];
+  return tab
+    ? [
+        [0, 560, 640],
+        [12, -85, 369],
+        [TAP_CONSULTAR - 2, 512, 369],
+        [TAP_PRODUCTO - 2, 320, 529],
+        [TAP_CONSUMO - 2, 320, 597],
+        [TAP_CONTINUAR - 2, 532, 529],
+        [TAP_OFERTA - 2, 87, 440],
+        [TAP_OFERTA_CONT - 2, 103, 600],
+        [TAP_VALIDAR - 2, 195, 453],
+        [CAPTURAS[0] - 2, -5, 535],
+        [CAPTURAS[2] + 30, -5, 535],
+        [TAP_WA - 2, 195, 463],
+        [TAP_WA + 40, 420, 620],
+        [TAP_FIRMA - 2, 195, 604],
+        ...firma,
+        [TAP_FIRMA_CONT - 2, 287, 555],
+        [TAP_CONFIRMAR - 2, 274, 552],
+        [TAP_CONFIRMAR + 40, 420, 650],
+        [TAP_CONTRATO - 2, 195, 591],
+        [TAP_CONTRATO + 40, 420, 650],
+      ]
+    : [
+        [0, 300, 760],
+        [12, 195, 315],
+        [TAP_CONSULTAR - 2, 195, 439],
+        [TAP_PRODUCTO - 2, 195, 671],
+        [TAP_CONSUMO - 2, 195, 739],
+        [TAP_CONTINUAR - 2, 195, 744],
+        [TAP_OFERTA - 2, 286, 400],
+        [TAP_OFERTA_CONT - 2, 103, 704],
+        [TAP_VALIDAR - 2, 195, 402],
+        [CAPTURAS[0] - 2, 195, 452],
+        [CAPTURAS[2] + 30, 195, 452],
+        [TAP_WA - 2, 195, 452],
+        [TAP_WA + 40, 300, 700],
+        [TAP_FIRMA - 2, 195, 604],
+        ...firma,
+        [TAP_FIRMA_CONT - 2, 280, 534],
+        [TAP_CONFIRMAR - 2, 274, 534],
+        [TAP_CONFIRMAR + 40, 320, 760],
+        [TAP_CONTRATO - 2, 195, 662],
+        [TAP_CONTRATO + 40, 320, 780],
+      ];
+};
+const DEDO_CEL = dedoDe(false);
+const DEDO_TAB = dedoDe(true);
 
-const posDedo = (frame: number) => {
+const posDedo = (frame: number, tab = false) => {
   if (frame >= TRAZO[0] && frame <= TRAZO[1]) {
-    return puntoFirma(frame);
+    return puntoFirma(frame, tab);
   }
+  const DEDO = tab ? DEDO_TAB : DEDO_CEL;
   let p = { x: DEDO[0][1], y: DEDO[0][2] };
   for (let i = 1; i < DEDO.length; i++) {
     const [f, x, y] = DEDO[i];
@@ -339,17 +388,18 @@ const Boton: React.FC<{
   </div>
 );
 
-const Titulo: React.FC<{ y: number; children: React.ReactNode; s?: number; c?: string }> = ({
+const Titulo: React.FC<{ y: number; children: React.ReactNode; s?: number; c?: string; margen?: number }> = ({
   y,
   children,
   s = 17,
   c = TINTA,
+  margen = 16,
 }) => (
   <div
     style={{
       position: "absolute",
-      left: 16,
-      right: 16,
+      left: margen,
+      right: margen,
       top: y,
       textAlign: "center",
       fontSize: s,
@@ -397,7 +447,16 @@ const Pasos: React.FC<{ actual: number }> = ({ actual }) => (
   </div>
 );
 
+// Tablet only: moves the body of a screen (below its title) down so it sits
+// centered in the space left under the title, with even margins.
+const Bajo: React.FC<{ dy: number; children: React.ReactNode }> = ({ dy, children }) => {
+  const t = useContext(Tab);
+  return <div style={{ position: "absolute", inset: 0, transform: t ? `translateY(${dy}px)` : undefined }}>{children}</div>;
+};
+const DY = { datos: 62, ofertas: 19, email: 51, identidad: 73, whatsapp: 61, resumen: 0, firma: 18, final: 33 };
+
 const Datos: React.FC<{ frame: number }> = ({ frame }) => {
+  const t = useContext(Tab);
   const { fps } = useVideoConfig();
   const ident = spring({ frame: frame - IDENTIFICADO, fps, config: { damping: 16 } });
   const abierto = frame >= TAP_PRODUCTO + 2 && frame < TAP_CONSUMO + 4;
@@ -411,35 +470,39 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ position: "absolute", top: 222, width: "100%", textAlign: "center", fontSize: 11, color: TINTA }}>
         *Todos los campos son obligatorios.
       </div>
+      <Bajo dy={DY.datos}>
       <div
         style={{
           position: "absolute",
-          left: 16,
+          left: t ? -255 : 16,
           top: 256,
-          width: 358,
-          height: ident > 0.01 ? 270 + ident * 260 : 236,
+          width: t ? 900 : 358,
+          height: t ? 92 + ident * 172 : ident > 0.01 ? 270 + ident * 260 : 236,
           border: `1px solid ${BORDE}`,
           borderRadius: 10,
           boxShadow: "0 4px 14px rgba(20,30,50,0.06)",
         }}
       />
-      <Campo etiqueta="DNI" valor={tipeo(frame, "2845678", TIPEO_DNI)} y={270} activo={enCampo(TIPEO_DNI)} cursor={enCampo(TIPEO_DNI) && Math.floor(frame / 8) % 2 === 0} gris={ident > 0.5} />
-      <Campo etiqueta="GÉNERO" valor="MASCULINO" y={340} select gris={ident > 0.5} />
+      <Campo etiqueta="DNI" valor={tipeo(frame, "2845678", TIPEO_DNI)} y={270} x={t ? -235 : undefined} w={t ? 300 : undefined} activo={enCampo(TIPEO_DNI)} cursor={enCampo(TIPEO_DNI) && Math.floor(frame / 8) % 2 === 0} gris={ident > 0.5} />
+      <Campo etiqueta="GÉNERO" valor="MASCULINO" y={t ? 270 : 340} x={t ? 80 : undefined} w={t ? 300 : undefined} select gris={ident > 0.5} />
       {/* Consultar turns into the identified client card */}
       <Boton
-        y={418}
+        y={t ? 286 : 418}
+        x={t ? 400 : undefined}
+        w={t ? 225 : undefined}
+        h={t ? 42 : undefined}
         texto={buscandoBoton ? <Spinner size={20} frame={frame} claro /> : "Consultar"}
         press={pulsado(frame, TAP_CONSULTAR)}
-        opacity={1 - ident}
+        opacity={t ? 1 : 1 - ident}
       />
       {ident > 0.01 ? (
         <>
           <div
             style={{
               position: "absolute",
-              left: 30,
-              top: 412,
-              width: 330,
+              left: t ? -235 : 30,
+              top: t ? 350 : 412,
+              width: t ? 860 : 330,
               height: 60,
               borderRadius: 8,
               background: "#eaf2fb",
@@ -456,10 +519,10 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
             <div style={{ fontSize: 17, fontWeight: 800, color: TINTA, marginTop: 3 }}>JAVIER PEREZ</div>
           </div>
           <div style={{ opacity: ident }}>
-            <Campo etiqueta="TELÉFONO" valor={tipeo(frame, "11 5555-0123", TIPEO_TEL)} y={488} activo={enCampo(TIPEO_TEL)} />
-            <Campo etiqueta="EMAIL" valor={tipeo(frame, "JPEREZ@MAIL.COM", TIPEO_MAIL)} y={558} activo={enCampo(TIPEO_MAIL)} />
-            <Campo etiqueta="PRODUCTO" valor={producto} y={628} select activo={abierto} gris={producto !== "CONSUMO"} />
-            <Boton y={712} texto="Continuar" press={pulsado(frame, TAP_CONTINUAR)} opacity={frame >= TAP_CONSUMO + 2 ? 1 : 0.45} />
+            <Campo etiqueta="TELÉFONO" valor={tipeo(frame, "11 5555-0123", TIPEO_TEL)} y={t ? 430 : 488} x={t ? -235 : undefined} w={t ? 210 : undefined} activo={enCampo(TIPEO_TEL)} />
+            <Campo etiqueta="EMAIL" valor={tipeo(frame, "JPEREZ@MAIL.COM", TIPEO_MAIL)} y={t ? 430 : 558} x={t ? -10 : undefined} w={t ? 210 : undefined} activo={enCampo(TIPEO_MAIL)} />
+            <Campo etiqueta="PRODUCTO" valor={producto} y={t ? 430 : 628} x={t ? 215 : undefined} w={t ? 210 : undefined} select activo={abierto} gris={producto !== "CONSUMO"} />
+            <Boton y={t ? 446 : 712} x={t ? 440 : undefined} w={t ? 185 : undefined} h={t ? 42 : undefined} texto="Continuar" press={pulsado(frame, TAP_CONTINUAR)} opacity={frame >= TAP_CONSUMO + 2 ? 1 : 0.45} />
           </div>
         </>
       ) : null}
@@ -467,9 +530,9 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
         <div
           style={{
             position: "absolute",
-            left: 30,
-            top: 694,
-            width: 330,
+            left: t ? 215 : 30,
+            top: t ? 490 : 694,
+            width: t ? 210 : 330,
             background: "white",
             border: `1px solid #b9c4d2`,
             borderRadius: 6,
@@ -499,6 +562,7 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
           })}
         </div>
       ) : null}
+      </Bajo>
     </>
   );
 };
@@ -510,6 +574,7 @@ const OFERTAS = [
   { n: 12, cuota: 125310 },
 ];
 const Ofertas: React.FC<{ frame: number }> = ({ frame }) => {
+  const t4 = useContext(Tab);
   const { fps } = useVideoConfig();
   const elegida = frame >= TAP_OFERTA + 2 ? 1 : -1;
   const monto = Math.round(850000 * interpolate(frame, [ESC.ofertas[0] + 6, ESC.ofertas[0] + 30], [0, 1], clamp));
@@ -517,6 +582,7 @@ const Ofertas: React.FC<{ frame: number }> = ({ frame }) => {
     <>
       <Pasos actual={2} />
       <Titulo y={194} s={19}>Monto aprobado: {pesos(850000)}</Titulo>
+      <Bajo dy={DY.ofertas}>
       <div style={{ position: "absolute", top: 236, left: 16, right: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
         <span style={{ fontSize: 12, fontWeight: 700, color: AZUL_OSCURO }}>Seleccioná un monto:</span>
         <span style={{ fontSize: 13, border: `1px solid ${BORDE}`, borderRadius: 5, padding: "4px 8px", fontWeight: 700, color: TINTA }}>
@@ -537,10 +603,10 @@ const Ofertas: React.FC<{ frame: number }> = ({ frame }) => {
             key={o.n}
             style={{
               position: "absolute",
-              left: 16 + (i % 2) * 183,
-              top: 300 + Math.floor(i / 2) * 186,
-              width: 175,
-              height: 172,
+              left: t4 ? -229 + i * 216 : 16 + (i % 2) * 183,
+              top: t4 ? 306 : 300 + Math.floor(i / 2) * 186,
+              width: t4 ? 200 : 175,
+              height: t4 ? 230 : 172,
               borderRadius: 12,
               border: `2px solid ${sel ? "#5b7fb5" : "#c5d0df"}`,
               background: sel ? "linear-gradient(160deg, #8fb4ea, #4f6f9e)" : "linear-gradient(160deg, #f8fafc, #e9eef5)",
@@ -566,8 +632,9 @@ const Ofertas: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         );
       })}
-      <Boton x={16} y={682} w={175} h={42} texto="Continuar" press={pulsado(frame, TAP_OFERTA_CONT)} opacity={elegida >= 0 ? 1 : 0.5} />
-      <Boton x={199} y={682} w={175} h={42} texto="Finalizar" color="#d62b2b" />
+      <Boton x={16} y={t4 ? 560 : 682} w={175} h={42} texto="Continuar" press={pulsado(frame, TAP_OFERTA_CONT)} opacity={elegida >= 0 ? 1 : 0.5} />
+      <Boton x={199} y={t4 ? 560 : 682} w={175} h={42} texto="Finalizar" color="#d62b2b" />
+      </Bajo>
     </>
   );
 };
@@ -584,6 +651,7 @@ const Email: React.FC<{ frame: number }> = ({ frame }) => {
         Te enviamos un código de 6 dígitos a<br />
         <b style={{ color: TINTA }}>jperez@mail.com</b>
       </div>
+      <Bajo dy={DY.email}>
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
@@ -623,6 +691,7 @@ const Email: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ position: "absolute", top: 520, width: "100%", textAlign: "center", fontSize: 11.5, color: AZUL_OSCURO, textDecoration: "underline" }}>
         Reenviar código
       </div>
+      </Bajo>
     </>
   );
 };
@@ -644,15 +713,17 @@ const Identidad: React.FC<{ frame: number }> = ({ frame }) => {
     "Mirá a la cámara para la selfie",
   ][Math.min(actual, 2)];
   const vista = Math.min(actual, 2);
+  const t = useContext(Tab);
   return (
     <>
       <Pasos actual={4} />
       <Titulo y={194}>Verificación de identidad</Titulo>
+      <Bajo dy={DY.identidad}>
       <div
         style={{
           position: "absolute",
-          left: 30,
-          top: 228,
+          left: t ? -170 : 30,
+          top: t ? 240 : 228,
           width: 330,
           height: 250,
           borderRadius: 14,
@@ -718,8 +789,8 @@ const Identidad: React.FC<{ frame: number }> = ({ frame }) => {
             key={it.n}
             style={{
               position: "absolute",
-              left: 30,
-              top: 496 + i * 58,
+              left: t ? 210 : 30,
+              top: t ? 252 + i * 60 : 496 + i * 58,
               width: 330,
               height: 48,
               borderRadius: 9,
@@ -751,8 +822,8 @@ const Identidad: React.FC<{ frame: number }> = ({ frame }) => {
         <div
           style={{
             position: "absolute",
-            left: 30,
-            top: 680,
+            left: t ? 210 : 30,
+            top: t ? 440 : 680,
             width: 330,
             height: 50,
             borderRadius: 10,
@@ -770,36 +841,39 @@ const Identidad: React.FC<{ frame: number }> = ({ frame }) => {
           ✓ Identidad verificada
         </div>
       ) : null}
+      </Bajo>
     </>
   );
 };
 
 const WhatsApp: React.FC<{ frame: number }> = ({ frame }) => {
+  const t = useContext(Tab);
   const { fps } = useVideoConfig();
   const enviado = spring({ frame: frame - TAP_WA - 6, fps, config: { damping: 16 } });
   return (
     <>
       <Pasos actual={5} />
-      <Titulo y={196} s={15} c={AZUL_OSCURO}>
+      <Titulo y={196} s={t ? 17 : 15} c={AZUL_OSCURO} margen={t ? -190 : 16}>
         Te vamos a enviar un mensaje por WhatsApp con los términos y condiciones de privacidad y uso de tus datos para
         finalizar el proceso.
       </Titulo>
-      <div style={{ position: "absolute", top: 300, width: "100%", textAlign: "center", fontSize: 12, color: TINTA }}>
+      <div style={{ position: "absolute", top: t ? 262 : 300, width: "100%", textAlign: "center", fontSize: 12, color: TINTA }}>
         Debés continuar con las instrucciones allí.
       </div>
-      <svg width={64} height={64} viewBox="0 0 64 64" style={{ position: "absolute", left: 163, top: 334 }}>
+      <Bajo dy={DY.whatsapp}>
+      <svg width={64} height={64} viewBox="0 0 64 64" style={{ position: "absolute", left: 163, top: t ? 296 : 334 }}>
         <circle cx={32} cy={32} r={30} fill="#25d366" />
         <path d="M32 14 A18 18 0 0 0 16.5 41 L14 50 L23.2 47.6 A18 18 0 1 0 32 14 Z" fill="white" />
         <path d="M32 17.5 A14.5 14.5 0 0 0 19.6 39.8 L18.2 45 L23.6 43.6 A14.5 14.5 0 1 0 32 17.5 Z" fill="#25d366" />
         <path d="M26 24.5 C25 24.5 24 26 24.5 28 C25.5 32 30 37.5 35.5 39.5 C37.5 40.2 39 39.2 39.4 38 L39.6 36.6 L36 34.8 L34.6 36.4 C32 35.4 29.6 33 28.6 30.4 L30.2 29 L28.4 25 Z" fill="white" />
       </svg>
-      <Boton x={70} y={430} w={250} texto="Enviar Mensaje" color={AZUL_OSCURO} press={pulsado(frame, TAP_WA)} />
+      <Boton x={70} y={t ? 380 : 430} w={250} texto="Enviar Mensaje" color={AZUL_OSCURO} press={pulsado(frame, TAP_WA)} />
       {enviado > 0.01 ? (
         <div
           style={{
             position: "absolute",
-            left: 30,
-            top: 500,
+            left: t ? -190 : 30,
+            top: t ? 462 : 500,
             width: 330,
             borderRadius: 10,
             background: "#eef8f1",
@@ -819,8 +893,8 @@ const WhatsApp: React.FC<{ frame: number }> = ({ frame }) => {
         <div
           style={{
             position: "absolute",
-            left: 30,
-            top: 588,
+            left: t ? 250 : 30,
+            top: t ? 462 : 588,
             width: 330,
             height: 56,
             borderRadius: 10,
@@ -842,6 +916,7 @@ const WhatsApp: React.FC<{ frame: number }> = ({ frame }) => {
           )}
         </div>
       ) : null}
+      </Bajo>
     </>
   );
 };
@@ -853,6 +928,7 @@ const Resumen: React.FC<{ frame: number }> = ({ frame }) => (
     <div style={{ position: "absolute", top: 232, left: 30, right: 30, textAlign: "center", fontSize: 12, color: TINTA, lineHeight: 1.5 }}>
       Este es el resumen de la operación. Para finalizar el proceso tenés que aceptarlo y firmarlo.
     </div>
+      <Bajo dy={DY.resumen}>
     <div
       style={{
         position: "absolute",
@@ -888,10 +964,13 @@ const Resumen: React.FC<{ frame: number }> = ({ frame }) => (
       En el siguiente paso vas a firmar digitalmente usando tu dedo.
     </div>
     <Boton x={70} y={582} w={250} texto="Pasar a la firma" press={pulsado(frame, TAP_FIRMA)} />
+      </Bajo>
   </>
 );
 
 const Firma: React.FC<{ frame: number }> = ({ frame }) => {
+  const tb = useContext(Tab);
+  const PAD = padDe(tb);
   const { fps } = useVideoConfig();
   const trazo = interpolate(frame, TRAZO, [0, 1], clamp);
   const modal = spring({ frame: frame - MODAL_FIRMA, fps, config: { damping: 16, stiffness: 140 } });
@@ -918,6 +997,7 @@ const Firma: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ position: "absolute", top: 226, width: "100%", textAlign: "center", fontSize: 11.5, color: TINTA_2 }}>
         Firmá en el recuadro usando tu dedo.
       </div>
+      <Bajo dy={DY.firma}>
       <div
         style={{
           position: "absolute",
@@ -934,16 +1014,16 @@ const Firma: React.FC<{ frame: number }> = ({ frame }) => {
         {firma(PAD.w, PAD.h, trazo)}
         <div style={{ position: "absolute", left: 24, right: 24, bottom: 34, borderBottom: "1px dashed #b9c4d2" }} />
       </div>
-      <Boton x={30} y={512} w={160} texto="Borrar" color="#e9edf2" />
-      <div style={{ position: "absolute", left: 30, top: 512, width: 160, height: 44, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13.5, fontWeight: 700, color: "#3d4350" }}>
+      <Boton x={tb ? 15 : 30} y={tb ? 515 : 512} w={tb ? 175 : 160} texto="Borrar" color="#e9edf2" />
+      <div style={{ position: "absolute", left: tb ? 15 : 30, top: tb ? 515 : 512, width: tb ? 175 : 160, height: 44, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13.5, fontWeight: 700, color: "#3d4350" }}>
         Borrar
       </div>
-      <Boton x={200} y={512} w={160} texto="Continuar" color="#1e3a5f" press={pulsado(frame, TAP_FIRMA_CONT)} opacity={trazo >= 1 ? 1 : 0.5} />
+      <Boton x={tb ? 200 : 200} y={tb ? 515 : 512} w={tb ? 175 : 160} texto="Continuar" color="#1e3a5f" press={pulsado(frame, TAP_FIRMA_CONT)} opacity={trazo >= 1 ? 1 : 0.5} />
       {recibida > 0.01 ? (
-        <div style={{ position: "absolute", top: 584, left: 0, right: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: recibida, transform: `scale(${0.9 + 0.1 * recibida})` }}>
-          <div style={{ width: 40, height: 40, borderRadius: "50%", background: VERDE, color: "white", fontSize: 22, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>✓</div>
+        <div style={{ position: "absolute", top: tb ? 574 : 584, left: 0, right: 0, display: "flex", flexDirection: tb ? "row" : "column", justifyContent: "center", alignItems: "center", gap: 8, opacity: recibida, transform: `scale(${0.9 + 0.1 * recibida})` }}>
+          <div style={{ width: tb ? 30 : 40, height: tb ? 30 : 40, borderRadius: "50%", background: VERDE, color: "white", fontSize: tb ? 17 : 22, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>✓</div>
           <div style={{ fontSize: 15, fontWeight: 800, color: VERDE }}>¡Firma recibida!</div>
-          <div style={{ border: `1px solid ${BORDE}`, borderRadius: 8, background: "white", padding: 4 }}>{firma(120, 84)}</div>
+          {tb ? null : <div style={{ border: `1px solid ${BORDE}`, borderRadius: 8, background: "white", padding: 4 }}>{firma(120, 84)}</div>}
         </div>
       ) : null}
       {vModal > 0.001 ? (
@@ -990,16 +1070,19 @@ const Firma: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         </>
       ) : null}
+      </Bajo>
     </>
   );
 };
 
 const Final: React.FC<{ frame: number }> = ({ frame }) => {
+  const tf = useContext(Tab);
   const { fps } = useVideoConfig();
   const t = spring({ frame: frame - ESC.final[0] - 4, fps, config: { damping: 12, stiffness: 120 } });
   return (
     <>
       <Pasos actual={8} />
+      <Bajo dy={DY.final}>
       <div style={{ position: "absolute", top: 200, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
         <div
           style={{
@@ -1027,9 +1110,12 @@ const Final: React.FC<{ frame: number }> = ({ frame }) => {
       <div
         style={{
           position: "absolute",
-          left: 30,
+          left: tf ? -105 : 30,
           top: 396,
-          width: 330,
+          width: tf ? 600 : 330,
+          display: tf ? "grid" : "block",
+          gridTemplateColumns: "1fr 1fr",
+          columnGap: 28,
           borderRadius: 12,
           border: `1px solid ${BORDE}`,
           padding: "6px 16px",
@@ -1049,7 +1135,7 @@ const Final: React.FC<{ frame: number }> = ({ frame }) => {
               display: "flex",
               justifyContent: "space-between",
               padding: "10px 0",
-              borderTop: i ? `1px solid ${BORDE}` : "none",
+              borderTop: (tf ? i > 1 : i > 0) ? `1px solid ${BORDE}` : "none",
               fontSize: 12.5,
               opacity: interpolate(frame, [ESC.final[0] + 14 + i * 4, ESC.final[0] + 22 + i * 4], [0, 1], clamp),
             }}
@@ -1059,7 +1145,8 @@ const Final: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         ))}
       </div>
-      <Boton x={70} y={640} w={250} texto="Ver contrato" color={AZUL_OSCURO} press={pulsado(frame, TAP_CONTRATO)} />
+      <Boton x={70} y={tf ? 536 : 640} w={250} texto="Ver contrato" color={AZUL_OSCURO} press={pulsado(frame, TAP_CONTRATO)} />
+      </Bajo>
     </>
   );
 };
@@ -1070,6 +1157,7 @@ const Final: React.FC<{ frame: number }> = ({ frame }) => {
 const NARANJA_DOC = "#f5a033";
 const VENCIMIENTOS = ["10/12/2026", "10/01/2027", "10/02/2027", "10/03/2027", "10/04/2027", "10/05/2027"];
 const Contrato: React.FC<{ frame: number }> = ({ frame }) => {
+  const tc = useContext(Tab);
   const { fps } = useVideoConfig();
   const scroll = interpolate(frame, SCROLL, [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
   const sello = spring({ frame: frame - SELLO, fps, config: { damping: 11, stiffness: 140 } });
@@ -1079,7 +1167,7 @@ const Contrato: React.FC<{ frame: number }> = ({ frame }) => {
   return (
     <>
       {/* Viewer toolbar */}
-      <div style={{ position: "absolute", left: 8, top: 86, width: W - 16, height: H - 100, background: "#e3e6ea", borderRadius: 12, overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: tc ? -115 : 8, top: tc ? 96 : 86, width: tc ? 620 : W - 16, height: tc ? 572 : H - 100, background: "#e3e6ea", borderRadius: 12, overflow: "hidden" }}>
         <div style={{ height: 40, background: "#3b3f46", display: "flex", alignItems: "center", padding: "0 14px", gap: 8, color: "white" }}>
           <div style={{ width: 18, height: 22, borderRadius: 3, background: "#e04a3f", fontSize: 6, fontWeight: 800, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 2, boxSizing: "border-box" }}>PDF</div>
           <div style={{ flex: 1, fontSize: 11.5, fontWeight: 700 }}>Contrato_2026111300002.pdf</div>
@@ -1238,12 +1326,13 @@ const Buscando: React.FC<{ frame: number; grande?: boolean }> = ({ frame, grande
   );
 };
 
-// `escritorio`: only the page content, for the notebook page that draws its
-// own header, card, overlay and mouse cursor around it.
-const App: React.FC<{ frame: number; escritorio?: boolean }> = ({ frame, escritorio }) => {
+const App: React.FC<{ frame: number; tablet?: boolean }> = ({ frame, tablet = false }) => {
+  const PW = tablet ? TAB.W : W;
+  const PH = tablet ? TAB.H : H;
+  const HEADER = tablet ? 58 : 78;
   const vis = (e: Escena) => {
     const [a, b] = ESC[e];
-    return interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp) * (a === 0 ? 1 : 1);
+    return interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
   };
   const desliza = (e: Escena) => {
     const [a, b] = ESC[e];
@@ -1261,216 +1350,116 @@ const App: React.FC<{ frame: number; escritorio?: boolean }> = ({ frame, escrito
     ["contrato", Contrato],
   ];
   const actual = escenaActual(frame);
-  const dedo = posDedo(frame);
+  // Column offset: in tablet mode the 390-wide column sits centered.
+  const ox = tablet ? TAB.ox : 0;
+  const oy = tablet ? TAB.oy : 0;
+  const p = posDedo(frame, tablet);
+  const dedo = { x: p.x + ox, y: p.y + oy };
   const tap = tapsDe.find((f) => frame >= f && frame < f + 16);
   const onda = tap === undefined ? 0 : (frame - tap) / 16;
   const dedoVis = punteroVisible(frame);
 
   return (
-    <div style={{ position: "relative", width: W, height: H, background: escritorio ? "transparent" : "#f4f6f9", fontFamily: FUENTE, overflow: escritorio ? "visible" : "hidden" }}>
-      {escritorio ? null : (
-      <>
-      {/* Header */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: W,
-          height: 78,
-          background: "#4a4a4a",
-          display: "flex",
-          alignItems: "center",
-          paddingTop: 30,
-          boxSizing: "border-box",
-        }}
-      >
-        <div style={{ marginLeft: 16 }}>
-          <Logo w={92} />
-        </div>
-        <div style={{ flex: 1, textAlign: "center", color: "white", fontSize: 10.5, fontWeight: 700, letterSpacing: 0.8 }}>
-          {TITULOS[actual]}
-        </div>
-        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#d6d9de", marginRight: 16 }} />
-      </div>
-      {/* Content card */}
-      <div
-        style={{
-          position: "absolute",
-          left: 8,
-          top: 86,
-          width: W - 16,
-          height: H - 100,
-          background: "white",
-          borderRadius: 12,
-          boxShadow: "0 4px 18px rgba(20,30,50,0.08)",
-        }}
-      />
-      </>
-      )}
-      <div style={{ position: "absolute", top: 100, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-        {/* Dark-lettered logo for the white page */}
-        <Img
-          src={staticFile("axonia-logo-original.png")}
-          style={{ width: 150, height: (150 * 231) / 676, opacity: interpolate(frame, [ESC.contrato[0], ESC.contrato[0] + 6], [1, 0], clamp) }}
-        />
-      </div>
-      {escenas.map(([e, C]) => {
-        const v = vis(e);
-        if (v <= 0.001) {
-          return null;
-        }
-        return (
-          <div key={e} style={{ position: "absolute", inset: 0, opacity: v, transform: `translateX(${desliza(e)}px)` }}>
-            <C frame={frame} />
+    <Tab.Provider value={tablet}>
+      {/* Dark base so no light edge shows above the header */}
+      <div style={{ position: "relative", width: PW, height: PH, background: "#4a4a4a", fontFamily: FUENTE, overflow: "hidden" }}>
+        <div style={{ position: "absolute", left: 0, top: HEADER, width: PW, height: PH - HEADER, background: "#f4f6f9" }} />
+        {/* Header */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: PW,
+            height: HEADER,
+            background: "#4a4a4a",
+            display: "flex",
+            alignItems: "center",
+            paddingTop: tablet ? 0 : 30,
+            boxSizing: "border-box",
+          }}
+        >
+          <div style={{ marginLeft: tablet ? 24 : 16 }}>
+            <Logo w={tablet ? 110 : 92} />
           </div>
-        );
-      })}
-      {escritorio ? null : <Buscando frame={frame} />}
-      {/* Finger */}
-      {tap !== undefined && !escritorio ? (
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: tablet ? 0 : 0, top: tablet ? 0 : 30, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: tablet ? 13 : 10.5, fontWeight: 700, letterSpacing: 0.8 }}>
+            {TITULOS[actual]}
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: tablet ? 26 : 16 }}>
+            <div style={{ width: tablet ? 30 : 26, height: tablet ? 30 : 26, borderRadius: "50%", background: "#d6d9de" }} />
+            {tablet ? <div style={{ color: "white", fontSize: 13, fontWeight: 700 }}>Delfina Martinez</div> : null}
+          </div>
+        </div>
+        {/* Content card */}
+        <div
+          style={{
+            position: "absolute",
+            left: tablet ? 20 : 8,
+            top: HEADER + (tablet ? 12 : 8),
+            width: PW - (tablet ? 40 : 16),
+            height: PH - HEADER - (tablet ? 24 : 22),
+            background: "white",
+            borderRadius: 12,
+            boxShadow: "0 4px 18px rgba(20,30,50,0.08)",
+          }}
+        />
+        <div style={{ position: "absolute", left: ox, top: oy, width: W, height: H }}>
+          <div style={{ position: "absolute", top: 100, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+            {/* Dark-lettered logo for the white page */}
+            <Img
+              src={staticFile("axonia-logo-original.png")}
+              style={{ width: 150, height: (150 * 231) / 676, opacity: interpolate(frame, [ESC.contrato[0], ESC.contrato[0] + 6], [1, 0], clamp) }}
+            />
+          </div>
+          {escenas.map(([e, C]) => {
+            const v = vis(e);
+            if (v <= 0.001) {
+              return null;
+            }
+            return (
+              <div key={e} style={{ position: "absolute", inset: 0, opacity: v, transform: `translateX(${desliza(e)}px)` }}>
+                <C frame={frame} />
+              </div>
+            );
+          })}
+        </div>
+        <Buscando frame={frame} grande={tablet} />
+        {/* Finger */}
+        {tap !== undefined ? (
+          <div
+            style={{
+              position: "absolute",
+              left: dedo.x,
+              top: dedo.y,
+              width: 18 + onda * 54,
+              height: 18 + onda * 54,
+              transform: "translate(-50%, -50%)",
+              borderRadius: "50%",
+              border: `3px solid rgba(255,140,66,${1 - onda})`,
+              background: `rgba(255,140,66,${(1 - onda) * 0.2})`,
+              zIndex: 6,
+            }}
+          />
+        ) : null}
         <div
           style={{
             position: "absolute",
             left: dedo.x,
             top: dedo.y,
-            width: 18 + onda * 54,
-            height: 18 + onda * 54,
-            transform: "translate(-50%, -50%)",
-            borderRadius: "50%",
-            border: `3px solid rgba(255,140,66,${1 - onda})`,
-            background: `rgba(255,140,66,${(1 - onda) * 0.2})`,
-          }}
-        />
-      ) : null}
-      <div
-        style={{
-          position: "absolute",
-          left: dedo.x,
-          top: dedo.y,
-          width: 34,
-          height: 34,
-          transform: `translate(-50%, -50%) scale(${1 - (tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp)) * 0.2})`,
-          borderRadius: "50%",
-          background: "rgba(255,255,255,0.55)",
-          border: "2px solid rgba(40,48,64,0.35)",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-          opacity: escritorio ? 0 : dedoVis * 0.9,
-        }}
-      />
-    </div>
-  );
-};
-
-// Landscape page (tablet 1180 x 820 or notebook 1280 x 800): full-width header, centered white card with
-// the onboarding content, full-page spinner overlay and a mouse cursor.
-// The form is shown larger than on the phone; the page scrolls to keep the
-// spot being touched in view, as on a real tablet.
-const ESC_PAGINA = 1.3;
-const objetivoScroll = (f: number) => (f >= ESC.contrato[0] ? 760 : f < 14 ? 315 : posDedo(f).y);
-const Escritorio: React.FC<{ frame: number; PW: number; PH: number; tactil?: boolean }> = ({ frame, PW, PH, tactil }) => {
-  const HEADER = 58;
-  const CARD = { x: PW / 2 - 330, y: HEADER + 14, w: 660, h: PH - HEADER + 40 };
-  const visible = PH - CARD.y;
-  const maxScroll = (H - 86) * ESC_PAGINA - visible + 10;
-  let media = 0;
-  for (let k = 0; k < 12; k++) {
-    media += objetivoScroll(Math.max(0, frame - k));
-  }
-  media /= 12;
-  const scroll = Math.max(0, Math.min(maxScroll, (media - 86) * ESC_PAGINA - visible * 0.65));
-  const ox = PW / 2 - (W / 2) * ESC_PAGINA;
-  const oy = CARD.y + 4 - 86 * ESC_PAGINA - scroll;
-  const actual = escenaActual(frame);
-  const p = posDedo(frame);
-  const cx = ox + p.x * ESC_PAGINA;
-  const cy = oy + p.y * ESC_PAGINA;
-  const tap = tapsDe.find((f) => frame >= f && frame < f + 16);
-  const onda = tap === undefined ? 0 : (frame - tap) / 16;
-  const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
-  return (
-    <div style={{ position: "relative", width: PW, height: PH, background: "#f1f3f6", fontFamily: FUENTE, overflow: "hidden" }}>
-      <div
-        style={{
-          position: "absolute",
-          left: CARD.x,
-          top: CARD.y - scroll,
-          width: CARD.w,
-          height: CARD.h + scroll,
-          background: "white",
-          borderRadius: 14,
-          boxShadow: "0 6px 24px rgba(20,30,50,0.1)",
-        }}
-      />
-      <div style={{ position: "absolute", left: ox, top: oy, transform: `scale(${ESC_PAGINA})`, transformOrigin: "0 0" }}>
-        <App frame={frame} escritorio />
-      </div>
-      <div style={{ position: "absolute", left: 0, top: 0, width: PW, height: HEADER, background: "#4a4a4a", display: "flex", alignItems: "center", zIndex: 4 }}>
-        <div style={{ marginLeft: 24 }}>
-          <Logo w={110} />
-        </div>
-        <div style={{ position: "absolute", left: 0, right: 0, textAlign: "center", color: "white", fontSize: 13, fontWeight: 700, letterSpacing: 1 }}>
-          {TITULOS[actual]}
-        </div>
-        <div style={{ flex: 1 }} />
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 26 }}>
-          <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#d6d9de" }} />
-          <div style={{ color: "white", fontSize: 13, fontWeight: 700 }}>Delfina Martinez</div>
-        </div>
-      </div>
-      <Buscando frame={frame} grande />
-      {tap !== undefined ? (
-        <div
-          style={{
-            position: "absolute",
-            left: cx,
-            top: cy,
-            width: 14 + onda * 46,
-            height: 14 + onda * 46,
-            transform: "translate(-50%, -50%)",
-            borderRadius: "50%",
-            border: `3px solid rgba(255,140,66,${1 - onda})`,
-            background: `rgba(255,140,66,${(1 - onda) * 0.2})`,
-            zIndex: 6,
-          }}
-        />
-      ) : null}
-      {tactil ? (
-        <div
-          style={{
-            position: "absolute",
-            left: cx,
-            top: cy,
             width: 34,
             height: 34,
-            transform: `translate(-50%, -50%) scale(${1 - presion * 0.2})`,
+            transform: `translate(-50%, -50%) scale(${1 - (tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp)) * 0.2})`,
             borderRadius: "50%",
             background: "rgba(255,255,255,0.55)",
             border: "2px solid rgba(40,48,64,0.35)",
             boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-            opacity: punteroVisible(frame) * 0.9,
+            opacity: dedoVis * 0.9,
             zIndex: 7,
           }}
         />
-      ) : (
-      <svg
-        width={26}
-        height={26}
-        viewBox="0 0 24 24"
-        style={{
-          position: "absolute",
-          left: cx - 4,
-          top: cy - 2,
-          opacity: punteroVisible(frame),
-          transform: `scale(${1 - presion * 0.15})`,
-          filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.35))",
-          zIndex: 7,
-        }}
-      >
-        <path d="M4 2 L4 19 L8.5 15 L11.5 21.5 L14.5 20 L11.5 13.8 L17.5 13.5 Z" fill="white" stroke="#111" strokeWidth={1.4} strokeLinejoin="round" />
-      </svg>
-      )}
-    </div>
+      </div>
+    </Tab.Provider>
   );
 };
 
@@ -1497,7 +1486,15 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
         }}
       >
         <Dispositivo tipo={tipo} w={w} h={h}>
-          {vertical ? <App frame={frame} /> : <Escritorio frame={frame} PW={w} PH={h} tactil />}
+          {vertical ? (
+            <App frame={frame} />
+          ) : (
+            <div style={{ width: w, height: h, overflow: "hidden" }}>
+              <div style={{ transform: `scale(${w / TAB.W})`, transformOrigin: "0 0" }}>
+                <App frame={frame} tablet />
+              </div>
+            </div>
+          )}
         </Dispositivo>
       </div>
     </AbsoluteFill>
