@@ -21,6 +21,11 @@ import {
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
 import { SUITE_FRAMES, Suite360, suite360Schema } from "./Suite360";
+import {
+  ONBOARDING_FRAMES,
+  OnboardingApp,
+  onboardingSchema,
+} from "./OnboardingApp";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -242,6 +247,17 @@ export const RemotionRoot: React.FC = () => {
         schema={suite360Schema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={SUITE_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render OnboardingApp
+        id="OnboardingApp"
+        component={OnboardingApp}
+        schema={onboardingSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={ONBOARDING_FRAMES}
         fps={30}
         width={1080}
         height={1920}

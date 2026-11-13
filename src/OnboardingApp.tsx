@@ -1,0 +1,915 @@
+import {
+  AbsoluteFill,
+  Easing,
+  Img,
+  interpolate,
+  spring,
+  staticFile,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
+import "@fontsource/montserrat/500.css";
+import "@fontsource/montserrat/700.css";
+import "@fontsource/montserrat/800.css";
+import { z } from "zod";
+import { FondoAbstracto } from "./FondoAbstracto";
+import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
+import { DniDorso, DniFrente, Persona } from "./Suite360";
+
+// Digital onboarding on a phone held straight (9:16, 24s): the client enters
+// their details, the engine looks for an offer (spinner), picks one of four
+// offers, validates the email code, captures ID front, back and a selfie
+// (each validated by the service, with a spinner) and ends on the WhatsApp
+// confirmation step.
+
+export const onboardingSchema = z.object({
+  fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
+  paleta: z.enum(["azul", "gris"]),
+});
+
+export const ONBOARDING_FRAMES = 720;
+
+const FUENTE = "Montserrat, sans-serif";
+const TINTA = "#1f2430";
+const TINTA_2 = "#6b7280";
+const BORDE = "#dfe3ea";
+const AZUL = "#4a8bc2";
+const AZUL_OSCURO = "#2c5a8c";
+const NAVY = "#14284b";
+const VERDE = "#1e8a4c";
+const W = 390;
+const H = 844;
+const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+
+// Timeline (frames).
+const ESC = {
+  datos: [0, 150],
+  buscando: [146, 206],
+  ofertas: [202, 304],
+  email: [300, 408],
+  identidad: [404, 606],
+  whatsapp: [602, ONBOARDING_FRAMES + 10],
+} as const;
+type Escena = keyof typeof ESC;
+
+const TIPEO_DNI = [16, 38];
+const TAP_CONSULTAR = 44;
+const IDENTIFICADO = 60;
+const TIPEO_TEL = [70, 88];
+const TIPEO_MAIL = [92, 112];
+const TAP_PRODUCTO = 116;
+const TAP_CONSUMO = 128;
+const TAP_CONTINUAR = 140;
+const TAP_OFERTA = 262;
+const TAP_OFERTA_CONT = 288;
+const TIPEO_COD = [318, 346];
+const TAP_VALIDAR = 356;
+const EMAIL_OK = 384;
+const CAPTURAS = [430, 492, 554];
+const VALIDA = 26; // frames the service takes to answer each capture
+const TAP_WA = 654;
+
+const tapsDe = [
+  TAP_CONSULTAR,
+  TAP_PRODUCTO,
+  TAP_CONSUMO,
+  TAP_CONTINUAR,
+  TAP_OFERTA,
+  TAP_OFERTA_CONT,
+  TAP_VALIDAR,
+  ...CAPTURAS,
+  TAP_WA,
+];
+
+// Finger path: [arrival frame, x, y] in screen coordinates.
+const DEDO: [number, number, number][] = [
+  [0, 300, 760],
+  [12, 195, 315],
+  [TAP_CONSULTAR - 2, 195, 439],
+  [TAP_PRODUCTO - 2, 195, 671],
+  [TAP_CONSUMO - 2, 195, 739],
+  [TAP_CONTINUAR - 2, 195, 744],
+  [TAP_OFERTA - 2, 286, 400],
+  [TAP_OFERTA_CONT - 2, 103, 704],
+  [TAP_VALIDAR - 2, 195, 402],
+  [CAPTURAS[0] - 2, 195, 452],
+  [CAPTURAS[2] + 30, 195, 452],
+  [TAP_WA - 2, 195, 452],
+  [TAP_WA + 40, 300, 640],
+];
+
+const posDedo = (frame: number) => {
+  let p = { x: DEDO[0][1], y: DEDO[0][2] };
+  for (let i = 1; i < DEDO.length; i++) {
+    const [f, x, y] = DEDO[i];
+    const desde = Math.max(DEDO[i - 1][0], f - 16);
+    if (frame >= f) {
+      p = { x, y };
+      continue;
+    }
+    if (frame > desde) {
+      const t = interpolate(frame, [desde, f], [0, 1], {
+        ...clamp,
+        easing: Easing.inOut(Easing.cubic),
+      });
+      p = { x: p.x + (x - p.x) * t, y: p.y + (y - p.y) * t };
+    }
+    break;
+  }
+  return p;
+};
+
+const tipeo = (frame: number, texto: string, [a, b]: readonly number[]) =>
+  texto.slice(0, Math.round(interpolate(frame, [a, b], [0, texto.length], clamp)));
+
+const pulsado = (frame: number, f: number) =>
+  interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
+
+const pesos = (n: number) => `$ ${n.toLocaleString("es-AR")}`;
+
+// Spinner like the app's: white arc with a blue arc turning inside.
+const Spinner: React.FC<{ size: number; frame: number; claro?: boolean }> = ({
+  size,
+  frame,
+  claro,
+}) => (
+  <svg width={size} height={size} viewBox="0 0 40 40">
+    <g transform={`rotate(${frame * 9} 20 20)`}>
+      <path
+        d="M20 4 A16 16 0 1 0 36 20"
+        fill="none"
+        stroke={claro ? "white" : "#c9d3df"}
+        strokeWidth={3.2}
+        strokeLinecap="round"
+      />
+    </g>
+    <g transform={`rotate(${-frame * 13} 20 20)`}>
+      <path
+        d="M20 9 A11 11 0 0 1 31 20"
+        fill="none"
+        stroke="#3f8fd6"
+        strokeWidth={3.2}
+        strokeLinecap="round"
+      />
+    </g>
+  </svg>
+);
+
+const Campo: React.FC<{
+  etiqueta: string;
+  valor: string;
+  y: number;
+  x?: number;
+  w?: number;
+  activo?: boolean;
+  cursor?: boolean;
+  select?: boolean;
+  gris?: boolean;
+}> = ({ etiqueta, valor, y, x = 30, w = 330, activo, cursor, select, gris }) => (
+  <>
+    <div
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        fontSize: 9.5,
+        fontWeight: 700,
+        color: TINTA,
+        letterSpacing: 0.5,
+      }}
+    >
+      {etiqueta}
+    </div>
+    <div
+      style={{
+        position: "absolute",
+        left: x,
+        top: y + 16,
+        width: w,
+        height: 42,
+        boxSizing: "border-box",
+        border: `1.5px solid ${activo ? "#7aa7d6" : BORDE}`,
+        borderRadius: 7,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 13,
+        fontWeight: 500,
+        color: gris ? "#9aa3b2" : TINTA,
+        background: "white",
+      }}
+    >
+      {valor}
+      {cursor ? (
+        <span style={{ width: 1.5, height: 16, background: TINTA, marginLeft: 1 }} />
+      ) : null}
+      {select ? (
+        <span style={{ position: "absolute", right: 12, fontSize: 10, color: TINTA }}>▾</span>
+      ) : null}
+    </div>
+  </>
+);
+
+const Boton: React.FC<{
+  texto: React.ReactNode;
+  x?: number;
+  y: number;
+  w?: number;
+  h?: number;
+  color?: string;
+  press?: number;
+  opacity?: number;
+}> = ({ texto, x = 30, y, w = 330, h = 44, color = AZUL, press = 0, opacity = 1 }) => (
+  <div
+    style={{
+      position: "absolute",
+      left: x,
+      top: y,
+      width: w,
+      height: h,
+      borderRadius: 8,
+      background: color,
+      color: "white",
+      fontSize: 13.5,
+      fontWeight: 700,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      transform: `scale(${1 - press * 0.06})`,
+      boxShadow: `0 4px 10px rgba(30,60,100,${0.18 + press * 0.2})`,
+      opacity,
+    }}
+  >
+    {texto}
+  </div>
+);
+
+const Titulo: React.FC<{ y: number; children: React.ReactNode; s?: number; c?: string }> = ({
+  y,
+  children,
+  s = 17,
+  c = TINTA,
+}) => (
+  <div
+    style={{
+      position: "absolute",
+      left: 16,
+      right: 16,
+      top: y,
+      textAlign: "center",
+      fontSize: s,
+      fontWeight: 700,
+      color: c,
+      lineHeight: 1.3,
+    }}
+  >
+    {children}
+  </div>
+);
+
+const Pasos: React.FC<{ actual: number }> = ({ actual }) => (
+  <div
+    style={{
+      position: "absolute",
+      top: 160,
+      left: 0,
+      right: 0,
+      display: "flex",
+      justifyContent: "center",
+      gap: 9,
+    }}
+  >
+    {Array.from({ length: 8 }).map((_, i) => (
+      <div
+        key={i}
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 5,
+          background: i + 1 <= actual ? AZUL : "#8a929e",
+          color: "white",
+          fontSize: 11,
+          fontWeight: 700,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: i + 1 === actual ? "0 0 0 3px rgba(74,139,194,0.3)" : "none",
+        }}
+      >
+        {i + 1}
+      </div>
+    ))}
+  </div>
+);
+
+const Datos: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const ident = spring({ frame: frame - IDENTIFICADO, fps, config: { damping: 16 } });
+  const abierto = frame >= TAP_PRODUCTO + 2 && frame < TAP_CONSUMO + 4;
+  const producto = frame >= TAP_CONSUMO + 2 ? "CONSUMO" : "ELEGÍ UN PRODUCTO";
+  const buscandoBoton = frame >= TAP_CONSULTAR + 2 && frame < IDENTIFICADO;
+  const enCampo = (r: readonly number[]) => frame >= r[0] - 4 && frame <= r[1] + 4;
+  return (
+    <>
+      <Pasos actual={1} />
+      <Titulo y={194}>Ingresar los datos *</Titulo>
+      <div style={{ position: "absolute", top: 222, width: "100%", textAlign: "center", fontSize: 11, color: TINTA }}>
+        *Todos los campos son obligatorios.
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: 16,
+          top: 256,
+          width: 358,
+          height: ident > 0.01 ? 270 + ident * 260 : 236,
+          border: `1px solid ${BORDE}`,
+          borderRadius: 10,
+          boxShadow: "0 4px 14px rgba(20,30,50,0.06)",
+        }}
+      />
+      <Campo etiqueta="DNI" valor={tipeo(frame, "28456789", TIPEO_DNI)} y={270} activo={enCampo(TIPEO_DNI)} cursor={enCampo(TIPEO_DNI) && Math.floor(frame / 8) % 2 === 0} gris={ident > 0.5} />
+      <Campo etiqueta="GÉNERO" valor="MASCULINO" y={340} select gris={ident > 0.5} />
+      {/* Consultar turns into the identified client card */}
+      <Boton
+        y={418}
+        texto={buscandoBoton ? <Spinner size={20} frame={frame} claro /> : "Consultar"}
+        press={pulsado(frame, TAP_CONSULTAR)}
+        opacity={1 - ident}
+      />
+      {ident > 0.01 ? (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              left: 30,
+              top: 412,
+              width: 330,
+              height: 60,
+              borderRadius: 8,
+              background: "#eaf2fb",
+              borderLeft: `4px solid ${NAVY}`,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: ident,
+              transform: `scale(${0.9 + ident * 0.1})`,
+            }}
+          >
+            <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: 1, color: NAVY }}>CLIENTE IDENTIFICADO</div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: TINTA, marginTop: 3 }}>JAVIER PEREZ</div>
+          </div>
+          <div style={{ opacity: ident }}>
+            <Campo etiqueta="TELÉFONO" valor={tipeo(frame, "11 5555-0123", TIPEO_TEL)} y={488} activo={enCampo(TIPEO_TEL)} />
+            <Campo etiqueta="EMAIL" valor={tipeo(frame, "JPEREZ@MAIL.COM", TIPEO_MAIL)} y={558} activo={enCampo(TIPEO_MAIL)} />
+            <Campo etiqueta="PRODUCTO" valor={producto} y={628} select activo={abierto} gris={producto !== "CONSUMO"} />
+            <Boton y={712} texto="Continuar" press={pulsado(frame, TAP_CONTINUAR)} opacity={frame >= TAP_CONSUMO + 2 ? 1 : 0.45} />
+          </div>
+        </>
+      ) : null}
+      {abierto ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 30,
+            top: 694,
+            width: 330,
+            background: "white",
+            border: `1px solid #b9c4d2`,
+            borderRadius: 6,
+            boxShadow: "0 10px 24px rgba(20,30,50,0.2)",
+            overflow: "hidden",
+            zIndex: 3,
+          }}
+        >
+          {["ELEGÍ UN PRODUCTO", "CONSUMO", "EFECTIVO", "PRENDARIO"].map((o, i) => {
+            const sel = i === 1 && frame >= TAP_CONSUMO - 4;
+            return (
+              <div
+                key={o}
+                style={{
+                  height: 30,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 12,
+                  color: sel ? "white" : i === 0 ? "#8a929e" : TINTA,
+                  background: sel ? "#2f6fe0" : "white",
+                }}
+              >
+                {o}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+    </>
+  );
+};
+
+const OFERTAS = [
+  { n: 3, cuota: 340420 },
+  { n: 6, cuota: 196180 },
+  { n: 9, cuota: 148950 },
+  { n: 12, cuota: 125310 },
+];
+const Ofertas: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const elegida = frame >= TAP_OFERTA + 2 ? 1 : -1;
+  const monto = Math.round(850000 * interpolate(frame, [ESC.ofertas[0] + 6, ESC.ofertas[0] + 30], [0, 1], clamp));
+  return (
+    <>
+      <Pasos actual={2} />
+      <Titulo y={194} s={19}>Monto aprobado: {pesos(850000)}</Titulo>
+      <div style={{ position: "absolute", top: 236, left: 16, right: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: AZUL_OSCURO }}>Seleccioná un monto:</span>
+        <span style={{ fontSize: 13, border: `1px solid ${BORDE}`, borderRadius: 5, padding: "4px 8px", fontWeight: 700, color: TINTA }}>
+          {pesos(monto)}
+        </span>
+      </div>
+      <div style={{ position: "absolute", top: 272, left: 70, width: 250, height: 5, borderRadius: 3, background: "#d6dee8" }}>
+        <div style={{ width: `${(monto / 850000) * 100}%`, height: "100%", borderRadius: 3, background: AZUL_OSCURO, position: "relative" }}>
+          <div style={{ position: "absolute", right: -7, top: -5, width: 14, height: 14, borderRadius: "50%", background: AZUL_OSCURO }} />
+        </div>
+      </div>
+      {OFERTAS.map((o, i) => {
+        const t = spring({ frame: frame - ESC.ofertas[0] - 10 - i * 5, fps, config: { damping: 15 } });
+        const sel = i === elegida;
+        const p = i === 1 ? pulsado(frame, TAP_OFERTA) : 0;
+        return (
+          <div
+            key={o.n}
+            style={{
+              position: "absolute",
+              left: 16 + (i % 2) * 183,
+              top: 300 + Math.floor(i / 2) * 186,
+              width: 175,
+              height: 172,
+              borderRadius: 12,
+              border: `2px solid ${sel ? "#5b7fb5" : "#c5d0df"}`,
+              background: sel ? "linear-gradient(160deg, #8fb4ea, #4f6f9e)" : "linear-gradient(160deg, #f8fafc, #e9eef5)",
+              color: sel ? "white" : TINTA,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              opacity: t,
+              transform: `scale(${(0.85 + 0.15 * t) * (1 - p * 0.05) * (sel ? 1.03 : 1)})`,
+              boxShadow: sel ? "0 12px 26px rgba(40,70,120,0.35)" : "0 3px 8px rgba(20,30,50,0.06)",
+            }}
+          >
+            <div style={{ fontSize: 12, opacity: 0.9 }}>{o.n} cuotas</div>
+            <div style={{ fontSize: 24, fontWeight: 800 }}>{pesos(o.cuota)}</div>
+            <div style={{ fontSize: 10.5, opacity: 0.85 }}>Monto total {pesos(o.cuota * o.n)}</div>
+            <div style={{ fontSize: 9.5, marginTop: 6, lineHeight: 1.6, textAlign: "center", opacity: 0.9 }}>
+              ✓ Tasa preferencial
+              <br />✓ Sin costos ocultos
+              <br />✓ Aprobación inmediata
+            </div>
+          </div>
+        );
+      })}
+      <Boton x={16} y={682} w={175} h={42} texto="Continuar" press={pulsado(frame, TAP_OFERTA_CONT)} opacity={elegida >= 0 ? 1 : 0.5} />
+      <Boton x={199} y={682} w={175} h={42} texto="Finalizar" color="#d62b2b" />
+    </>
+  );
+};
+
+const Email: React.FC<{ frame: number }> = ({ frame }) => {
+  const codigo = tipeo(frame, "482913", TIPEO_COD);
+  const validando = frame >= TAP_VALIDAR + 2 && frame < EMAIL_OK;
+  const ok = frame >= EMAIL_OK;
+  return (
+    <>
+      <Pasos actual={3} />
+      <Titulo y={194}>Validá tu email</Titulo>
+      <div style={{ position: "absolute", top: 228, left: 30, right: 30, textAlign: "center", fontSize: 12, color: TINTA_2, lineHeight: 1.5 }}>
+        Te enviamos un código de 6 dígitos a<br />
+        <b style={{ color: TINTA }}>jperez@mail.com</b>
+      </div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left: 38 + i * 54,
+            top: 290,
+            width: 44,
+            height: 54,
+            borderRadius: 8,
+            border: `1.5px solid ${ok ? VERDE : codigo.length === i ? "#7aa7d6" : BORDE}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 24,
+            fontWeight: 800,
+            color: TINTA,
+            background: ok ? "#eef8f1" : "white",
+          }}
+        >
+          {codigo[i] ?? ""}
+        </div>
+      ))}
+      <Boton y={380} texto="Validar código" press={pulsado(frame, TAP_VALIDAR)} opacity={codigo.length === 6 ? 1 : 0.5} />
+      {validando || ok ? (
+        <div style={{ position: "absolute", top: 452, left: 0, right: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+          {validando ? (
+            <>
+              <Spinner size={30} frame={frame} />
+              <span style={{ fontSize: 13, color: TINTA_2 }}>Validando código…</span>
+            </>
+          ) : (
+            <span style={{ fontSize: 15, fontWeight: 700, color: VERDE }}>✓ Email validado</span>
+          )}
+        </div>
+      ) : null}
+      <div style={{ position: "absolute", top: 520, width: "100%", textAlign: "center", fontSize: 11.5, color: AZUL_OSCURO, textDecoration: "underline" }}>
+        Reenviar código
+      </div>
+    </>
+  );
+};
+
+const ITEMS = [
+  { n: "DNI frente", s: "Validando con RENAPER…" },
+  { n: "DNI dorso", s: "Leyendo código del documento…" },
+  { n: "Selfie", s: "Validando biometría…" },
+];
+const Identidad: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const idx = CAPTURAS.findIndex((c) => frame < c + VALIDA + 8);
+  const actual = idx === -1 ? 3 : idx;
+  const flash = Math.max(...CAPTURAS.map((c) => interpolate(frame, [c, c + 2, c + 10], [0, 0.9, 0], clamp)));
+  const listo = spring({ frame: frame - (CAPTURAS[2] + VALIDA + 6), fps, config: { damping: 16 } });
+  const guia = [
+    "Ubicá el frente del DNI dentro del marco",
+    "Ahora el dorso del DNI",
+    "Mirá a la cámara para la selfie",
+  ][Math.min(actual, 2)];
+  const vista = Math.min(actual, 2);
+  return (
+    <>
+      <Pasos actual={4} />
+      <Titulo y={194}>Verificación de identidad</Titulo>
+      <div
+        style={{
+          position: "absolute",
+          left: 30,
+          top: 228,
+          width: 330,
+          height: 250,
+          borderRadius: 14,
+          background: "#1c2129",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ width: vista === 2 ? 150 : 236, height: vista === 2 ? 170 : 150, display: "flex", alignItems: "center", justifyContent: "center", marginTop: -46 }}>
+          {vista === 0 ? <DniFrente /> : null}
+          {vista === 1 ? <DniDorso /> : null}
+          {vista === 2 ? (
+            <svg viewBox="0 0 60 70" width="100%" height="100%">
+              <defs>
+                <clipPath id="ovaloSelfie">
+                  <ellipse cx={30} cy={34} rx={21} ry={27} />
+                </clipPath>
+              </defs>
+              <g clipPath="url(#ovaloSelfie)">
+                <rect width={60} height={70} fill="#c9d8e6" />
+                <Persona id="onbSelfie" />
+              </g>
+              <ellipse cx={30} cy={34} rx={21} ry={27} fill="none" stroke="white" strokeWidth={1} strokeDasharray="3 2" />
+            </svg>
+          ) : null}
+        </div>
+        <svg width={330} height={250} style={{ position: "absolute", inset: 0 }}>
+          <g stroke="white" strokeWidth={3} fill="none" strokeLinecap="round" opacity={0.9}>
+            <path d="M24 40 V20 H44 M286 20 H306 V40 M24 158 V178 H44 M286 178 H306 V158" />
+          </g>
+        </svg>
+        <div style={{ position: "absolute", bottom: 56, width: "100%", textAlign: "center", fontSize: 11, color: "white", opacity: 0.9 }}>
+          {actual < 3 ? guia : "Captura completa"}
+        </div>
+        {/* Shutter */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 8,
+            left: 165 - 20,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            border: "3px solid white",
+            boxSizing: "border-box",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: `scale(${1 - Math.max(...CAPTURAS.map((c) => pulsado(frame, c))) * 0.12})`,
+          }}
+        >
+          <div style={{ width: 28, height: 28, borderRadius: "50%", background: "white" }} />
+        </div>
+        <div style={{ position: "absolute", inset: 0, background: "white", opacity: flash }} />
+      </div>
+      {ITEMS.map((it, i) => {
+        const c = CAPTURAS[i];
+        const estado = frame < c + 2 ? "pendiente" : frame < c + VALIDA ? "validando" : "ok";
+        return (
+          <div
+            key={it.n}
+            style={{
+              position: "absolute",
+              left: 30,
+              top: 496 + i * 58,
+              width: 330,
+              height: 48,
+              borderRadius: 9,
+              border: `1px solid ${estado === "ok" ? "#b9e0c8" : i === actual ? "#9cc0e6" : BORDE}`,
+              background: estado === "ok" ? "#f0f9f3" : "white",
+              display: "flex",
+              alignItems: "center",
+              padding: "0 14px",
+              boxSizing: "border-box",
+              gap: 10,
+            }}
+          >
+            <div style={{ width: 26, height: 26, borderRadius: 6, background: i === 2 ? "#e6eef7" : "#e9eef5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>
+              {i === 2 ? "☺" : "▭"}
+            </div>
+            <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: TINTA }}>{it.n}</div>
+            {estado === "pendiente" ? <span style={{ fontSize: 11, color: "#9aa3b2" }}>Pendiente</span> : null}
+            {estado === "validando" ? (
+              <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: TINTA_2 }}>
+                <Spinner size={20} frame={frame} />
+                {it.s}
+              </span>
+            ) : null}
+            {estado === "ok" ? <span style={{ fontSize: 12, fontWeight: 700, color: VERDE }}>✓ Validado</span> : null}
+          </div>
+        );
+      })}
+      {listo > 0.01 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 30,
+            top: 680,
+            width: 330,
+            height: 50,
+            borderRadius: 10,
+            background: VERDE,
+            color: "white",
+            fontSize: 15,
+            fontWeight: 800,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: listo,
+            transform: `scale(${0.9 + 0.1 * listo})`,
+          }}
+        >
+          ✓ Identidad verificada
+        </div>
+      ) : null}
+    </>
+  );
+};
+
+const WhatsApp: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const enviado = spring({ frame: frame - TAP_WA - 6, fps, config: { damping: 16 } });
+  return (
+    <>
+      <Pasos actual={5} />
+      <Titulo y={196} s={15} c={AZUL_OSCURO}>
+        Te vamos a enviar un mensaje por WhatsApp con los términos y condiciones de privacidad y uso de tus datos para
+        finalizar el proceso.
+      </Titulo>
+      <div style={{ position: "absolute", top: 300, width: "100%", textAlign: "center", fontSize: 12, color: TINTA }}>
+        Debés continuar con las instrucciones allí.
+      </div>
+      <svg width={64} height={64} viewBox="0 0 64 64" style={{ position: "absolute", left: 163, top: 334 }}>
+        <circle cx={32} cy={32} r={30} fill="#25d366" />
+        <path d="M32 14 A18 18 0 0 0 16.5 41 L14 50 L23.2 47.6 A18 18 0 1 0 32 14 Z" fill="white" />
+        <path d="M32 17.5 A14.5 14.5 0 0 0 19.6 39.8 L18.2 45 L23.6 43.6 A14.5 14.5 0 1 0 32 17.5 Z" fill="#25d366" />
+        <path d="M26 24.5 C25 24.5 24 26 24.5 28 C25.5 32 30 37.5 35.5 39.5 C37.5 40.2 39 39.2 39.4 38 L39.6 36.6 L36 34.8 L34.6 36.4 C32 35.4 29.6 33 28.6 30.4 L30.2 29 L28.4 25 Z" fill="white" />
+      </svg>
+      <Boton x={70} y={430} w={250} texto="Enviar Mensaje" color={AZUL_OSCURO} press={pulsado(frame, TAP_WA)} />
+      {enviado > 0.01 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 30,
+            top: 500,
+            width: 330,
+            borderRadius: 10,
+            background: "#eef8f1",
+            border: "1px solid #b9e0c8",
+            padding: "12px 14px",
+            boxSizing: "border-box",
+            opacity: enviado,
+            transform: `translateY(${(1 - enviado) * 16}px)`,
+            textAlign: "center",
+          }}
+        >
+          <div style={{ fontSize: 14, fontWeight: 800, color: VERDE }}>✓ Mensaje enviado</div>
+          <div style={{ fontSize: 11.5, color: TINTA, marginTop: 4 }}>Revisá tu WhatsApp al 11 5555-0123</div>
+        </div>
+      ) : null}
+    </>
+  );
+};
+
+const TITULOS: Record<Escena, string> = {
+  datos: "CARGAR DATOS",
+  buscando: "CARGAR DATOS",
+  ofertas: "OFERTAS DISPONIBLES",
+  email: "VALIDACIÓN DE EMAIL",
+  identidad: "VERIFICACIÓN DE IDENTIDAD",
+  whatsapp: "CONFIRMACIÓN",
+};
+
+const LOGO_W = 2028;
+const LOGO_H = 693;
+const Logo: React.FC<{ w: number }> = ({ w }) => (
+  <div style={{ position: "relative", width: w, height: (w * LOGO_H) / LOGO_W }}>
+    {["axonia-letras.png", "axonia-icono.png"].map((f) => (
+      <Img key={f} src={staticFile(f)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
+    ))}
+  </div>
+);
+
+const App: React.FC<{ frame: number }> = ({ frame }) => {
+  const vis = (e: Escena) => {
+    const [a, b] = ESC[e];
+    return interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp) * (a === 0 ? 1 : 1);
+  };
+  const desliza = (e: Escena) => {
+    const [a, b] = ESC[e];
+    return interpolate(frame, [a, a + 8], [30, 0], clamp) + interpolate(frame, [b - 6, b], [0, -30], clamp);
+  };
+  const escenas: [Escena, React.FC<{ frame: number }>][] = [
+    ["datos", Datos],
+    ["ofertas", Ofertas],
+    ["email", Email],
+    ["identidad", Identidad],
+    ["whatsapp", WhatsApp],
+  ];
+  const actual = (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "datos";
+  const buscando = vis("buscando");
+  const dedo = posDedo(frame);
+  const tap = tapsDe.find((f) => frame >= f && frame < f + 16);
+  const onda = tap === undefined ? 0 : (frame - tap) / 16;
+  const dedoVis =
+    interpolate(frame, [6, 14], [0, 1], clamp) *
+    (1 - interpolate(frame, [ESC.buscando[0], ESC.buscando[0] + 6, ESC.buscando[1] - 6, ESC.buscando[1]], [0, 1, 1, 0], clamp)) *
+    interpolate(frame, [TAP_WA + 30, TAP_WA + 44], [1, 0], clamp);
+
+  return (
+    <div style={{ position: "relative", width: W, height: H, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden" }}>
+      {/* Header */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: W,
+          height: 78,
+          background: "#4a4a4a",
+          display: "flex",
+          alignItems: "center",
+          paddingTop: 30,
+          boxSizing: "border-box",
+        }}
+      >
+        <div style={{ marginLeft: 16 }}>
+          <Logo w={92} />
+        </div>
+        <div style={{ flex: 1, textAlign: "center", color: "white", fontSize: 10.5, fontWeight: 700, letterSpacing: 0.8 }}>
+          {TITULOS[actual]}
+        </div>
+        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#d6d9de", marginRight: 16 }} />
+      </div>
+      {/* Content card */}
+      <div
+        style={{
+          position: "absolute",
+          left: 8,
+          top: 86,
+          width: W - 16,
+          height: H - 100,
+          background: "white",
+          borderRadius: 12,
+          boxShadow: "0 4px 18px rgba(20,30,50,0.08)",
+        }}
+      />
+      <div style={{ position: "absolute", top: 100, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+        {/* Dark-lettered logo for the white page */}
+        <Img src={staticFile("axonia-logo-original.png")} style={{ width: 150, height: (150 * 231) / 676 }} />
+      </div>
+      {escenas.map(([e, C]) => {
+        const v = vis(e);
+        if (v <= 0.001) {
+          return null;
+        }
+        return (
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v, transform: `translateX(${desliza(e)}px)` }}>
+            <C frame={frame} />
+          </div>
+        );
+      })}
+      {/* Looking for an offer */}
+      {buscando > 0.001 ? (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `rgba(10,12,16,${0.82 * buscando})`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 26,
+            color: "white",
+            textAlign: "center",
+            padding: "0 28px",
+          }}
+        >
+          <div style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.35, opacity: buscando }}>
+            Estamos analizando los datos y buscando una oferta.
+          </div>
+          <div style={{ fontSize: 14, lineHeight: 1.4, opacity: buscando * 0.9 }}>
+            Por favor aguardá, puede demorar hasta 60 segundos.
+          </div>
+          <div style={{ opacity: buscando }}>
+            <Spinner size={86} frame={frame} claro />
+          </div>
+        </div>
+      ) : null}
+      {/* Finger */}
+      {tap !== undefined ? (
+        <div
+          style={{
+            position: "absolute",
+            left: dedo.x,
+            top: dedo.y,
+            width: 18 + onda * 54,
+            height: 18 + onda * 54,
+            transform: "translate(-50%, -50%)",
+            borderRadius: "50%",
+            border: `3px solid rgba(255,140,66,${1 - onda})`,
+            background: `rgba(255,140,66,${(1 - onda) * 0.2})`,
+          }}
+        />
+      ) : null}
+      <div
+        style={{
+          position: "absolute",
+          left: dedo.x,
+          top: dedo.y,
+          width: 34,
+          height: 34,
+          transform: `translate(-50%, -50%) scale(${1 - (tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp)) * 0.2})`,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.55)",
+          border: "2px solid rgba(40,48,64,0.35)",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+          opacity: dedoVis * 0.9,
+        }}
+      />
+    </div>
+  );
+};
+
+export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fondo, paleta }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const { w, h } = pantallaDe("celular", true);
+  const { W: EW, H: EH } = exteriorDe("celular", w, h);
+  const esc = Math.min(980 / EW, 1560 / EH);
+  const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
+  const flota = Math.sin(frame / 45) * 5;
+  return (
+    <AbsoluteFill style={{ fontFamily: FUENTE }}>
+      <FondoAbstracto paleta={paleta} estilo={fondo} />
+      <div
+        style={{
+          position: "absolute",
+          left: 540,
+          top: 960,
+          opacity: t,
+          transform: `translate(-50%, -50%) translateY(${flota + (1 - t) * 120}px) scale(${esc})`,
+        }}
+      >
+        <Dispositivo tipo="celular" w={w} h={h}>
+          <App frame={frame} />
+        </Dispositivo>
+      </div>
+    </AbsoluteFill>
+  );
+};

@@ -249,7 +249,7 @@ const Dato: React.FC<{ k: string; v: React.ReactNode; o?: number }> = ({ k, v, o
 // documents.
 // Drawn portrait (60 x 70 box) used in the ID photo and the selfie. `id`
 // keeps the gradient ids unique per copy.
-const Persona: React.FC<{ id: string; fondo?: string }> = ({ id, fondo }) => {
+export const Persona: React.FC<{ id: string; fondo?: string }> = ({ id, fondo }) => {
   const u = (n: string) => `url(#${id}-${n})`;
   return (
     <g>
@@ -344,7 +344,7 @@ const Persona: React.FC<{ id: string; fondo?: string }> = ({ id, fondo }) => {
   );
 };
 
-const DniFrente: React.FC = () => (
+export const DniFrente: React.FC = () => (
   <svg viewBox="0 0 86 54" width="94%">
     <defs>
       <linearGradient id="dniFondo" x1="0" y1="0" x2="1" y2="1">
@@ -399,7 +399,7 @@ const DniFrente: React.FC = () => (
   </svg>
 );
 
-const DniDorso: React.FC = () => (
+export const DniDorso: React.FC = () => (
   <svg viewBox="0 0 86 54" width="94%">
     <rect x={0.5} y={0.5} width={85} height={53} rx={4} fill="#e6edf4" stroke="#9fb3c8" />
     <g fill="none" stroke="#7d93b6" strokeWidth={0.7}>
