@@ -106,29 +106,46 @@ const Cartera: Producto = ({ id }) => (
   </svg>
 );
 
-const Zapatilla: Producto = ({ id }) => (
+const Reloj: Producto = ({ id }) => (
   <svg viewBox="0 0 200 140" width="100%" height="100%">
     <defs>
-      <linearGradient id={`${id}z`} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#ffffff" />
-        <stop offset="1" stopColor="#d9dfe8" />
+      <linearGradient id={`${id}m`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#e2e5ea" />
+        <stop offset="0.5" stopColor="#9aa2ae" />
+        <stop offset="1" stopColor="#5b616c" />
       </linearGradient>
-      <linearGradient id={`${id}s`} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#f6f7f9" />
-        <stop offset="1" stopColor="#c9d0da" />
+      <linearGradient id={`${id}c`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#2b4fb8" />
+        <stop offset="1" stopColor="#152a6b" />
       </linearGradient>
+      <radialGradient id={`${id}p`} cx="0.35" cy="0.3" r="0.8">
+        <stop offset="0" stopColor="#1b2740" />
+        <stop offset="1" stopColor="#05080f" />
+      </radialGradient>
     </defs>
-    <Sombra rx={80} y={124} />
-    <path d="M22 100 C24 82 40 74 58 70 C68 66 74 58 80 52 C92 62 106 70 124 74 C152 78 172 84 180 98 L182 108 L22 110 Z" fill={`url(#${id}z)`} stroke="#aeb7c4" strokeWidth={1.4} />
-    <path d="M20 106 L184 104 C186 110 184 116 178 118 C130 122 70 122 26 120 C20 118 18 112 20 106 Z" fill={`url(#${id}s)`} stroke="#aeb7c4" strokeWidth={1.4} />
-    <path d="M24 112 C70 116 130 116 182 110" stroke="#2f8cff" strokeWidth={3} fill="none" />
-    <path d="M80 52 C76 66 78 80 90 92 L58 96 C44 96 34 94 26 96" fill="none" stroke="#c4cbd6" strokeWidth={1.6} />
-    <path d="M22 98 C30 90 40 88 52 88" fill="none" stroke="#2f8cff" strokeWidth={6} strokeLinecap="round" />
-    {[0, 1, 2, 3, 4].map((i) => (
-      <path key={i} d={`M${86 + i * 8} ${62 + i * 2.5} L${98 + i * 8} ${56 + i * 2.5}`} stroke="#5b6472" strokeWidth={2.6} strokeLinecap="round" />
+    <Sombra rx={40} y={132} />
+    <path d="M80 6 L120 6 L116 40 L84 40 Z" fill={`url(#${id}c)`} />
+    <path d="M84 100 L116 100 L120 134 L80 134 Z" fill={`url(#${id}c)`} />
+    {[12, 20, 28].map((y) => (
+      <rect key={y} x={86} y={y} width={28} height={2} rx={1} fill="#0f1f4d" opacity={0.5} />
     ))}
-    <path d="M108 90 L150 84 M114 96 L158 90 M120 102 L166 96" stroke="#2f8cff" strokeWidth={3.4} strokeLinecap="round" />
-    <path d="M168 86 C176 90 180 96 180 102" stroke="#1b2a4a" strokeWidth={5} fill="none" strokeLinecap="round" />
+    {[110, 118, 126].map((y) => (
+      <rect key={y} x={86} y={y} width={28} height={2} rx={1} fill="#0f1f4d" opacity={0.5} />
+    ))}
+    <rect x={64} y={32} width={72} height={76} rx={20} fill={`url(#${id}m)`} />
+    <rect x={136} y={56} width={6} height={14} rx={3} fill="#7d838c" />
+    <rect x={136} y={76} width={5} height={8} rx={2.5} fill="#7d838c" />
+    <rect x={70} y={38} width={60} height={64} rx={15} fill={`url(#${id}p)`} />
+    <circle cx={100} cy={70} r={22} fill="none" stroke="#1e293b" strokeWidth={4} />
+    <path d="M100 48 A22 22 0 1 1 79 76" fill="none" stroke="#2f8cff" strokeWidth={4} strokeLinecap="round" />
+    <path d="M100 54 A16 16 0 0 1 114 78" fill="none" stroke="#22c55e" strokeWidth={3.4} strokeLinecap="round" />
+    <text x={100} y={74} textAnchor="middle" fontFamily="Montserrat" fontWeight={800} fontSize={12} fill="white">
+      10:09
+    </text>
+    <text x={100} y={84} textAnchor="middle" fontFamily="Montserrat" fontWeight={500} fontSize={5} fill="#9fb2cc">
+      8.420 pasos
+    </text>
+    <path d="M74 46 C80 40 90 40 96 42" stroke="white" strokeWidth={2.4} opacity={0.2} fill="none" strokeLinecap="round" />
   </svg>
 );
 
@@ -463,7 +480,7 @@ const LumenUltra = telefono(MODELOS.lumenUltra);
 type ItemTienda = { nombre: string; marca: string; precio: number; P: Producto; vista?: Vista };
 const DESTACADOS: ItemTienda[] = [
   { nombre: "Cartera Classic", marca: "Urbana", precio: 74900, P: Cartera },
-  { nombre: "Zapatillas Urban", marca: "Street", precio: 59900, P: Zapatilla },
+  { nombre: "Smartwatch Fit", marca: "Pulse", precio: 159900, P: Reloj },
   { nombre: "Smartphone X12", marca: "Nova", precio: 649900, P: Celular },
   { nombre: "Anteojos de Sol", marca: "Fashion Shades", precio: 29900, P: Anteojos },
   { nombre: "Auriculares Inalámbricos", marca: "Sonic", precio: 89900, P: Auriculares },
@@ -483,7 +500,7 @@ const CELULARES: ItemTienda[] = [
   { nombre: "Zeta Fold", marca: "Zeta", precio: 1399900, P: telefono(MODELOS.zetaFold), vista: "solo" },
 ];
 const CATEGORIAS: [string, Producto][] = [
-  ["Calzado", Zapatilla],
+  ["Relojes", Reloj],
   ["Indumentaria", Campera],
   ["Electrónica", Auriculares],
   ["Hogar", Lampara],
@@ -551,7 +568,7 @@ const Header: React.FC<{ frame: number; seccion: string }> = ({ frame, seccion }
         <div style={{ display: "flex", alignItems: "center", gap: 8, color: "white" }}>
           <Icono d={I_USUARIO} />
           <div style={{ lineHeight: 1.15 }}>
-            <div style={{ fontSize: 12.5, fontWeight: 700 }}>Hola, Mary</div>
+            <div style={{ fontSize: 12.5, fontWeight: 700 }}>Hola, Javier</div>
             <div style={{ fontSize: 10, color: "#9aa3b2" }}>Mi cuenta ▾</div>
           </div>
         </div>
@@ -658,7 +675,7 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
         {[
           { P: Cartera, x: 730, y: 120, w: 190, d: 8 },
           { P: Celular, x: 900, y: 150, w: 150, d: 12 },
-          { P: Zapatilla, x: 790, y: 210, w: 190, d: 16 },
+          { P: Reloj, x: 800, y: 200, w: 170, d: 16 },
           { P: Anteojos, x: 930, y: 250, w: 120, d: 20 },
         ].map(({ P, x, y, w, d }, i) => (
           <div key={i} style={{ position: "absolute", left: x, top: y, width: w, height: w * 0.7, opacity: entra(d), transform: `translateY(${(1 - entra(d)) * 30}px)`, filter: "drop-shadow(0 12px 14px rgba(0,0,0,0.5))" }}>
@@ -786,9 +803,26 @@ const ProductoPagina: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         ))}
         {/* Main image */}
-        <div style={{ position: "absolute", left: 104, top: 48, width: 430, height: 470, borderRadius: 12, background: "radial-gradient(circle at 50% 45%, #ffffff, #eef1f6)", display: "flex", alignItems: "center", justifyContent: "center", opacity: entra(0) }}>
+        <div style={{ position: "absolute", left: 104, top: 48, width: 430, height: 420, borderRadius: 12, background: "radial-gradient(circle at 50% 45%, #ffffff, #eef1f6)", display: "flex", alignItems: "center", justifyContent: "center", opacity: entra(0) }}>
           <div style={{ width: 420, height: 300, transform: `scale(${0.9 + entra(0) * 0.1})`, filter: "drop-shadow(0 20px 18px rgba(15,25,45,0.25))" }}>
             <LumenUltra id="principal" vista={VISTAS[vista]} />
+          </div>
+        </div>
+        {/* Description */}
+        <div style={{ position: "absolute", left: 24, top: 488, width: 752, borderTop: `1px solid ${BORDE}`, paddingTop: 16, opacity: entra(14) }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: TINTA }}>Descripción</div>
+          <div style={{ fontSize: 12, color: TINTA_2, marginTop: 8, lineHeight: 1.6 }}>
+            El Lumen S9 Ultra combina una pantalla AMOLED de 6,8" con 120 Hz, procesador de última generación y una cámara
+            principal de 200 MP con zoom óptico 10x para fotos nítidas de día y de noche. Su batería de 5.000 mAh con carga
+            rápida de 45 W te acompaña todo el día. Incluye 256 GB de almacenamiento, resistencia al agua IP68 y 12 meses de
+            garantía oficial.
+          </div>
+          <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+            {["Envío gratis", "12 meses de garantía", "Devolución sin cargo"].map((t) => (
+              <span key={t} style={{ fontSize: 11, fontWeight: 700, color: AZUL, background: "#eef5ff", borderRadius: 12, padding: "4px 11px" }}>
+                ✓ {t}
+              </span>
+            ))}
           </div>
         </div>
         {/* Info */}
@@ -984,7 +1018,7 @@ const Checkout: React.FC<{ frame: number }> = ({ frame }) => {
             {[
               ["Entrega", "Retiro en local · Sin costo"],
               ["Pago", "Préstamo Personal · 6 cuotas de " + pesos(Math.round((TOTAL * 1.36) / 6))],
-              ["Contacto", "11 5328-8468 · mary@mail.com"],
+              ["Contacto", "11 5328-8468 · javier@mail.com"],
             ].map(([k, v], i) => (
               <div key={k} style={{ marginTop: 14, padding: "14px 16px", border: `1px solid ${BORDE}`, borderRadius: 9, display: "flex", justifyContent: "space-between", opacity: interpolate(frame, [REVISION + 4 + i * 4, REVISION + 12 + i * 4], [0, 1], clamp) }}>
                 <span style={{ fontSize: 12, color: TINTA_2 }}>{k}</span>
@@ -1048,7 +1082,7 @@ const Confirmacion: React.FC<{ frame: number }> = ({ frame }) => {
           return <div key={i} style={{ position: "absolute", left: x, top: y, width: 7, height: 11, borderRadius: 2, background: [AZUL, "#FF8C42", VERDE, "#f5b301"][i % 4], transform: `rotate(${i * 37 + frame * 6}deg)`, opacity: interpolate(frame - f0, [50, 80], [1, 0], clamp) }} />;
         })}
         <div style={{ width: 86, height: 86, borderRadius: "50%", background: VERDE, color: "white", fontSize: 48, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${t})`, boxShadow: `0 0 0 ${12 * t}px rgba(30,138,76,0.15)` }}>✓</div>
-        <div style={{ fontSize: 26, fontWeight: 800, color: TINTA, marginTop: 24 }}>¡Gracias por tu compra, Mary!</div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: TINTA, marginTop: 24 }}>¡Gracias por tu compra, Javier!</div>
         <div style={{ fontSize: 13.5, color: TINTA_2, marginTop: 8 }}>Pedido N.º 2026-111300157 · Préstamo aprobado</div>
         <div style={{ width: 440, marginTop: 26, border: `1px solid ${BORDE}`, borderRadius: 12, padding: "6px 18px", boxSizing: "border-box" }}>
           {PEDIDO.map((p, i) => (
