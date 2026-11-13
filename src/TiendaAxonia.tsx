@@ -106,46 +106,84 @@ const Cartera: Producto = ({ id }) => (
   </svg>
 );
 
-const Reloj: Producto = ({ id }) => (
+export const Reloj: Producto = ({ id }) => (
   <svg viewBox="0 0 200 140" width="100%" height="100%">
     <defs>
+      {/* Black silicone band */}
+      <linearGradient id={`${id}c`} x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stopColor="#0c0d10" />
+        <stop offset="0.45" stopColor="#2a2d33" />
+        <stop offset="1" stopColor="#0c0d10" />
+      </linearGradient>
+      {/* Graphite aluminum case */}
       <linearGradient id={`${id}m`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#e2e5ea" />
-        <stop offset="0.5" stopColor="#9aa2ae" />
-        <stop offset="1" stopColor="#5b616c" />
+        <stop offset="0" stopColor="#5b616c" />
+        <stop offset="0.35" stopColor="#2b2f36" />
+        <stop offset="0.7" stopColor="#15171b" />
+        <stop offset="1" stopColor="#3a3f48" />
       </linearGradient>
-      <linearGradient id={`${id}c`} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#2b4fb8" />
-        <stop offset="1" stopColor="#152a6b" />
+      <linearGradient id={`${id}v`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="rgba(255,255,255,0.22)" />
+        <stop offset="0.4" stopColor="rgba(255,255,255,0)" />
       </linearGradient>
-      <radialGradient id={`${id}p`} cx="0.35" cy="0.3" r="0.8">
-        <stop offset="0" stopColor="#1b2740" />
-        <stop offset="1" stopColor="#05080f" />
-      </radialGradient>
+      <linearGradient id={`${id}cr`} x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stopColor="#3a3f48" />
+        <stop offset="0.5" stopColor="#8a929e" />
+        <stop offset="1" stopColor="#2b2f36" />
+      </linearGradient>
     </defs>
-    <Sombra rx={40} y={132} />
-    <path d="M80 6 L120 6 L116 40 L84 40 Z" fill={`url(#${id}c)`} />
-    <path d="M84 100 L116 100 L120 134 L80 134 Z" fill={`url(#${id}c)`} />
-    {[12, 20, 28].map((y) => (
-      <rect key={y} x={86} y={y} width={28} height={2} rx={1} fill="#0f1f4d" opacity={0.5} />
+    <Sombra rx={34} y={133} />
+    {/* Upper and lower band, tapering into the case */}
+    <path d="M83 2 L117 2 C118 14 118 26 116 38 L84 38 C82 26 82 14 83 2 Z" fill={`url(#${id}c)`} />
+    <path d="M84 102 L116 102 C118 114 118 126 117 138 L83 138 C82 126 82 114 84 102 Z" fill={`url(#${id}c)`} />
+    {[116, 123, 130].map((y) => (
+      <circle key={y} cx={100} cy={y} r={1.6} fill="#050506" />
     ))}
-    {[110, 118, 126].map((y) => (
-      <rect key={y} x={86} y={y} width={28} height={2} rx={1} fill="#0f1f4d" opacity={0.5} />
+    <path d="M86 6 L86 34 M86 106 L86 134" stroke="white" strokeWidth={1} opacity={0.08} />
+    {/* Case */}
+    <rect x={67} y={34} width={66} height={72} rx={18} fill={`url(#${id}m)`} />
+    <rect x={68.5} y={35.5} width={63} height={69} rx={16.5} fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth={1} />
+    {/* Crown and side button */}
+    <rect x={132} y={54} width={5} height={13} rx={2.5} fill={`url(#${id}cr)`} />
+    {[57, 60, 63].map((y) => (
+      <line key={y} x1={132.5} y1={y} x2={136.5} y2={y} stroke="#15171b" strokeWidth={0.5} />
     ))}
-    <rect x={64} y={32} width={72} height={76} rx={20} fill={`url(#${id}m)`} />
-    <rect x={136} y={56} width={6} height={14} rx={3} fill="#7d838c" />
-    <rect x={136} y={76} width={5} height={8} rx={2.5} fill="#7d838c" />
-    <rect x={70} y={38} width={60} height={64} rx={15} fill={`url(#${id}p)`} />
-    <circle cx={100} cy={70} r={22} fill="none" stroke="#1e293b" strokeWidth={4} />
-    <path d="M100 48 A22 22 0 1 1 79 76" fill="none" stroke="#2f8cff" strokeWidth={4} strokeLinecap="round" />
-    <path d="M100 54 A16 16 0 0 1 114 78" fill="none" stroke="#22c55e" strokeWidth={3.4} strokeLinecap="round" />
-    <text x={100} y={74} textAnchor="middle" fontFamily="Montserrat" fontWeight={800} fontSize={12} fill="white">
+    <rect x={132} y={74} width={3.5} height={16} rx={1.75} fill="#2b2f36" />
+    {/* Glass and display */}
+    <rect x={71} y={38} width={58} height={64} rx={14} fill="#000" />
+    <rect x={74} y={41} width={52} height={58} rx={11.5} fill="#05070b" />
+    {/* Watch face: small complications around the time */}
+    <text x={100} y={62} textAnchor="middle" fontFamily="Montserrat" fontWeight={700} fontSize={4.2} fill="#ff8c42">
+      JUE 13
+    </text>
+    <text x={100} y={75} textAnchor="middle" fontFamily="Montserrat" fontWeight={500} fontSize={11} fill="white" letterSpacing={-0.3}>
       10:09
     </text>
-    <text x={100} y={84} textAnchor="middle" fontFamily="Montserrat" fontWeight={500} fontSize={5} fill="#9fb2cc">
-      8.420 pasos
+    {[
+      { x: 84, c: "#ef4444", p: 0.75 },
+      { x: 100, c: "#22c55e", p: 0.55 },
+      { x: 116, c: "#38bdf8", p: 0.85 },
+    ].map(({ x, c, p }) => (
+      <g key={x}>
+        <circle cx={x} cy={87} r={4.6} fill="none" stroke="#1f2937" strokeWidth={1.6} />
+        <circle
+          cx={x}
+          cy={87}
+          r={4.6}
+          fill="none"
+          stroke={c}
+          strokeWidth={1.6}
+          strokeDasharray={`${2 * Math.PI * 4.6 * p} 100`}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${x} 87)`}
+        />
+      </g>
+    ))}
+    <text x={100} y={52} textAnchor="middle" fontFamily="Montserrat" fontWeight={500} fontSize={3.4} fill="#9aa3b2">
+      8.420 pasos · 72 lpm
     </text>
-    <path d="M74 46 C80 40 90 40 96 42" stroke="white" strokeWidth={2.4} opacity={0.2} fill="none" strokeLinecap="round" />
+    {/* Glass reflection */}
+    <rect x={71} y={38} width={58} height={64} rx={14} fill={`url(#${id}v)`} />
   </svg>
 );
 

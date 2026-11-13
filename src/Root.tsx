@@ -27,7 +27,7 @@ import {
   onboardingSchema,
 } from "./OnboardingApp";
 import { OfertasOpciones } from "./OfertasOpciones";
-import { TIENDA_FRAMES, TiendaAxonia, tiendaSchema } from "./TiendaAxonia";
+import { Reloj, TIENDA_FRAMES, TiendaAxonia, tiendaSchema } from "./TiendaAxonia";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -294,6 +294,19 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        // Still: close-up of the store smartwatch drawing
+        id="RelojTienda"
+        component={() => (
+          <div style={{ width: 800, height: 560, background: "#f6f7fa" }}>
+            <Reloj id="preview" />
+          </div>
+        )}
+        durationInFrames={1}
+        fps={30}
+        width={800}
+        height={560}
       />
     </>
   );
