@@ -144,7 +144,6 @@ const Puesto: React.FC<{ color: string | null; giro?: number; arriba?: boolean }
 const Home: React.FC<{ frame: number }> = ({ frame }) => {
   const { fps } = useVideoConfig();
   const panel = spring({ frame: frame - INICIO_CAMPANA, fps, config: { damping: 16 } });
-  const llamados = Math.round(interpolate(frame, [INICIO_CAMPANA, 150], [0, 186], clamp));
   const tiles: [string, string, string][] = [
     ["Campañas", "Gestión y seguimiento de campañas de llamadas", I_CAMPANA],
     ["Estrategias", "Flujos de contacto y plantillas de mensajes", I_FLUJO],
@@ -210,10 +209,10 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
               </div>
               <div style={{ display: "flex", gap: 14, marginTop: 20 }}>
                 {[
-                  ["Llamados", num(llamados)],
-                  ["En conversación", num(estadoContador(frame, 1))],
-                  ["Llamando", num(estadoContador(frame, 0))],
-                  ["Contactabilidad", pct(interpolate(frame, [INICIO_CAMPANA, 150], [0, 21.3], clamp))],
+                  ["Llamados", num(1248)],
+                  ["En conversación", "15"],
+                  ["Llamando", "8"],
+                  ["Contactabilidad", pct(21.3)],
                 ].map(([k, v]) => (
                   <div key={k} style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 9, padding: "12px 14px" }}>
                     <div style={{ fontSize: 9.5, color: "#d1d5db" }}>{k}</div>
@@ -222,7 +221,7 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
                 ))}
               </div>
               <div style={{ marginTop: 18, height: 8, borderRadius: 4, background: "rgba(255,255,255,0.12)" }}>
-                <div style={{ width: `${interpolate(frame, [INICIO_CAMPANA, 150], [0, 38], clamp)}%`, height: "100%", borderRadius: 4, background: "#3b82f6" }} />
+                <div style={{ width: "38%", height: "100%", borderRadius: 4, background: "#3b82f6" }} />
               </div>
               <div style={{ fontSize: 9.5, color: "#d1d5db", marginTop: 6 }}>Avance de la campaña · 46 agentes virtuales</div>
             </div>
@@ -239,15 +238,6 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
       </div>
     </div>
   );
-};
-const estadoContador = (frame: number, estado: number) => {
-  let n = 0;
-  for (let i = 0; i < 46; i++) {
-    if (estadoAsiento(i, frame) === estado) {
-      n++;
-    }
-  }
-  return n;
 };
 
 // ---------- Flow editor ----------
@@ -826,6 +816,35 @@ const Dashboard: React.FC<{ frame: number }> = ({ frame }) => {
           ],
           32,
         )}
+      </div>
+      <div style={{ position: "absolute", left: 0, right: 0, top: 568, textAlign: "center", fontSize: 12, fontWeight: 700 }}>LLAMADOS POR DÍA</div>
+      <div style={{ position: "absolute", left: 30, right: 30, top: 590, height: 170, background: PANEL, borderRadius: 10, border: `1px solid ${LINEA}`, padding: "14px 18px", boxSizing: "border-box" }}>
+        <div style={{ display: "flex", gap: 16, fontSize: 9.5, color: "#c9d0da", marginBottom: 8 }}>
+          {[
+            ["Llamados", "#5b84b8"],
+            ["Atendidos", "#4f9c7a"],
+          ].map(([t, c]) => (
+            <div key={t} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 9, height: 9, borderRadius: 2, background: c }} />
+              {t}
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 104 }}>
+          {[1820, 2410, 2265, 2630, 2980, 1150, 0, 2540, 2760, 2895, 3120, 2870, 1210, 0].map((v, i) => {
+            const t = sube(frame, f0 + 36 + i * 2, 24);
+            const a = Math.round(v * 0.041);
+            return (
+              <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <div style={{ width: "100%", height: 88, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 3 }}>
+                  <div style={{ width: "45%", height: `${(v / 3200) * 100 * t}%`, background: "#5b84b8", borderRadius: "3px 3px 0 0" }} />
+                  <div style={{ width: "45%", height: `${(a / 3200) * 100 * t * 6}%`, background: "#4f9c7a", borderRadius: "3px 3px 0 0" }} />
+                </div>
+                <div style={{ fontSize: 8.5, color: "#aab3c0" }}>{String(i + 1).padStart(2, "0")}/11</div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
