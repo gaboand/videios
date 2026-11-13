@@ -20,6 +20,7 @@ import {
   ConsolidacionDeudas,
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
+import { SUITE_FRAMES, Suite360, suite360Schema } from "./Suite360";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -219,6 +220,17 @@ export const RemotionRoot: React.FC = () => {
           dispositivo: "notebook" as const,
         }}
         durationInFrames={CONSOLIDACION_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render Suite360
+        id="Suite360"
+        component={Suite360}
+        schema={suite360Schema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={SUITE_FRAMES}
         fps={30}
         width={1920}
         height={1080}
