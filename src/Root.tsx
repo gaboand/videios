@@ -235,6 +235,17 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
       />
+      <Composition
+        // npx remotion render Suite360v
+        id="Suite360v"
+        component={Suite360}
+        schema={suite360Schema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={SUITE_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
     </>
   );
 };

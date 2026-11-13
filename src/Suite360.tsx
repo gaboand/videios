@@ -12,7 +12,7 @@ import "@fontsource/montserrat/800.css";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 
-// Credit management suite 360 (1920x1080, 15s): the modules of the suite
+// Credit management suite 360 (16:9 or 9:16, 16s): the modules of the suite
 // (channels, lead funnel, risk manager, loan marketplace, loan core,
 // collections CRM and contact flow) appear one by one, linked by hand-drawn
 // arrows, while the camera zooms in on each; at the end it pulls back to
@@ -32,57 +32,128 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 export const SUITE_FRAMES = 480;
 
 type Id = "canales" | "funnel" | "riesgo" | "marketplace" | "core" | "crm" | "contact";
-const MODULOS: { id: Id; nombre: string; x: number; y: number; w: number; h: number }[] = [
-  { id: "canales", nombre: "Onboarding", x: 70, y: 250, w: 330, h: 240 },
-  { id: "funnel", nombre: "Lead Funnel", x: 90, y: 660, w: 290, h: 230 },
-  { id: "riesgo", nombre: "Gestor de Riesgo", x: 500, y: 470, w: 400, h: 190 },
-  { id: "marketplace", nombre: "Marketplace de Préstamos", x: 960, y: 120, w: 440, h: 210 },
-  { id: "core", nombre: "Core de Préstamos", x: 960, y: 640, w: 440, h: 250 },
-  { id: "crm", nombre: "CRM de Cobranzas", x: 1480, y: 250, w: 380, h: 240 },
-  { id: "contact", nombre: "Contact Flow", x: 1480, y: 650, w: 380, h: 260 },
-];
+type Modulo = { id: Id; nombre: string; x: number; y: number; w: number; h: number };
+type Escena = {
+  W: number;
+  H: number;
+  mods: Modulo[];
+  // Arrow drawn as each module (from the second on) appears.
+  flechas: { d: string; doble?: boolean }[];
+  general: Cam;
+};
+type Cam = { x: number; y: number; z: number };
 
-// Arrow drawn as each module (from the second on) appears.
-const FLECHAS: { d: string; doble?: boolean }[] = [
-  { d: "M 235 530 L 235 615", doble: true },
-  { d: "M 415 300 Q 700 250 760 455" },
-  { d: "M 860 458 C 870 400 885 345 935 305" },
-  { d: "M 720 690 Q 760 790 940 760" },
-  { d: "M 1408 740 C 1452 700 1428 470 1466 405" },
-  { d: "M 1670 525 L 1670 610", doble: true },
-];
+const NOMBRES: Record<Id, string> = {
+  canales: "Onboarding",
+  funnel: "Lead Funnel",
+  riesgo: "Gestor de Riesgo",
+  marketplace: "Marketplace de Préstamos",
+  core: "Core de Préstamos",
+  crm: "CRM de Cobranzas",
+  contact: "Contact Flow",
+};
+const TAM: Record<Id, [number, number]> = {
+  canales: [330, 240],
+  funnel: [290, 230],
+  riesgo: [400, 190],
+  marketplace: [440, 210],
+  core: [440, 250],
+  crm: [380, 240],
+  contact: [380, 260],
+};
+const ORDEN_MODULOS: Id[] = ["canales", "funnel", "riesgo", "marketplace", "core", "crm", "contact"];
+const ubicar = (pos: Record<Id, [number, number]>): Modulo[] =>
+  ORDEN_MODULOS.map((id) => ({
+    id,
+    nombre: NOMBRES[id],
+    x: pos[id][0],
+    y: pos[id][1],
+    w: TAM[id][0],
+    h: TAM[id][1],
+  }));
+
+// 16:9: the flow left to right, as in the reference slide.
+const HORIZONTAL: Escena = {
+  W: 1920,
+  H: 1080,
+  mods: ubicar({
+    canales: [70, 250],
+    funnel: [90, 660],
+    riesgo: [500, 470],
+    marketplace: [960, 120],
+    core: [960, 640],
+    crm: [1480, 250],
+    contact: [1480, 650],
+  }),
+  flechas: [
+    { d: "M 235 530 L 235 615", doble: true },
+    { d: "M 415 300 Q 700 250 760 455" },
+    { d: "M 860 458 C 870 400 885 345 935 305" },
+    { d: "M 720 690 Q 760 790 940 760" },
+    { d: "M 1408 740 C 1452 700 1428 470 1466 405" },
+    { d: "M 1670 525 L 1670 610", doble: true },
+  ],
+  general: { x: 960, y: 540, z: 1 },
+};
+
+// 9:16: the same flow top to bottom.
+const VERTICAL: Escena = {
+  W: 1080,
+  H: 1920,
+  mods: ubicar({
+    canales: [70, 300],
+    funnel: [710, 305],
+    riesgo: [340, 690],
+    marketplace: [50, 1020],
+    core: [590, 1020],
+    crm: [640, 1410],
+    contact: [60, 1410],
+  }),
+  flechas: [
+    { d: "M 418 422 L 692 422", doble: true },
+    { d: "M 240 556 C 262 640 560 600 612 676" },
+    { d: "M 430 892 C 400 925 452 950 426 1000" },
+    { d: "M 700 892 C 740 968 880 935 900 1003" },
+    { d: "M 950 1282 C 966 1320 934 1352 950 1393" },
+    { d: "M 625 1540 L 457 1540", doble: true },
+  ],
+  general: { x: 540, y: 965, z: 1 },
+};
 
 // Timeline (frames).
 const PRIMERO = 22;
 const PASO = 56;
+const N_MODULOS = ORDEN_MODULOS.length;
 const aparicion = (i: number) => PRIMERO + i * PASO;
-const ULTIMO = aparicion(MODULOS.length - 1);
+const ULTIMO = aparicion(N_MODULOS - 1);
 const ALEJA = ULTIMO + 40;
 const ALEJA_FIN = ALEJA + 48;
 
-type Cam = { x: number; y: number; z: number };
-const camDe = (i: number): Cam => {
-  const m = MODULOS[i];
+const camDe = (e: Escena, i: number): Cam => {
+  const m = e.mods[i];
   return {
     x: m.x + m.w / 2,
     y: m.y + m.h / 2 - 14,
-    z: Math.min((1920 * 0.56) / m.w, (1080 * 0.56) / (m.h + 40), 2.6),
+    z: Math.min(
+      (e.W * (e.W > e.H ? 0.56 : 0.86)) / m.w,
+      (e.H * (e.W > e.H ? 0.56 : 0.42)) / (m.h + 40),
+      2.6,
+    ),
   };
 };
-const GENERAL: Cam = { x: 960, y: 540, z: 1 };
 
-const camara = (frame: number): Cam => {
-  const c0 = camDe(0);
+const camara = (e: Escena, frame: number): Cam => {
+  const c0 = camDe(e, 0);
   const claves: { f: number; c: Cam }[] = [
     { f: 0, c: { ...c0, z: c0.z * 0.8 } },
     { f: aparicion(0) + 40, c: c0 },
   ];
-  for (let i = 1; i < MODULOS.length; i++) {
-    claves.push({ f: aparicion(i) + 4, c: camDe(i) });
-    claves.push({ f: aparicion(i) + 30, c: camDe(i) });
+  for (let i = 1; i < N_MODULOS; i++) {
+    claves.push({ f: aparicion(i) + 4, c: camDe(e, i) });
+    claves.push({ f: aparicion(i) + 30, c: camDe(e, i) });
   }
-  claves.push({ f: ALEJA, c: camDe(MODULOS.length - 1) });
-  claves.push({ f: ALEJA_FIN, c: GENERAL });
+  claves.push({ f: ALEJA, c: camDe(e, N_MODULOS - 1) });
+  claves.push({ f: ALEJA_FIN, c: e.general });
   for (let k = 1; k < claves.length; k++) {
     const a = claves[k - 1];
     const b = claves[k];
@@ -95,13 +166,13 @@ const camara = (frame: number): Cam => {
       let z = Math.exp(Math.log(a.c.z) + (Math.log(b.c.z) - Math.log(a.c.z)) * t);
       // Between two modules the camera pulls back mid-way, so the arrow and
       // both modules stay in view instead of empty background.
-      if (b.c !== GENERAL && (a.c.x !== b.c.x || a.c.y !== b.c.y)) {
+      if (b.c !== e.general && (a.c.x !== b.c.x || a.c.y !== b.c.y)) {
         z *= 1 - 0.42 * Math.sin(Math.PI * t);
       }
       return { x: a.c.x + (b.c.x - a.c.x) * t, y: a.c.y + (b.c.y - a.c.y) * t, z };
     }
   }
-  return GENERAL;
+  return e.general;
 };
 
 const progreso = (frame: number, desde: number, i: number, paso = 2, dur = 8) =>
@@ -910,11 +981,12 @@ const CONTENIDO: Record<Id, React.FC<{ t: number }>> = {
 
 export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, paleta }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const cam = camara(frame);
+  const { fps, width, height } = useVideoConfig();
+  const e = height > width ? VERTICAL : HORIZONTAL;
+  const cam = camara(e, frame);
   const general = interpolate(frame, [ALEJA, ALEJA_FIN], [0, 1], clamp);
   const actual = Math.min(
-    MODULOS.length - 1,
+    N_MODULOS - 1,
     Math.max(0, Math.floor((frame - PRIMERO + 10) / PASO)),
   );
 
@@ -926,20 +998,20 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
           position: "absolute",
           left: 0,
           top: 0,
-          width: 1920,
-          height: 1080,
+          width: e.W,
+          height: e.H,
           transformOrigin: "0 0",
-          transform: `translate(960px, 540px) scale(${cam.z}) translate(${-cam.x}px, ${-cam.y}px)`,
+          transform: `translate(${e.W / 2}px, ${e.H / 2}px) scale(${cam.z}) translate(${-cam.x}px, ${-cam.y}px)`,
         }}
       >
         {/* Arrows */}
-        <svg width={1920} height={1080} style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+        <svg width={e.W} height={e.H} style={{ position: "absolute", inset: 0, overflow: "visible" }}>
           <defs>
             <marker id="punta" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="white" />
             </marker>
           </defs>
-          {FLECHAS.map((f, i) => {
+          {e.flechas.map((f, i) => {
             const desde = aparicion(i + 1) - 22;
             const p = interpolate(frame, [desde, desde + 20], [0, 1], {
               ...clamp,
@@ -974,7 +1046,7 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
           })}
         </svg>
         {/* Modules */}
-        {MODULOS.map((m, i) => {
+        {e.mods.map((m, i) => {
           const t = frame - aparicion(i);
           const s = spring({ frame: t, fps, config: { damping: 15, stiffness: 110 } });
           if (s <= 0.001) {
