@@ -14,6 +14,7 @@ import { PlanPagos, planPagosSchema } from "./PlanPagos";
 import { WorkflowAxonia, workflowSchema } from "./WorkflowAxonia";
 import { ModulosAxonia, modulosSchema } from "./ModulosAxonia";
 import { Transicion, transicionSchema } from "./Transicion";
+import { SegmentacionApp, segmentacionAppSchema } from "./SegmentacionApp";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -153,6 +154,36 @@ export const RemotionRoot: React.FC = () => {
         schema={planPagosSchema}
         defaultProps={{ fondo: "geometrico", paleta: "gris" }}
         durationInFrames={270}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render SegmentacionApp
+        id="SegmentacionApp"
+        component={SegmentacionApp}
+        schema={segmentacionAppSchema}
+        defaultProps={{
+          fondo: "ondas",
+          paleta: "gris",
+          dispositivo: "notebook" as const,
+        }}
+        durationInFrames={360}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render SegmentacionApp169
+        id="SegmentacionApp169"
+        component={SegmentacionApp}
+        schema={segmentacionAppSchema}
+        defaultProps={{
+          fondo: "ondas",
+          paleta: "gris",
+          dispositivo: "notebook" as const,
+        }}
+        durationInFrames={360}
         fps={30}
         width={1920}
         height={1080}
