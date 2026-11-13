@@ -27,6 +27,7 @@ import {
   onboardingSchema,
 } from "./OnboardingApp";
 import { OfertasOpciones } from "./OfertasOpciones";
+import { CONTACTFLOW_FRAMES, ContactFlow, contactFlowSchema } from "./ContactFlow";
 import { BACKOFFICE_FRAMES, BackOffice, BackOfficeMovil, backOfficeSchema } from "./BackOffice";
 import { Reloj, TIENDA_FRAMES, TiendaAxonia, TiendaMovil, tiendaSchema } from "./TiendaAxonia";
 
@@ -341,6 +342,17 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      <Composition
+        // npx remotion render ContactFlow
+        id="ContactFlow"
+        component={ContactFlow}
+        schema={contactFlowSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={CONTACTFLOW_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
       />
     </>
   );
