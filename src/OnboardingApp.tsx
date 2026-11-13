@@ -41,7 +41,6 @@ const TINTA_2 = "#6b7280";
 const BORDE = "#dfe3ea";
 const AZUL = "#4a8bc2";
 const AZUL_OSCURO = "#2c5a8c";
-const NAVY = "#14284b";
 const VERDE = "#1e8a4c";
 const W = 390;
 const H = 844;
@@ -311,7 +310,8 @@ const Campo: React.FC<{
   cursor?: boolean;
   select?: boolean;
   gris?: boolean;
-}> = ({ etiqueta, valor, y, x = 30, w = 330, activo, cursor, select, gris }) => (
+  colorActivo?: string;
+}> = ({ etiqueta, valor, y, x = 30, w = 330, activo, cursor, select, gris, colorActivo = "#7aa7d6" }) => (
   <>
     <div
       style={{
@@ -334,7 +334,7 @@ const Campo: React.FC<{
         width: w,
         height: 42,
         boxSizing: "border-box",
-        border: `1.5px solid ${activo ? "#7aa7d6" : BORDE}`,
+        border: `1.5px solid ${activo ? colorActivo : BORDE}`,
         borderRadius: 7,
         display: "flex",
         alignItems: "center",
@@ -415,7 +415,7 @@ const Titulo: React.FC<{ y: number; children: React.ReactNode; s?: number; c?: s
   </div>
 );
 
-const Pasos: React.FC<{ actual: number }> = ({ actual }) => (
+const Pasos: React.FC<{ actual: number; color?: string }> = ({ actual, color = AZUL }) => (
   <div
     style={{
       position: "absolute",
@@ -434,14 +434,14 @@ const Pasos: React.FC<{ actual: number }> = ({ actual }) => (
           width: 20,
           height: 20,
           borderRadius: 5,
-          background: i + 1 <= actual ? AZUL : "#8a929e",
+          background: i + 1 <= actual ? color : "#8a929e",
           color: "white",
           fontSize: 11,
           fontWeight: 700,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: i + 1 === actual ? "0 0 0 3px rgba(74,139,194,0.3)" : "none",
+          boxShadow: i + 1 === actual ? `0 0 0 3px color-mix(in srgb, ${color} 30%, transparent)` : "none",
         }}
       >
         {i + 1}
@@ -458,6 +458,99 @@ const Bajo: React.FC<{ dy: number; children: React.ReactNode }> = ({ dy, childre
 };
 const DY = { datos: 62, ofertas: 19, email: 51, identidad: 73, whatsapp: 61, resumen: 0, firma: 18, final: 33 };
 
+// White-label demo during the data form: the app starts as Axonia, then
+// turns into a red "Tu Logo" brand and then a green "Tu Comercio" one, and
+// goes back to Axonia behind the offer-search spinner.
+type Marca = { header: string; primario: string; claro: string; borde: string; seleccion: string };
+const MARCAS: Marca[] = [
+  { header: "#4a4a4a", primario: "#4a8bc2", claro: "#eaf2fb", borde: "#14284b", seleccion: "#2f6fe0" },
+  { header: "#9e1c1c", primario: "#d63a3a", claro: "#fdecec", borde: "#9e1c1c", seleccion: "#d63a3a" },
+  { header: "#17633a", primario: "#2e9e4a", claro: "#e8f6ee", borde: "#17633a", seleccion: "#2e9e4a" },
+];
+const CAMBIO_MARCA: [number, number, number][] = [
+  // [from, to, start frame]
+  [0, 1, 34],
+  [1, 2, 74],
+  [2, 0, 146],
+];
+const DURA_CAMBIO = 8;
+// Weight of each brand at a frame (at most two are non-zero).
+const pesosMarca = (frame: number) => {
+  const w = [1, 0, 0];
+  let actual = 0;
+  for (const [de, a, f] of CAMBIO_MARCA) {
+    if (frame < f) {
+      break;
+    }
+    const t = interpolate(frame, [f, f + DURA_CAMBIO], [0, 1], clamp);
+    w[0] = w[1] = w[2] = 0;
+    w[de] = 1 - t;
+    w[a] = t;
+    actual = a;
+  }
+  return { w, actual };
+};
+const colorMarca = (frame: number, k: keyof Marca) => {
+  const { w } = pesosMarca(frame);
+  const activos = w.map((v, i) => [v, i] as const).filter(([v]) => v > 0);
+  if (activos.length === 1) {
+    return MARCAS[activos[0][1]][k];
+  }
+  const [[va, ia], [, ib]] = activos;
+  return `color-mix(in srgb, ${MARCAS[ia][k]} ${(va * 100).toFixed(1)}%, ${MARCAS[ib][k]})`;
+};
+
+// Generic brand logos. `claro`: white lettering for the dark header.
+const LogoTuLogo: React.FC<{ w: number; claro?: boolean }> = ({ w, claro }) => (
+  <svg width={w} height={w * 0.34} viewBox="0 0 150 51">
+    <circle cx={25} cy={25.5} r={20} fill={claro ? "white" : "#d63a3a"} />
+    <path d="M15 31 C19 18 31 16 35 22 C30 20 24 23 21 33 Z" fill={claro ? "#9e1c1c" : "white"} />
+    <circle cx={32} cy={32} r={4} fill={claro ? "#9e1c1c" : "white"} />
+    <text x={52} y={34} fontFamily="Montserrat, sans-serif" fontWeight={800} fontSize={22} fill={claro ? "white" : "#9e1c1c"}>
+      Tu Logo
+    </text>
+  </svg>
+);
+const LogoTuComercio: React.FC<{ w: number; claro?: boolean }> = ({ w, claro }) => (
+  <svg width={w} height={w * 0.34} viewBox="0 0 150 51">
+    <rect x={6} y={14} width={34} height={28} rx={5} fill={claro ? "white" : "#2e9e4a"} />
+    <path d="M15 16 C15 7 31 7 31 16" fill="none" stroke={claro ? "white" : "#2e9e4a"} strokeWidth={3.4} strokeLinecap="round" />
+    <path d="M15 25 L21 31 L31 21" fill="none" stroke={claro ? "#17633a" : "white"} strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" />
+    <text x={46} y={26} fontFamily="Montserrat, sans-serif" fontWeight={500} fontSize={13} fill={claro ? "rgba(255,255,255,0.85)" : "#4b5563"}>
+      Tu
+    </text>
+    <text x={46} y={42} fontFamily="Montserrat, sans-serif" fontWeight={800} fontSize={19} fill={claro ? "white" : "#17633a"}>
+      Comercio
+    </text>
+  </svg>
+);
+// Logo of the current brand, cross-fading between brands.
+const LogoMarca: React.FC<{ frame: number; w: number; claro?: boolean }> = ({ frame, w, claro }) => {
+  const { w: pw } = pesosMarca(frame);
+  const h = w * 0.34;
+  return (
+    <div style={{ position: "relative", width: w, height: h }}>
+      {pw.map((v, i) =>
+        v > 0.001 ? (
+          <div key={i} style={{ position: "absolute", left: 0, top: 0, width: w, height: h, opacity: v }}>
+            {i === 0 ? (
+              claro ? (
+                <Logo w={w} />
+              ) : (
+                <Img src={staticFile("axonia-logo-original.png")} style={{ width: w, height: (w * 231) / 676 }} />
+              )
+            ) : i === 1 ? (
+              <LogoTuLogo w={w} claro={claro} />
+            ) : (
+              <LogoTuComercio w={w} claro={claro} />
+            )}
+          </div>
+        ) : null,
+      )}
+    </div>
+  );
+};
+
 const Datos: React.FC<{ frame: number }> = ({ frame }) => {
   const t = useContext(Tab);
   const { fps } = useVideoConfig();
@@ -466,9 +559,11 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
   const producto = frame >= TAP_CONSUMO + 2 ? "CONSUMO" : "ELEGÍ UN PRODUCTO";
   const buscandoBoton = frame >= TAP_CONSULTAR + 2 && frame < IDENTIFICADO;
   const enCampo = (r: readonly number[]) => frame >= r[0] - 4 && frame <= r[1] + 4;
+  const primario = colorMarca(frame, "primario");
+  const activo = `color-mix(in srgb, ${primario} 65%, white)`;
   return (
     <>
-      <Pasos actual={1} />
+      <Pasos actual={1} color={primario} />
       <Titulo y={194}>Ingresar los datos *</Titulo>
       <div style={{ position: "absolute", top: 222, width: "100%", textAlign: "center", fontSize: 11, color: TINTA }}>
         *Todos los campos son obligatorios.
@@ -486,7 +581,7 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
           boxShadow: "0 4px 14px rgba(20,30,50,0.06)",
         }}
       />
-      <Campo etiqueta="DNI" valor={tipeo(frame, "2845678", TIPEO_DNI)} y={270} x={t ? -235 : undefined} w={t ? 300 : undefined} activo={enCampo(TIPEO_DNI)} cursor={enCampo(TIPEO_DNI) && Math.floor(frame / 8) % 2 === 0} gris={ident > 0.5} />
+      <Campo etiqueta="DNI" valor={tipeo(frame, "2845678", TIPEO_DNI)} y={270} x={t ? -235 : undefined} w={t ? 300 : undefined} colorActivo={activo} activo={enCampo(TIPEO_DNI)} cursor={enCampo(TIPEO_DNI) && Math.floor(frame / 8) % 2 === 0} gris={ident > 0.5} />
       <Campo etiqueta="GÉNERO" valor="MASCULINO" y={t ? 270 : 340} x={t ? 80 : undefined} w={t ? 300 : undefined} select gris={ident > 0.5} />
       {/* Consultar turns into the identified client card */}
       <Boton
@@ -496,6 +591,7 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
         h={t ? 42 : undefined}
         texto={buscandoBoton ? <Spinner size={20} frame={frame} claro /> : "Consultar"}
         press={pulsado(frame, TAP_CONSULTAR)}
+        color={primario}
         opacity={t ? 1 : 1 - ident}
       />
       {ident > 0.01 ? (
@@ -508,8 +604,8 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
               width: t ? 860 : 330,
               height: 60,
               borderRadius: 8,
-              background: "#eaf2fb",
-              borderLeft: `4px solid ${NAVY}`,
+              background: colorMarca(frame, "claro"),
+              borderLeft: `4px solid ${colorMarca(frame, "borde")}`,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -518,14 +614,14 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
               transform: `scale(${0.9 + ident * 0.1})`,
             }}
           >
-            <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: 1, color: NAVY }}>CLIENTE IDENTIFICADO</div>
+            <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: 1, color: colorMarca(frame, "borde") }}>CLIENTE IDENTIFICADO</div>
             <div style={{ fontSize: 17, fontWeight: 800, color: TINTA, marginTop: 3 }}>JAVIER PEREZ</div>
           </div>
           <div style={{ opacity: ident }}>
-            <Campo etiqueta="TELÉFONO" valor={tipeo(frame, "11 5555-0123", TIPEO_TEL)} y={t ? 430 : 488} x={t ? -235 : undefined} w={t ? 210 : undefined} activo={enCampo(TIPEO_TEL)} />
-            <Campo etiqueta="EMAIL" valor={tipeo(frame, "JPEREZ@MAIL.COM", TIPEO_MAIL)} y={t ? 430 : 558} x={t ? -10 : undefined} w={t ? 210 : undefined} activo={enCampo(TIPEO_MAIL)} />
-            <Campo etiqueta="PRODUCTO" valor={producto} y={t ? 430 : 628} x={t ? 215 : undefined} w={t ? 210 : undefined} select activo={abierto} gris={producto !== "CONSUMO"} />
-            <Boton y={t ? 446 : 712} x={t ? 440 : undefined} w={t ? 185 : undefined} h={t ? 42 : undefined} texto="Continuar" press={pulsado(frame, TAP_CONTINUAR)} opacity={frame >= TAP_CONSUMO + 2 ? 1 : 0.45} />
+            <Campo etiqueta="TELÉFONO" valor={tipeo(frame, "11 5555-0123", TIPEO_TEL)} y={t ? 430 : 488} x={t ? -235 : undefined} w={t ? 210 : undefined} colorActivo={activo} activo={enCampo(TIPEO_TEL)} />
+            <Campo etiqueta="EMAIL" valor={tipeo(frame, "JPEREZ@MAIL.COM", TIPEO_MAIL)} y={t ? 430 : 558} x={t ? -10 : undefined} w={t ? 210 : undefined} colorActivo={activo} activo={enCampo(TIPEO_MAIL)} />
+            <Campo etiqueta="PRODUCTO" valor={producto} y={t ? 430 : 628} x={t ? 215 : undefined} w={t ? 210 : undefined} select colorActivo={activo} activo={abierto} gris={producto !== "CONSUMO"} />
+            <Boton y={t ? 446 : 712} x={t ? 440 : undefined} w={t ? 185 : undefined} h={t ? 42 : undefined} texto="Continuar" color={primario} press={pulsado(frame, TAP_CONTINUAR)} opacity={frame >= TAP_CONSUMO + 2 ? 1 : 0.45} />
           </div>
         </>
       ) : null}
@@ -556,7 +652,7 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
                   justifyContent: "center",
                   fontSize: 12,
                   color: sel ? "white" : i === 0 ? "#8a929e" : TINTA,
-                  background: sel ? "#2f6fe0" : "white",
+                  background: sel ? colorMarca(frame, "seleccion") : "white",
                 }}
               >
                 {o}
@@ -1351,7 +1447,7 @@ const App: React.FC<{ frame: number; tablet?: boolean }> = ({ frame, tablet = fa
   return (
     <Tab.Provider value={tablet}>
       {/* Dark base so no light edge shows above the header */}
-      <div style={{ position: "relative", width: PW, height: PH, background: "#4a4a4a", fontFamily: FUENTE, overflow: "hidden" }}>
+      <div style={{ position: "relative", width: PW, height: PH, background: colorMarca(frame, "header"), fontFamily: FUENTE, overflow: "hidden" }}>
         <div style={{ position: "absolute", left: 0, top: HEADER, width: PW, height: PH - HEADER, background: "#f4f6f9" }} />
         {/* Header */}
         <div
@@ -1361,7 +1457,7 @@ const App: React.FC<{ frame: number; tablet?: boolean }> = ({ frame, tablet = fa
             top: 0,
             width: PW,
             height: HEADER,
-            background: "#4a4a4a",
+            background: colorMarca(frame, "header"),
             display: "flex",
             alignItems: "center",
             paddingTop: tablet ? 0 : 30,
@@ -1369,7 +1465,7 @@ const App: React.FC<{ frame: number; tablet?: boolean }> = ({ frame, tablet = fa
           }}
         >
           <div style={{ marginLeft: tablet ? 24 : 16 }}>
-            <Logo w={tablet ? 110 : 92} />
+            <LogoMarca frame={frame} w={tablet ? 110 : 92} claro />
           </div>
           <div style={{ flex: 1 }} />
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: tablet ? 26 : 16 }}>
@@ -1393,10 +1489,9 @@ const App: React.FC<{ frame: number; tablet?: boolean }> = ({ frame, tablet = fa
         <div style={{ position: "absolute", left: ox, top: oy, width: W, height: H }}>
           <div style={{ position: "absolute", top: 100, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
             {/* Dark-lettered logo for the white page */}
-            <Img
-              src={staticFile("axonia-logo-original.png")}
-              style={{ width: 150, height: (150 * 231) / 676, opacity: interpolate(frame, [ESC.contrato[0], ESC.contrato[0] + 6], [1, 0], clamp) }}
-            />
+            <div style={{ opacity: interpolate(frame, [ESC.contrato[0], ESC.contrato[0] + 6], [1, 0], clamp) }}>
+              <LogoMarca frame={frame} w={150} />
+            </div>
           </div>
           {escenas.map(([e, C]) => {
             const v = vis(e);
