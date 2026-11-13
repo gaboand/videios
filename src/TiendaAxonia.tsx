@@ -65,7 +65,10 @@ const pesos = (n: number) => `$${n.toLocaleString("es-AR")}`;
 const pulsado = (frame: number, f: number) => interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
 
 // ---------- Products, drawn in a 200 x 140 box ----------
-type Producto = React.FC<{ id: string }>;
+// How a product photo is staged: phones use every option, other products
+// ignore it.
+type Vista = "par" | "frente" | "dorso" | "caja" | "solo" | "trio" | "lado";
+type Producto = React.FC<{ id: string; vista?: Vista }>;
 
 const Sombra: React.FC<{ cx?: number; rx?: number; y?: number }> = ({ cx = 100, rx = 70, y = 128 }) => (
   <ellipse cx={cx} cy={y} rx={rx} ry={6} fill="#0b1220" opacity={0.18} />
@@ -221,6 +224,8 @@ const Lampara: Producto = ({ id }) => (
 // Phones: front and back of each model, drawn from a few parameters.
 type Modelo = {
   cuerpo: [string, string];
+  // Other colors, for the "trio" photo.
+  variantes?: [string, string][];
   modulo: "triple" | "doble" | "vertical" | "pastilla" | "circulo" | "simple" | "diagonal" | "cuadrado";
   pantalla: [string, string];
 };
@@ -355,41 +360,103 @@ const Frente: React.FC<{ m: Modelo; id: string }> = ({ m, id }) => (
     </text>
   </g>
 );
-type Vista = "par" | "frente" | "dorso";
 const telefono = (m: Modelo) => {
-  const T: React.FC<{ id: string; vista?: Vista }> = ({ id, vista = "par" }) => (
-    <svg viewBox="0 0 200 140" width="100%" height="100%">
-      <Sombra rx={vista === "par" ? 56 : 34} y={132} />
-      {vista === "par" ? (
-        <>
-          <g transform="translate(58 10) rotate(-8 28 58)">
+  const T: Producto = ({ id, vista = "par" }) => {
+    let foto: React.ReactNode;
+    switch (vista) {
+      case "par":
+        foto = (
+          <>
+            <g transform="translate(58 10) rotate(-8 28 58)">
+              <Dorso m={m} id={`${id}d`} />
+            </g>
+            <g transform="translate(92 14) rotate(6 28 58)">
+              <Frente m={m} id={`${id}f`} />
+            </g>
+          </>
+        );
+        break;
+      case "caja": {
+        // Retail box behind, phone standing in front of it.
+        foto = (
+          <>
+            <defs>
+              <linearGradient id={`${id}k`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#ffffff" />
+                <stop offset="1" stopColor="#dfe4ec" />
+              </linearGradient>
+            </defs>
+            <path d="M44 18 L116 18 L124 12 L52 12 Z" fill="#c9d0da" />
+            <path d="M116 18 L124 12 L124 118 L116 126 Z" fill="#b3bbc7" />
+            <rect x={44} y={18} width={72} height={108} rx={3} fill={`url(#${id}k)`} stroke="#c3cad5" />
+            <g transform="translate(64 32) scale(0.55)">
+              <Frente m={m} id={`${id}kf`} />
+            </g>
+            <rect x={56} y={104} width={48} height={4} rx={2} fill={m.cuerpo[1]} opacity={0.8} />
+            <rect x={66} y={112} width={28} height={3} rx={1.5} fill="#9aa3b2" />
+            <g transform="translate(110 22) rotate(4 28 58) scale(0.92)">
+              <Dorso m={m} id={`${id}d`} />
+            </g>
+          </>
+        );
+        break;
+      }
+      case "solo":
+        foto = (
+          <g transform="translate(72 12) rotate(-14 28 58)">
             <Dorso m={m} id={`${id}d`} />
           </g>
-          <g transform="translate(92 14) rotate(6 28 58)">
-            <Frente m={m} id={`${id}f`} />
-          </g>
-        </>
-      ) : (
-        <g transform="translate(72 10)">{vista === "dorso" ? <Dorso m={m} id={`${id}d`} /> : <Frente m={m} id={`${id}f`} />}</g>
-      )}
-    </svg>
-  );
+        );
+        break;
+      case "trio": {
+        const colores = [m.variantes?.[0] ?? m.cuerpo, m.cuerpo, m.variantes?.[1] ?? m.cuerpo];
+        foto = (
+          <>
+            {colores.map((c, i) => (
+              <g key={i} transform={`translate(${38 + i * 34} ${i === 1 ? 8 : 16}) rotate(${(i - 1) * 12} 28 58) scale(${i === 1 ? 1 : 0.9})`}>
+                <Dorso m={{ ...m, cuerpo: c }} id={`${id}t${i}`} />
+              </g>
+            ))}
+          </>
+        );
+        break;
+      }
+      case "lado":
+        foto = (
+          <>
+            <g transform="translate(66 12) skewY(-8) scale(0.9 1)">
+              <Dorso m={m} id={`${id}d`} />
+            </g>
+            <rect x={116} y={4} width={6} height={112} rx={3} fill={m.cuerpo[1]} transform="skewY(-8)" opacity={0.9} />
+          </>
+        );
+        break;
+      default:
+        foto = <g transform="translate(72 10)">{vista === "dorso" ? <Dorso m={m} id={`${id}d`} /> : <Frente m={m} id={`${id}f`} />}</g>;
+    }
+    return (
+      <svg viewBox="0 0 200 140" width="100%" height="100%">
+        <Sombra rx={vista === "par" || vista === "caja" || vista === "trio" ? 62 : 34} y={132} />
+        {foto}
+      </svg>
+    );
+  };
   return T;
 };
 const MODELOS: Record<string, Modelo> = {
   novaPro: { cuerpo: ["#c9ccd1", "#7d828a"], modulo: "triple", pantalla: ["#1e3a8a", "#7c3aed"] },
   nova: { cuerpo: ["#3b4f7a", "#141f3b"], modulo: "doble", pantalla: ["#0ea5e9", "#1e3a8a"] },
   lumenUltra: { cuerpo: ["#3a3d44", "#0d0e11"], modulo: "vertical", pantalla: ["#fb923c", "#be123c"] },
-  lumen: { cuerpo: ["#b8ead6", "#5fbf9a"], modulo: "pastilla", pantalla: ["#34d399", "#0f766e"] },
+  lumen: { cuerpo: ["#b8ead6", "#5fbf9a"], modulo: "pastilla", pantalla: ["#34d399", "#0f766e"], variantes: [["#fde2e4", "#e8a0a8"], ["#e0e7ff", "#8b9cf0"]] },
   pulseEdge: { cuerpo: ["#ef4444", "#7f1d1d"], modulo: "circulo", pantalla: ["#f43f5e", "#4c1d95"] },
   pulseLite: { cuerpo: ["#ffffff", "#d3d8e0"], modulo: "simple", pantalla: ["#93c5fd", "#6366f1"] },
-  orbit: { cuerpo: ["#d8c8f5", "#8b6fd6"], modulo: "diagonal", pantalla: ["#c084fc", "#1d4ed8"] },
+  orbit: { cuerpo: ["#d8c8f5", "#8b6fd6"], modulo: "diagonal", pantalla: ["#c084fc", "#1d4ed8"], variantes: [["#3a3d44", "#0d0e11"], ["#fef3c7", "#d9b45a"]] },
   zeta: { cuerpo: ["#f3dfa7", "#b98b32"], modulo: "cuadrado", pantalla: ["#fde68a", "#b45309"] },
 };
 const Celular = telefono(MODELOS.novaPro);
 const LumenUltra = telefono(MODELOS.lumenUltra);
 
-type ItemTienda = { nombre: string; marca: string; precio: number; P: Producto };
+type ItemTienda = { nombre: string; marca: string; precio: number; P: Producto; vista?: Vista };
 const DESTACADOS: ItemTienda[] = [
   { nombre: "Cartera Classic", marca: "Urbana", precio: 74900, P: Cartera },
   { nombre: "Zapatillas Urban", marca: "Street", precio: 59900, P: Zapatilla },
@@ -399,13 +466,13 @@ const DESTACADOS: ItemTienda[] = [
 ];
 const CELULARES: ItemTienda[] = [
   { nombre: "Nova X12 Pro", marca: "Nova", precio: 1249900, P: Celular },
-  { nombre: "Nova X12", marca: "Nova", precio: 899900, P: telefono(MODELOS.nova) },
-  { nombre: "Lumen A5", marca: "Lumen", precio: 349900, P: telefono(MODELOS.lumen) },
-  { nombre: "Pulse Edge 5G", marca: "Pulse", precio: 729900, P: telefono(MODELOS.pulseEdge) },
-  { nombre: "Pulse Lite", marca: "Pulse", precio: 285000, P: telefono(MODELOS.pulseLite) },
+  { nombre: "Nova X12", marca: "Nova", precio: 899900, P: telefono(MODELOS.nova), vista: "caja" },
+  { nombre: "Lumen A5", marca: "Lumen", precio: 349900, P: telefono(MODELOS.lumen), vista: "trio" },
+  { nombre: "Pulse Edge 5G", marca: "Pulse", precio: 729900, P: telefono(MODELOS.pulseEdge), vista: "solo" },
+  { nombre: "Pulse Lite", marca: "Pulse", precio: 285000, P: telefono(MODELOS.pulseLite), vista: "frente" },
   { nombre: "Lumen S9 Ultra", marca: "Lumen", precio: 1149900, P: LumenUltra },
-  { nombre: "Orbit Flex", marca: "Orbit", precio: 539900, P: telefono(MODELOS.orbit) },
-  { nombre: "Zeta Max", marca: "Zeta", precio: 989900, P: telefono(MODELOS.zeta) },
+  { nombre: "Orbit Flex", marca: "Orbit", precio: 539900, P: telefono(MODELOS.orbit), vista: "trio" },
+  { nombre: "Zeta Max", marca: "Zeta", precio: 989900, P: telefono(MODELOS.zeta), vista: "caja" },
 ];
 const CATEGORIAS: [string, Producto][] = [
   ["Calzado", Zapatilla],
@@ -533,7 +600,7 @@ const CardProducto: React.FC<{ it: ItemTienda; id: string; w: number; h: number;
       <Icono d={I_CORAZON} s={13} c={TINTA_2} />
     </div>
     <div style={{ flex: 1, background: "#f6f7fa", borderRadius: 8, padding: "6px 10px" }}>
-      <it.P id={id} />
+      <it.P id={id} vista={it.vista} />
     </div>
     <div style={{ fontSize: 12, fontWeight: 800, color: TINTA, marginTop: 9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.nombre}</div>
     <div style={{ fontSize: 10, color: TINTA_2, marginTop: 1 }}>{it.marca}</div>
@@ -790,7 +857,7 @@ const ProductoPagina: React.FC<{ frame: number }> = ({ frame }) => {
 
 const VISTAS: Vista[] = ["par", "dorso", "frente"];
 const PEDIDO = [
-  { nombre: "Lumen S9 Ultra", precio: 1149900, P: LumenUltra as Producto },
+  { nombre: "Lumen S9 Ultra", precio: 1149900, P: LumenUltra },
   { nombre: "Anteojos de Sol", precio: 29900, P: Anteojos },
 ];
 const TOTAL = PEDIDO.reduce((a, p) => a + p.precio, 0);
