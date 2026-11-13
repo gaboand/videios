@@ -1258,18 +1258,6 @@ const Contrato: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
-const TITULOS: Record<Escena, string> = {
-  datos: "CARGAR DATOS",
-  buscando: "CARGAR DATOS",
-  ofertas: "OFERTAS DISPONIBLES",
-  email: "VALIDACIÓN DE EMAIL",
-  identidad: "VERIFICACIÓN DE IDENTIDAD",
-  whatsapp: "VERIFICACIÓN TELEFÓNICA",
-  resumen: "TÉRMINOS Y CONDICIONES",
-  firma: "FIRMA DIGITAL",
-  final: "ONBOARDING COMPLETO",
-  contrato: "CONTRATO",
-};
 
 const LOGO_W = 2028;
 const LOGO_H = 693;
@@ -1280,9 +1268,6 @@ const Logo: React.FC<{ w: number }> = ({ w }) => (
     ))}
   </div>
 );
-
-const escenaActual = (frame: number) =>
-  (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "datos";
 
 // Finger/cursor visibility: hidden while the offer search runs and once the
 // contract is open.
@@ -1354,7 +1339,6 @@ const App: React.FC<{ frame: number; tablet?: boolean }> = ({ frame, tablet = fa
     ["final", Final],
     ["contrato", Contrato],
   ];
-  const actual = escenaActual(frame);
   // Column offset: in tablet mode the 390-wide column sits centered.
   const ox = tablet ? TAB.ox : 0;
   const oy = tablet ? TAB.oy : 0;
@@ -1386,9 +1370,6 @@ const App: React.FC<{ frame: number; tablet?: boolean }> = ({ frame, tablet = fa
         >
           <div style={{ marginLeft: tablet ? 24 : 16 }}>
             <Logo w={tablet ? 110 : 92} />
-          </div>
-          <div style={{ position: "absolute", left: 0, right: 0, bottom: tablet ? 0 : 0, top: tablet ? 0 : 30, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: tablet ? 13 : 10.5, fontWeight: 700, letterSpacing: 0.8 }}>
-            {TITULOS[actual]}
           </div>
           <div style={{ flex: 1 }} />
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: tablet ? 26 : 16 }}>
