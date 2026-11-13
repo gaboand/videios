@@ -1051,3 +1051,601 @@ export const ContactFlow: React.FC<z.infer<typeof contactFlowSchema>> = ({ fondo
     </AbsoluteFill>
   );
 };
+
+// ---------- 9:16 version: the same Contact Flow as a mobile app on a phone ----------
+const MW = 390;
+const MH = 844;
+const M_HEADER = 92;
+const M_TABS = 64;
+const MC = M_HEADER; // content top
+const TABS_MOVIL: [string, string, Escena[]][] = [
+  ["Inicio", SIDE_ICONOS[0], ["home"]],
+  ["Estrategias", I_FLUJO, ["flujo", "plantillas"]],
+  ["Campañas", I_CAMPANA, ["campana"]],
+  ["Reportes", I_REPORTE, ["segmentacion", "franja"]],
+  ["Dashboard", SIDE_ICONOS[4], ["dashboard"]],
+];
+const tabX = (i: number) => (MW / 5) * i + MW / 10;
+
+const Segmentado: React.FC<{ a: string; b: string; activo: 0 | 1; press?: number }> = ({ a, b, activo, press = 0 }) => (
+  <div style={{ position: "absolute", left: 12, right: 12, top: 12, height: 34, background: "#e2e6ec", borderRadius: 9, display: "flex", padding: 3, boxSizing: "border-box" }}>
+    {[a, b].map((t, i) => (
+      <div key={t} style={{ flex: 1, borderRadius: 7, background: i === activo ? "white" : "transparent", boxShadow: i === activo ? "0 1px 4px rgba(20,30,50,0.12)" : "none", fontSize: 11.5, fontWeight: 700, color: i === activo ? TINTA : TINTA_2, display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${i === 1 ? 1 - press * 0.05 : 1})` }}>
+        {t}
+      </div>
+    ))}
+  </div>
+);
+const Contenido: React.FC<{ fondo?: string; children: React.ReactNode }> = ({ fondo = "#eef1f5", children }) => (
+  <div style={{ position: "absolute", left: 0, top: MC, width: MW, height: MH - MC - M_TABS, background: fondo, overflow: "hidden" }}>{children}</div>
+);
+
+const HomeMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const tiles: [string, string][] = [
+    ["Campañas", I_CAMPANA],
+    ["Estrategias", I_FLUJO],
+    ["Reportes", I_REPORTE],
+    ["Sistemas", I_SISTEMA],
+  ];
+  return (
+    <Contenido>
+      <div style={{ position: "absolute", left: 14, top: 12, fontSize: 18, fontWeight: 800, color: TINTA, borderLeft: `3px solid ${TINTA}`, paddingLeft: 8 }}>Contact Flow</div>
+      <div style={{ position: "absolute", left: 12, top: 48, display: "grid", gridTemplateColumns: "175px 175px", gap: 8 }}>
+        {tiles.map(([t, ic], i) => (
+          <div key={t} style={{ height: 60, background: "white", borderRadius: 10, display: "flex", alignItems: "center", gap: 10, padding: "0 12px", boxShadow: "0 2px 6px rgba(20,30,50,0.06)", transform: `scale(${i === 1 ? 1 - pulsado(frame, TAP_ESTRATEGIAS) * 0.05 : 1})` }}>
+            <div style={{ width: 30, height: 30, borderRadius: 7, background: NAVY, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icono d={ic} s={16} />
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: TINTA }}>{t}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 186, height: 408, background: "#6b7280", borderRadius: 14 }}>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 12, display: "grid", gridTemplateColumns: "repeat(6, 44px)", gap: "6px 8px", justifyContent: "center" }}>
+          {Array.from({ length: 30 }).map((_, i) => (
+            <Puesto key={i} arriba={Math.floor(i / 6) % 2 === 0} color={colorAsiento(i, frame)} />
+          ))}
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 268, height: 128, background: "#4b5563", borderRadius: 10, padding: "12px 14px", boxSizing: "border-box" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 9, fontWeight: 800, color: "#052e16", background: "#4ade80", borderRadius: 9, padding: "2px 7px" }}>EN CURSO</span>
+            <span style={{ fontSize: 12, fontWeight: 800, color: "white" }}>MORA TEMPRANA NOVIEMBRE</span>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            {[
+              ["Llamados", "1.248"],
+              ["Conversación", "15"],
+              ["Contactab.", "21,3%"],
+            ].map(([k, v]) => (
+              <div key={k} style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "7px 9px" }}>
+                <div style={{ fontSize: 9, color: "#d1d5db" }}>{k}</div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: "white" }}>{v}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 10, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.12)" }}>
+            <div style={{ width: "38%", height: "100%", borderRadius: 3, background: "#3b82f6" }} />
+          </div>
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 604, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "6px 14px" }}>
+        {[{ n: "Disponible", c: "#b6bcc6" }, ...ESTADOS].map((e) => (
+          <div key={e.n} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, color: TINTA }}>
+            <div style={{ width: 12, height: 10, borderRadius: 3, background: e.c }} />
+            {e.n}
+          </div>
+        ))}
+      </div>
+    </Contenido>
+  );
+};
+
+// Flow editor laid out top to bottom.
+const NFM: NodoFlujo[] = [
+  { t: "Inicio", x: 150, y: 70, w: 90, h: 64, tipo: "inicio" },
+  { t: "Primer llamado", x: 125, y: 162, w: 140, h: 44, tipo: "accion", c: "#3b82f6" },
+  { t: "¿Cómo salió?", x: 125, y: 236, w: 140, h: 48, tipo: "decision", c: "#8b5cf6" },
+  { t: "Contactado", x: 14, y: 330, w: 112, h: 42, tipo: "fin" },
+  { t: "¿Tiene email?", x: 140, y: 312, w: 110, h: 110, tipo: "rombo" },
+  { t: "Cerrado", x: 264, y: 330, w: 112, h: 42, tipo: "fin" },
+  { t: "Link al bot", x: 60, y: 470, w: 120, h: 44, tipo: "accion", c: "#fbbf24" },
+  { t: "Reintento", x: 210, y: 470, w: 120, h: 44, tipo: "accion", c: "#3b82f6" },
+];
+const abajo = (n: NodoFlujo) => ({ x: n.x + n.w / 2, y: n.y + n.h });
+const arriba = (n: NodoFlujo) => ({ x: n.x + n.w / 2, y: n.y });
+const FlujoMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const f0 = ESC.flujo[0];
+  const aparece = (i: number) => spring({ frame: frame - f0 - 10 - i * 9, fps, config: { damping: 14, stiffness: 140 } });
+  return (
+    <Contenido>
+      <Segmentado a="Flujos" b="Plantillas" activo={0} press={pulsado(frame, TAP_PLANTILLAS)} />
+      <div style={{ position: "absolute", left: 12, right: 12, top: 56, bottom: 64, borderRadius: 10, background: "#a3a8b0", backgroundImage: "linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)", backgroundSize: "16px 16px", overflow: "hidden" }}>
+        <svg width={MW} height={700} style={{ position: "absolute", left: -12, top: -56, overflow: "visible" }}>
+          {AF.map(([a, b], k) => {
+            const p = interpolate(frame, [f0 + 18 + b * 9, f0 + 30 + b * 9], [0, 1], clamp);
+            const A = abajo(NFM[a]);
+            const B = arriba(NFM[b]);
+            const my = (A.y + B.y) / 2;
+            return <path key={k} d={`M ${A.x} ${A.y} C ${A.x} ${my} ${B.x} ${my} ${B.x} ${B.y}`} fill="none" stroke="#3f4652" strokeWidth={2} pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} />;
+          })}
+        </svg>
+        {NFM.map((n, i) => {
+          const t = aparece(i);
+          const base: React.CSSProperties = { position: "absolute", left: n.x - 12, top: n.y - 56, width: n.w, height: n.h, opacity: Math.min(1, t * 1.4), transform: `scale(${0.7 + 0.3 * t})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 10, fontWeight: 700, boxSizing: "border-box" };
+          if (n.tipo === "inicio") {
+            return <div key={n.t} style={{ ...base, borderRadius: "50%", background: "#15803d", border: "2px solid #14532d" }}>{n.t}</div>;
+          }
+          if (n.tipo === "rombo") {
+            return (
+              <div key={n.t} style={base}>
+                <div style={{ position: "absolute", width: n.w * 0.7, height: n.h * 0.7, background: "#215d7a", border: "2px solid #1e3a8a", transform: "rotate(45deg)" }} />
+                <span style={{ position: "relative" }}>{n.t}</span>
+              </div>
+            );
+          }
+          return (
+            <div key={n.t} style={{ ...base, borderRadius: 6, background: n.tipo === "fin" ? "#374151" : "#2b2f36", overflow: "hidden", boxShadow: "0 4px 10px rgba(0,0,0,0.25)" }}>
+              {n.c ? <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 10, background: n.c }} /> : null}
+              <span style={{ paddingLeft: n.c ? 8 : 0 }}>{n.t}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, bottom: 12, height: 42, display: "flex", gap: 8 }}>
+        <div style={{ flex: 1, borderRadius: 8, background: "#2563eb", color: "white", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>Guardar</div>
+        <div style={{ flex: 1.4, borderRadius: 8, border: "1px solid #b9e0c8", background: "#eef8f1", color: VERDE, fontSize: 11.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", opacity: interpolate(frame, [f0 + 90, f0 + 100], [0.3, 1], clamp) }}>✓ Flujo completo</div>
+      </div>
+    </Contenido>
+  );
+};
+
+const PlantillasMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const f0 = ESC.plantillas[0];
+  const nueva = spring({ frame: frame - NUEVA_PLANTILLA, fps, config: { damping: 15 } });
+  const brillo = interpolate(frame, [NUEVA_PLANTILLA, NUEVA_PLANTILLA + 10, NUEVA_PLANTILLA + 60], [0, 1, 0.3], clamp);
+  const tarjeta = (p: Plantilla, t: number, destacada = false) => {
+    const [bg, fg] = COLOR_CANAL[p[0]];
+    return (
+      <div key={p[1]} style={{ height: 70, marginBottom: 7, background: destacada ? `rgba(30,138,76,${0.08 + brillo * 0.12})` : "white", border: `1px solid ${destacada ? "#b9e0c8" : BORDE}`, borderRadius: 10, padding: "8px 12px", boxSizing: "border-box", opacity: t, transform: `translateX(${(1 - t) * 24}px)` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: fg, background: bg, borderRadius: 5, padding: "2px 7px" }}>{p[0]}</span>
+          <span style={{ flex: 1, fontSize: 12, fontWeight: 800, color: TINTA }}>{p[2]}</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: VERDE, background: "#dcf3e3", borderRadius: 8, padding: "2px 7px" }}>{destacada ? "Nueva" : "Activa"}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 8 }}>
+          {p[3].slice(0, 3).map((v) => (
+            <span key={v} style={{ fontSize: 8.5, fontWeight: 700, color: "#374151", background: "#f1f3f6", borderRadius: 8, padding: "2px 6px" }}>
+              {v}
+            </span>
+          ))}
+          <span style={{ flex: 1 }} />
+          <span style={{ fontSize: 10, color: TINTA_2 }}>{num(p[4])} env.</span>
+        </div>
+      </div>
+    );
+  };
+  return (
+    <Contenido>
+      <Segmentado a="Flujos" b="Plantillas" activo={1} />
+      <div style={{ position: "absolute", left: 14, top: 58, fontSize: 17, fontWeight: 800, color: TINTA }}>Plantillas de mensajes</div>
+      <div style={{ position: "absolute", right: 12, top: 54, background: NAVY, color: "white", fontSize: 11, fontWeight: 700, borderRadius: 7, padding: "7px 10px", transform: `scale(${1 - interpolate(frame, [NUEVA_PLANTILLA - 14, NUEVA_PLANTILLA - 10, NUEVA_PLANTILLA - 4], [0, 1, 0], clamp) * 0.06})` }}>+ Nueva</div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 96 }}>
+        {nueva > 0.01 ? <div style={{ height: 77 * Math.min(1, nueva), overflow: "hidden" }}>{tarjeta(NUEVA, Math.min(1, nueva), true)}</div> : null}
+        {PLANTILLAS.slice(0, 6).map((p, i) => tarjeta(p, interpolate(frame, [f0 + 8 + i * 3, f0 + 18 + i * 3], [0, 1], clamp)))}
+      </div>
+      {nueva > 0.01 ? (
+        <div style={{ position: "absolute", left: 12, right: 12, bottom: 10, background: "white", borderRadius: 12, boxShadow: "0 -6px 20px rgba(20,30,50,0.15)", padding: "12px 14px", boxSizing: "border-box", opacity: Math.min(1, nueva), transform: `translateY(${(1 - nueva) * 30}px)` }}>
+          <div style={{ fontSize: 10.5, fontWeight: 800, color: "#15803d" }}>Vista previa · WhatsApp</div>
+          <div style={{ marginTop: 6, background: "#dcf8c6", borderRadius: "10px 10px 10px 2px", padding: "9px 11px", fontSize: 11, color: TINTA, lineHeight: 1.45 }}>
+            Hola <b>Javier</b>, tu cuota de <b>$ 196.180</b> está vencida. Podés regularizarla desde acá: <span style={{ color: "#1d4ed8" }}>pagar.axonia.app/j82k</span>
+          </div>
+        </div>
+      ) : null}
+    </Contenido>
+  );
+};
+
+const TarjetaResultado: React.FC<{ n: string; c: string; v: number; total: number; sub: string; sv: number; t: number; h?: number; press?: number }> = ({ n, c, v, total, sub, sv, t, h = 92, press = 0 }) => (
+  <div style={{ height: h, background: "white", borderRadius: 10, border: `1px solid ${BORDE}`, padding: "9px 11px", boxSizing: "border-box", transform: `scale(${1 - press * 0.05})` }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 800, color: TINTA, whiteSpace: "nowrap" }}>
+      <div style={{ width: 6, height: 6, borderRadius: 2, background: c }} />
+      {n}
+    </div>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 3 }}>
+      <span style={{ fontSize: 17, fontWeight: 800, color: TINTA }}>{num(Math.round(v * t))}</span>
+      <span style={{ fontSize: 9.5, color: TINTA_2 }}>{pct((v / total) * 100)}</span>
+    </div>
+    <div style={{ height: 3, borderRadius: 2, background: "#e5e7eb", marginTop: 4 }}>
+      <div style={{ width: `${(v / total) * 100 * t}%`, minWidth: 3, height: "100%", borderRadius: 2, background: "#1f6f86" }} />
+    </div>
+    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: TINTA, marginTop: 7, whiteSpace: "nowrap" }}>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", marginRight: 4 }}>{sub}</span>
+      <b>{num(Math.round(sv * t))}</b>
+    </div>
+  </div>
+);
+
+const CampanaMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.campana[0];
+  const avance = sube(frame, f0 + 14, 70);
+  return (
+    <Contenido>
+      <div style={{ position: "absolute", left: 14, top: 10, fontSize: 10, color: TINTA_2 }}>← Volver a campañas</div>
+      <div style={{ position: "absolute", left: 14, top: 26, fontSize: 16, fontWeight: 800, color: TINTA }}>MORA TEMPRANA NOVIEMBRE</div>
+      <div style={{ position: "absolute", left: 14, top: 52, display: "flex", gap: 8, alignItems: "center" }}>
+        <span style={{ fontSize: 9, fontWeight: 800, color: avance >= 1 ? VERDE : "#1d4ed8", background: avance >= 1 ? "#dcf3e3" : "#dbeafe", borderRadius: 9, padding: "2px 8px" }}>{avance >= 1 ? "TERMINADA" : "EN CURSO"}</span>
+        <span style={{ fontSize: 10, color: TINTA_2 }}>· Intervalo 15 s</span>
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 76, height: 46, background: "#f0f7ff", border: "1px solid #bfdbfe", borderRadius: 9, display: "flex", alignItems: "center", gap: 10, padding: "0 12px" }}>
+        <Icono d="M12 4 A8 8 0 1 1 12 20 A8 8 0 1 1 12 4 M12 8 V12 L15 14" s={18} c="#2563eb" w={2} />
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#1e3a8a" }}>Programación activa</div>
+          <div style={{ fontSize: 9.5, color: "#1e40af" }}>Lun a Vie 09–20 h · Sáb 09–13 h</div>
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 132, height: 84, background: "white", borderRadius: 10, padding: "10px 14px", boxSizing: "border-box" }}>
+        <div style={{ display: "flex" }}>
+          {[
+            ["Casos", num(TOTAL_CAMPANA)],
+            ["Discados", num(Math.round(TOTAL_CAMPANA * avance))],
+            ["Pendientes", num(Math.round(TOTAL_CAMPANA * (1 - avance)))],
+          ].map(([k, v]) => (
+            <div key={k} style={{ flex: 1 }}>
+              <div style={{ fontSize: 9.5, color: TINTA_2 }}>{k}</div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: TINTA }}>{v}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ height: 6, borderRadius: 3, background: "#e5e7eb", marginTop: 10 }}>
+          <div style={{ width: `${avance * 100}%`, height: "100%", borderRadius: 3, background: "#1f6f86" }} />
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: 14, top: 226, fontSize: 13, fontWeight: 800, color: TINTA }}>Resultados</div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 248, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
+        {RESULTADOS.map(([n, c, v, sub, sv], i) => (
+          <TarjetaResultado key={n} n={n} c={c} v={v} total={TOTAL_CAMPANA} sub={sub} sv={sv} h={88} t={sube(frame, f0 + 20 + i * 3, 60) * avance} />
+        ))}
+      </div>
+    </Contenido>
+  );
+};
+
+const M_CAT = { top: 372, h: 88, gap: 6 };
+const M_HOJA = 300;
+const SegmentacionMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const f0 = ESC.segmentacion[0];
+  const hoja = spring({ frame: frame - TAP_CATEGORIA - 4, fps, config: { damping: 18, stiffness: 120 } });
+  const tabla = frame >= TAP_DESENLACE + 4;
+  const tablaT = spring({ frame: frame - TAP_DESENLACE - 4, fps, config: { damping: 18, stiffness: 140 } });
+  const cierre = interpolate(frame, [TAP_FRANJA - 8, TAP_FRANJA], [0, 1], clamp);
+  const vh = hoja * (1 - cierre);
+  const arribaHoja = tabla ? interpolate(tablaT, [0, 1], [M_HOJA, 8]) : M_HOJA;
+  return (
+    <Contenido>
+      <Segmentado a="Segmentación" b="Franjas" activo={0} press={pulsado(frame, TAP_FRANJA)} />
+      <div style={{ position: "absolute", left: 12, right: 12, top: 56, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {[
+          ["Casos gestionados", num(Math.round(TOTAL_SEG * sube(frame, f0 + 6))), "38,3% de 130.473"],
+          ["Ratio de contacto", pct(34.5 * sube(frame, f0 + 8)), "17.254 contactados"],
+          ["A búsqueda de datos", num(Math.round(23961 * sube(frame, f0 + 10))), "teléfono inválido"],
+          ["Deuda alcanzada", `$ ${num(Math.round(62833 * sube(frame, f0 + 12)))} MM`, ""],
+        ].map(([k, v, s]) => (
+          <div key={k} style={{ height: 58, background: "white", borderRadius: 10, padding: "8px 11px", boxSizing: "border-box" }}>
+            <div style={{ fontSize: 9, color: TINTA_2 }}>{k}</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: TINTA }}>{v}</div>
+            {s ? <div style={{ fontSize: 8, color: TINTA_2 }}>{s}</div> : null}
+          </div>
+        ))}
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 188, height: 72, background: "white", borderRadius: 10, padding: "10px 12px", boxSizing: "border-box" }}>
+        <div style={{ fontSize: 11.5, fontWeight: 800, color: TINTA }}>Distribución de resultados</div>
+        <div style={{ display: "flex", gap: 2, marginTop: 8, height: 10 }}>
+          {[6, 2, 5, 3, 1, 0, 4, 7].map((k, j) => (
+            <div key={k} style={{ width: `${(CATEGORIAS[k][2] / TOTAL_SEG) * 100 * sube(frame, f0 + 14, 40)}%`, minWidth: 4, background: ["#a8d5df", "#1f6f86", "#8ec5d3", "#2b88a3", "#145b70", "#0c3f50", "#3fa0bb", "#c7e6ee"][j], borderRadius: 2 }} />
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 10, marginTop: 7, fontSize: 9, color: TINTA_2 }}>
+          {[6, 2, 5].map((k) => (
+            <span key={k}>
+              <b style={{ color: TINTA }}>{pct((CATEGORIAS[k][2] / TOTAL_SEG) * 100)}</b> {CATEGORIAS[k][0]}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: 14, top: 270, fontSize: 12.5, fontWeight: 800, color: TINTA }}>Detalle por categoría</div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: M_CAT.top - MC, display: "grid", gridTemplateColumns: "1fr 1fr", gap: M_CAT.gap }}>
+        {CATEGORIAS.map(([n, c, v, sub, sv], i) => (
+          <TarjetaResultado key={n} n={n} c={c} v={v} total={TOTAL_SEG} sub={sub} sv={sv} h={M_CAT.h} t={sube(frame, f0 + 16 + i * 3, 40)} press={i === 0 ? pulsado(frame, TAP_CATEGORIA) : 0} />
+        ))}
+      </div>
+      {vh > 0.001 ? (
+        <>
+          <div style={{ position: "absolute", inset: 0, background: `rgba(30,34,42,${0.45 * vh})` }} />
+          <div style={{ position: "absolute", left: 0, right: 0, top: arribaHoja, bottom: 0, background: "white", borderRadius: "16px 16px 0 0", transform: `translateY(${(1 - vh) * 500}px)`, overflow: "hidden" }}>
+            <div style={{ width: 40, height: 4, borderRadius: 2, background: "#d1d5db", margin: "8px auto 0" }} />
+            {!tabla ? (
+              <div style={{ padding: "8px 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 800, color: TINTA }}>
+                  <div style={{ width: 7, height: 7, borderRadius: 2, background: "#16a34a" }} /> Compromiso logrado
+                </div>
+                <div style={{ fontSize: 10, color: TINTA_2, marginTop: 3 }}>357 casos · 0,7% del total</div>
+                {DESENLACES.map(([n, v], i) => {
+                  const t = sube(frame, TAP_CATEGORIA + 10 + i * 4, 24);
+                  return (
+                    <div key={n} style={{ height: 64, borderBottom: `1px solid ${BORDE}`, paddingTop: 12, boxSizing: "border-box", background: i === 1 && frame >= TAP_DESENLACE - 10 ? "#f0f7ff" : "white", transform: `scale(${i === 1 ? 1 - pulsado(frame, TAP_DESENLACE) * 0.02 : 1})` }}>
+                      <div style={{ display: "flex", fontSize: 12, color: TINTA }}>
+                        <span style={{ flex: 1, fontWeight: 700 }}>{n}</span>
+                        <span style={{ width: 50, textAlign: "right" }}>{v}</span>
+                        <span style={{ width: 56, textAlign: "right", color: TINTA_2 }}>{pct((v / 357) * 100)}</span>
+                      </div>
+                      <div style={{ marginTop: 8, height: 7, borderRadius: 4, background: "#eef1f5" }}>
+                        <div style={{ width: `${(v / 257) * 100 * t}%`, height: "100%", borderRadius: 4, background: "#0f4c5c" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ padding: "8px 12px", opacity: tablaT }}>
+                <div style={{ fontSize: 10, color: TINTA_2, paddingLeft: 4 }}>← Compromiso logrado</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 800, color: TINTA, marginTop: 4, paddingLeft: 4 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: 2, background: "#16a34a" }} /> Promesa de pago · 62 casos
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  {CASOS.slice(0, 8).map((c, i) => (
+                    <div key={c[1]} style={{ height: 66, marginBottom: 6, border: `1px solid ${BORDE}`, borderRadius: 10, padding: "8px 12px", boxSizing: "border-box", opacity: interpolate(frame, [TAP_DESENLACE + 8 + i * 2, TAP_DESENLACE + 16 + i * 2], [0, 1], clamp) }}>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: 11.5, fontWeight: 800, color: TINTA }}>{c[2]}</span>
+                        <span style={{ fontSize: 11.5, fontWeight: 800, color: TINTA }}>{pesos(c[7])}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 9.5, color: TINTA_2 }}>
+                        <span>
+                          DNI {c[1]} · {c[0]}
+                        </span>
+                        <span style={{ color: VERDE, fontWeight: 700 }}>Promesa {c[6].slice(0, 5)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      ) : null}
+    </Contenido>
+  );
+};
+
+const FranjaMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.franja[0];
+  return (
+    <Contenido>
+      <Segmentado a="Segmentación" b="Franjas" activo={1} />
+      <div style={{ position: "absolute", left: 14, top: 56, fontSize: 15, fontWeight: 800, color: TINTA }}>Performance por franja horaria</div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 84, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {[
+          ["Total llamados", num(Math.round(86128 * sube(frame, f0 + 4)))],
+          ["Contacto efectivo", pct(21.3 * sube(frame, f0 + 6))],
+          ["Promesas", num(Math.round(67 * sube(frame, f0 + 8)))],
+          ["Mejor franja", "20–21 h"],
+        ].map(([k, v]) => (
+          <div key={k} style={{ height: 52, background: "white", borderRadius: 10, padding: "8px 11px", boxSizing: "border-box" }}>
+            <div style={{ fontSize: 9, color: TINTA_2 }}>{k}</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: TINTA }}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 210, background: "white", borderRadius: 10, padding: "8px 12px", boxSizing: "border-box" }}>
+        <div style={{ display: "flex", fontSize: 9, fontWeight: 700, color: TINTA_2, paddingBottom: 6, borderBottom: `1px solid ${BORDE}` }}>
+          <span style={{ width: 64 }}>Franja</span>
+          <span style={{ width: 64 }}>Llamados</span>
+          <span style={{ flex: 1 }}>Contacto efectivo</span>
+        </div>
+        {FRANJAS.map(([f, tot, , efe], i) => {
+          const t = sube(frame, f0 + 14 + i * 4, 26);
+          const p = efe / tot;
+          return (
+            <div key={f} style={{ display: "flex", alignItems: "center", height: 46, borderBottom: `1px solid ${BORDE}`, fontSize: 10.5, color: TINTA, opacity: interpolate(frame, [f0 + 10 + i * 4, f0 + 18 + i * 4], [0, 1], clamp) }}>
+              <span style={{ width: 64, fontWeight: 700 }}>{f}</span>
+              <span style={{ width: 64 }}>{num(Math.round(tot * t))}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5 }}>
+                  <b>{num(Math.round(efe * t))}</b>
+                  <span style={{ color: TINTA_2 }}>{pct(p * 100)}</span>
+                </div>
+                <div style={{ height: 4, borderRadius: 2, background: "#eef1f5", marginTop: 4 }}>
+                  <div style={{ width: `${(p / 0.25) * 100 * t}%`, height: "100%", borderRadius: 2, background: "#0f4c5c" }} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Contenido>
+  );
+};
+
+const DashboardMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.dashboard[0];
+  const PANEL = "#151d30";
+  const LINEA = "#26314a";
+  const kpi = (k: string, v: string, borde: string, i: number) => (
+    <div key={k} style={{ height: 58, background: PANEL, borderRadius: 10, borderTop: `2px solid ${borde}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, opacity: interpolate(frame, [f0 + i * 3, f0 + 10 + i * 3], [0, 1], clamp) }}>
+      <div style={{ fontSize: 8.5, letterSpacing: 0.5, color: "#c9d0da", textAlign: "center" }}>{k}</div>
+      <div style={{ fontSize: 17, fontWeight: 800 }}>{v}</div>
+    </div>
+  );
+  return (
+    <Contenido fondo="#0d1424">
+      <div style={{ color: "white" }}>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 12, textAlign: "center", fontSize: 15, fontWeight: 800 }}>Dashboard de Contact Flow</div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 40, display: "flex", gap: 6 }}>
+          {["Hoy", "Semana", "Mes actual", "Año"].map((b) => (
+            <div key={b} style={{ fontSize: 9.5, fontWeight: 700, padding: "5px 10px", borderRadius: 6, border: `1px solid ${b === "Mes actual" ? "#3b82f6" : LINEA}`, background: b === "Mes actual" ? "#2563eb" : "transparent" }}>
+              {b}
+            </div>
+          ))}
+        </div>
+        <div style={{ position: "absolute", left: 14, top: 76, fontSize: 10.5, fontWeight: 700 }}>VOLUMEN DE GESTIÓN</div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 94, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          {kpi("LLAMADOS", num(Math.round(29581 * sube(frame, f0 + 4))), "#5b84b8", 0)}
+          {kpi("ATENDIDOS", num(Math.round(1201 * sube(frame, f0 + 6))), "#4f9c7a", 1)}
+          {kpi("CASOS ALCANZADOS", num(Math.round(29579 * sube(frame, f0 + 8))), "#5b84b8", 2)}
+          {kpi("CAMPAÑAS ACTIVAS", "3", "#c98a4b", 3)}
+        </div>
+        <div style={{ position: "absolute", left: 14, top: 230, fontSize: 10.5, fontWeight: 700 }}>EFECTIVIDAD</div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 248, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          {kpi("% CONTACTABILIDAD", pct(21.3 * sube(frame, f0 + 10)), "#4f9c7a", 4)}
+          {kpi("% GESTIÓN EFECTIVA", pct(6.8 * sube(frame, f0 + 12)), "#4f9c7a", 5)}
+          {kpi("% BUZÓN DE VOZ", pct(43.9 * sube(frame, f0 + 14)), "#c98a4b", 6)}
+          {kpi("% TELÉFONO INVÁLIDO", pct(14.2 * sube(frame, f0 + 16)), "#b85b5b", 7)}
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 384, background: PANEL, borderRadius: 10, border: `1px solid ${LINEA}`, padding: "10px 14px", boxSizing: "border-box" }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, textAlign: "center", borderBottom: `1px solid ${LINEA}`, paddingBottom: 6 }}>POR DESENLACE</div>
+          {(
+            [
+              ["Se dejó mensaje", 12997, 0.439],
+              ["Apagado o sin señal", 8972, 0.303],
+              ["Sin respuesta de la red", 3998, 0.135],
+              ["Promesa de pago", 1214, 0.041],
+            ] as [string, number, number][]
+          ).map(([k, v, p], i) => (
+            <div key={k} style={{ marginTop: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10 }}>
+                <b>{k}</b>
+                <span style={{ color: "#aab3c0" }}>
+                  {num(Math.round(v * sube(frame, f0 + 20 + i * 4)))} · {pct(p * 100)}
+                </span>
+              </div>
+              <div style={{ height: 4, borderRadius: 2, background: LINEA, marginTop: 4 }}>
+                <div style={{ width: `${p * 100 * sube(frame, f0 + 20 + i * 4)}%`, height: "100%", borderRadius: 2, background: "#5b84b8" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 562, height: 118, background: PANEL, borderRadius: 10, border: `1px solid ${LINEA}`, padding: "10px 12px", boxSizing: "border-box" }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, textAlign: "center" }}>LLAMADOS POR DÍA</div>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 72, marginTop: 8 }}>
+            {[1820, 2410, 2265, 2630, 2980, 1150, 0, 2540, 2760, 2895, 3120, 2870, 1210, 0].map((v, i) => (
+              <div key={i} style={{ flex: 1, height: `${(v / 3200) * 100 * sube(frame, f0 + 36 + i * 2, 24)}%`, background: "#5b84b8", borderRadius: "2px 2px 0 0" }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </Contenido>
+  );
+};
+
+// Finger path on the phone: [arrival frame, x, y].
+const DEDO_MOVIL: [number, number, number][] = [
+  [0, 300, 700],
+  [TAP_ESTRATEGIAS - 2, 12 + 175 + 8 + 87, MC + 48 + 30],
+  [TAP_PLANTILLAS - 2, 285, MC + 29],
+  [TAP_CAMPANAS - 2, tabX(2), MH - M_TABS / 2 - 4],
+  [TAP_REPORTES - 2, tabX(3), MH - M_TABS / 2 - 4],
+  [TAP_CATEGORIA - 2, 100, M_CAT.top + M_CAT.h / 2],
+  [TAP_DESENLACE - 2, 195, MC + M_HOJA + 12 + 8 + 40 + 64 + 32],
+  [TAP_FRANJA - 2, 285, MC + 29],
+  [TAP_DASH - 2, tabX(4), MH - M_TABS / 2 - 4],
+  [TAP_DASH + 40, 300, 640],
+];
+const posDedoMovil = (frame: number) => {
+  let p = { x: DEDO_MOVIL[0][1], y: DEDO_MOVIL[0][2] };
+  for (let i = 1; i < DEDO_MOVIL.length; i++) {
+    const [f, x, y] = DEDO_MOVIL[i];
+    const desde = Math.max(DEDO_MOVIL[i - 1][0], f - 18);
+    if (frame >= f) {
+      p = { x, y };
+      continue;
+    }
+    if (frame > desde) {
+      const t = interpolate(frame, [desde, f], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+      p = { x: p.x + (x - p.x) * t, y: p.y + (y - p.y) * t };
+    }
+    break;
+  }
+  return p;
+};
+
+const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const escenas: [Escena, React.FC<{ frame: number }>][] = [
+    ["home", HomeMovil],
+    ["flujo", FlujoMovil],
+    ["plantillas", PlantillasMovil],
+    ["campana", CampanaMovil],
+    ["segmentacion", SegmentacionMovil],
+    ["franja", FranjaMovil],
+    ["dashboard", DashboardMovil],
+  ];
+  const actual = (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "home";
+  const oscuro = actual === "dashboard";
+  const dedo = posDedoMovil(frame);
+  const tap = TAPS.find((f) => frame >= f && frame < f + 16);
+  const onda = tap === undefined ? 0 : (frame - tap) / 16;
+  const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
+  const dedoVis = interpolate(frame, [96, 110], [0, 1], clamp) * interpolate(frame, [TAP_DASH + 30, TAP_DASH + 44], [1, 0], clamp);
+  const tapsTab: Record<number, number> = { 2: TAP_CAMPANAS, 3: TAP_REPORTES, 4: TAP_DASH };
+  return (
+    <div style={{ position: "relative", width: MW, height: MH, background: "#4a4a4a", fontFamily: FUENTE, overflow: "hidden" }}>
+      {escenas.map(([e, C]) => {
+        const [a, b] = ESC[e];
+        const v = interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
+        if (v <= 0.001) {
+          return null;
+        }
+        return (
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v }}>
+            <C frame={frame} />
+          </div>
+        );
+      })}
+      <div style={{ position: "absolute", left: 0, top: 0, width: MW, height: M_HEADER, background: "#4a4a4a", zIndex: 5 }}>
+        <div style={{ position: "absolute", left: 16, top: 52 }}>
+          <Logo w={92} />
+        </div>
+        <div style={{ position: "absolute", right: 16, top: 50, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, color: "white" }}>Delfina Martinez</div>
+          <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#e5e7eb" }} />
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: M_TABS, background: oscuro ? "#111827" : "white", borderTop: `1px solid ${oscuro ? "#26314a" : BORDE}`, display: "flex", zIndex: 5 }}>
+        {TABS_MOVIL.map(([n, d, es], i) => {
+          const sel = es.includes(actual);
+          const col = sel ? "#FF8C42" : oscuro ? "#9aa3b2" : "#6b7280";
+          return (
+            <div key={n} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, paddingBottom: 6, transform: `scale(${i in tapsTab ? 1 - pulsado(frame, tapsTab[i]) * 0.12 : 1})` }}>
+              <Icono d={d} s={19} c={col} />
+              <div style={{ fontSize: 9, fontWeight: 700, color: col }}>{n}</div>
+            </div>
+          );
+        })}
+      </div>
+      {tap !== undefined ? (
+        <div style={{ position: "absolute", left: dedo.x, top: dedo.y, width: 18 + onda * 50, height: 18 + onda * 50, transform: "translate(-50%, -50%)", borderRadius: "50%", border: `3px solid rgba(255,140,66,${1 - onda})`, background: `rgba(255,140,66,${(1 - onda) * 0.2})`, zIndex: 8 }} />
+      ) : null}
+      <div style={{ position: "absolute", left: dedo.x, top: dedo.y, width: 34, height: 34, transform: `translate(-50%, -50%) scale(${1 - presion * 0.2})`, borderRadius: "50%", background: "rgba(255,255,255,0.55)", border: "2px solid rgba(40,48,64,0.35)", boxShadow: "0 4px 10px rgba(0,0,0,0.2)", opacity: dedoVis * 0.9, zIndex: 9 }} />
+    </div>
+  );
+};
+
+export const ContactFlowMovil: React.FC<z.infer<typeof contactFlowSchema>> = ({ fondo, paleta }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  const { w, h } = pantallaDe("celular", true);
+  const { W: EW, H: EH } = exteriorDe("celular", w, h);
+  const esc = Math.min((width * 0.88) / EW, (height * 0.84) / EH);
+  const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
+  return (
+    <AbsoluteFill style={{ fontFamily: FUENTE }}>
+      <FondoAbstracto paleta={paleta} estilo={fondo} />
+      <div style={{ position: "absolute", left: width / 2, top: height / 2, opacity: t, transform: `translate(-50%, -50%) scale(${esc})` }}>
+        <Dispositivo tipo="celular" w={w} h={h}>
+          <PaginaMovil frame={frame} />
+        </Dispositivo>
+      </div>
+    </AbsoluteFill>
+  );
+};
