@@ -452,6 +452,10 @@ const MODELOS: Record<string, Modelo> = {
   pulseLite: { cuerpo: ["#ffffff", "#d3d8e0"], modulo: "simple", pantalla: ["#93c5fd", "#6366f1"] },
   orbit: { cuerpo: ["#d8c8f5", "#8b6fd6"], modulo: "diagonal", pantalla: ["#c084fc", "#1d4ed8"], variantes: [["#3a3d44", "#0d0e11"], ["#fef3c7", "#d9b45a"]] },
   zeta: { cuerpo: ["#f3dfa7", "#b98b32"], modulo: "cuadrado", pantalla: ["#fde68a", "#b45309"] },
+  novaMini: { cuerpo: ["#fbcfe8", "#db7aa6"], modulo: "doble", pantalla: ["#f9a8d4", "#9d174d"] },
+  lumenS9: { cuerpo: ["#9cc3f5", "#3b6fc4"], modulo: "vertical", pantalla: ["#60a5fa", "#1e3a8a"] },
+  pulsePro: { cuerpo: ["#2b2f36", "#0b0c0e"], modulo: "circulo", pantalla: ["#22d3ee", "#1e40af"], variantes: [["#e5e7eb", "#9ca3af"], ["#93c5fd", "#1d4ed8"]] },
+  zetaFold: { cuerpo: ["#e5e7eb", "#8f96a3"], modulo: "cuadrado", pantalla: ["#a5b4fc", "#312e81"] },
 };
 const Celular = telefono(MODELOS.novaPro);
 const LumenUltra = telefono(MODELOS.lumenUltra);
@@ -473,6 +477,10 @@ const CELULARES: ItemTienda[] = [
   { nombre: "Lumen S9 Ultra", marca: "Lumen", precio: 1149900, P: LumenUltra },
   { nombre: "Orbit Flex", marca: "Orbit", precio: 539900, P: telefono(MODELOS.orbit), vista: "trio" },
   { nombre: "Zeta Max", marca: "Zeta", precio: 989900, P: telefono(MODELOS.zeta), vista: "caja" },
+  { nombre: "Nova Mini", marca: "Nova", precio: 459900, P: telefono(MODELOS.novaMini), vista: "lado" },
+  { nombre: "Lumen S9", marca: "Lumen", precio: 869900, P: telefono(MODELOS.lumenS9), vista: "par" },
+  { nombre: "Pulse Edge Pro", marca: "Pulse", precio: 999900, P: telefono(MODELOS.pulsePro), vista: "trio" },
+  { nombre: "Zeta Fold", marca: "Zeta", precio: 1399900, P: telefono(MODELOS.zetaFold), vista: "solo" },
 ];
 const CATEGORIAS: [string, Producto][] = [
   ["Calzado", Zapatilla],
@@ -692,13 +700,16 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
+const SCROLL_CATALOGO = [196, 236];
 const Catalogo: React.FC<{ frame: number }> = ({ frame }) => {
   const f0 = ESC.catalogo[0];
   const destacada = interpolate(frame, [TAP_PRODUCTO - 14, TAP_PRODUCTO - 4], [0, 1], clamp);
+  const scroll = interpolate(frame, SCROLL_CATALOGO, [0, 300], { ...clamp, easing: Easing.inOut(Easing.cubic) });
   return (
-    <div style={{ position: "absolute", left: 0, top: HEADER_H, width: PW, height: PH - HEADER_H, background: "#f4f6f9" }}>
+    <div style={{ position: "absolute", left: 0, top: HEADER_H, width: PW, height: PH - HEADER_H, background: "#f4f6f9", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: PW, height: 1100, transform: `translateY(${-scroll}px)` }}>
       <div style={{ position: "absolute", left: 40, top: 24, fontSize: 28, fontWeight: 800, color: TINTA }}>Catálogo</div>
-      <div style={{ position: "absolute", left: 270, top: 34, fontSize: 12, color: TINTA_2 }}>8 productos</div>
+      <div style={{ position: "absolute", left: 270, top: 34, fontSize: 12, color: TINTA_2 }}>12 productos</div>
       <div style={{ position: "absolute", right: 40, top: 24, display: "flex", gap: 10, alignItems: "center" }}>
         <span style={{ fontSize: 12, color: TINTA_2 }}>Ordenar por</span>
         <div style={{ width: 130, height: 34, background: "white", border: `1px solid ${BORDE}`, borderRadius: 7, fontSize: 12, display: "flex", alignItems: "center", padding: "0 10px", boxSizing: "border-box", justifyContent: "space-between" }}>
@@ -726,11 +737,11 @@ const Catalogo: React.FC<{ frame: number }> = ({ frame }) => {
         <div style={{ height: 32, background: AZUL, color: "white", borderRadius: 6, fontSize: 11.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 12 }}>Aplicar filtros</div>
         <div style={{ fontSize: 13, fontWeight: 800, color: TINTA, marginTop: 20 }}>Marcas</div>
         {[
-          ["Nova", 2],
-          ["Lumen", 2],
-          ["Pulse", 2],
+          ["Nova", 3],
+          ["Lumen", 3],
+          ["Pulse", 3],
           ["Orbit", 1],
-          ["Zeta", 1],
+          ["Zeta", 2],
         ].map(([m, n]) => (
           <div key={m as string} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 9, fontSize: 11.5, color: TINTA }}>
             <div style={{ width: 13, height: 13, border: "1.5px solid #aab3c0", borderRadius: 3 }} />
@@ -752,6 +763,7 @@ const Catalogo: React.FC<{ frame: number }> = ({ frame }) => {
             destacada={i === 5 ? destacada : 0}
           />
         ))}
+      </div>
       </div>
     </div>
   );
@@ -1067,7 +1079,7 @@ const Confirmacion: React.FC<{ frame: number }> = ({ frame }) => {
 const DEDO: [number, number, number][] = [
   [0, 900, 700],
   [TAP_CELULARES - 2, 668, 86],
-  [TAP_PRODUCTO - 2, 640, 610],
+  [TAP_PRODUCTO - 2, 640, 310],
   [TAP_AGREGAR - 2, 978, 512],
   [TAP_IR_CARRITO - 2, 910, 590],
   [TAP_PRESTAMO - 2, 300, 507],
