@@ -176,6 +176,40 @@ const Dato: React.FC<{ k: string; v: React.ReactNode; o?: number }> = ({ k, v, o
 
 // Generic ID card (front and back) and a drawn selfie for the onboarding
 // documents.
+// Drawn portrait (60 x 70 box) used in the ID photo and the selfie.
+const Persona: React.FC<{ fondo: string }> = ({ fondo }) => (
+  <g>
+    <rect width={60} height={70} fill={fondo} />
+    {/* Jacket, shirt and lapels */}
+    <path d="M5 70 C6 59 15 53.5 24.5 52.5 L35.5 52.5 C45 53.5 54 59 55 70 Z" fill="#2c4d75" />
+    <path d="M24.5 52.5 L30 63 L35.5 52.5 Z" fill="#e3edf8" />
+    <path d="M24.5 52.5 L28.5 70 M35.5 52.5 L31.5 70" stroke="#1f3a5c" strokeWidth={1} />
+    <path d="M24.5 52.5 L27.5 58 L30 55 Z M35.5 52.5 L32.5 58 L30 55 Z" fill="#f7fafd" />
+    {/* Neck */}
+    <path d="M25.5 43 L25.5 53 C27.5 55 32.5 55 34.5 53 L34.5 43 Z" fill="#c98f6c" />
+    <path d="M25.5 46 C28 49 32 49 34.5 46 L34.5 43 L25.5 43 Z" fill="#b57b59" />
+    {/* Ears */}
+    <ellipse cx={18.6} cy={34} rx={2.2} ry={3.6} fill="#d39a77" />
+    <ellipse cx={41.4} cy={34} rx={2.2} ry={3.6} fill="#d39a77" />
+    {/* Face */}
+    <path d="M19 29 C19 19.5 41 19.5 41 29 L41 36 C41 43.5 36 48.5 30 48.5 C24 48.5 19 43.5 19 36 Z" fill="#e0a986" />
+    <path d="M22 41 C24.5 46.5 35.5 46.5 38 41 C37 46 33.5 48.5 30 48.5 C26.5 48.5 23 46 22 41 Z" fill="#cf9572" opacity={0.6} />
+    {/* Hair with side part */}
+    <path d="M18.4 32 C16.5 18.5 24 12.5 31 13 C38.5 13 44 18.5 41.6 32 C40.8 27.5 39.5 24.5 36.5 22.8 C31 25.5 25 25.2 21.5 23.8 C20 26 19 28.8 18.4 32 Z" fill="#3a2a20" />
+    <path d="M24 16.5 C28 14.5 34 14.8 37.5 17.5 C33.5 16.6 28.5 16.4 24 16.5 Z" fill="#5a4334" />
+    {/* Brows, eyes, nose, mouth */}
+    <path d="M22.8 29.4 C24.2 28.4 26.4 28.4 27.6 29.2 M32.4 29.2 C33.6 28.4 35.8 28.4 37.2 29.4" stroke="#3a2a20" strokeWidth={1.1} strokeLinecap="round" fill="none" />
+    <ellipse cx={25.2} cy={32.6} rx={1.9} ry={1.3} fill="white" />
+    <ellipse cx={34.8} cy={32.6} rx={1.9} ry={1.3} fill="white" />
+    <circle cx={25.4} cy={32.7} r={1} fill="#3b2a20" />
+    <circle cx={34.6} cy={32.7} r={1} fill="#3b2a20" />
+    <path d="M30 33.5 C29.6 36 29 37.5 28.6 38.2 C29.4 38.8 30.6 38.8 31.4 38.4" stroke="#b57b59" strokeWidth={0.8} fill="none" strokeLinecap="round" />
+    <path d="M26.4 41.2 C28.4 43 31.6 43 33.6 41.2 C31.6 42 28.4 42 26.4 41.2 Z" fill="#9c4f3f" stroke="#9c4f3f" strokeWidth={0.6} strokeLinejoin="round" />
+    <ellipse cx={23} cy={38} rx={1.8} ry={1} fill="#e8907a" opacity={0.35} />
+    <ellipse cx={37} cy={38} rx={1.8} ry={1} fill="#e8907a" opacity={0.35} />
+  </g>
+);
+
 const DniFrente: React.FC = () => (
   <svg viewBox="0 0 86 54" width="94%">
     <rect x={0.5} y={0.5} width={85} height={53} rx={4} fill="#dfe9f3" stroke="#9fb3c8" />
@@ -184,10 +218,10 @@ const DniFrente: React.FC = () => (
     <text x={43} y={6.6} fontSize={4} fontWeight={700} fill="white" textAnchor="middle" fontFamily="Montserrat">
       DOCUMENTO DE IDENTIDAD
     </text>
-    <rect x={5} y={14} width={22} height={28} rx={2} fill="#c9d6e4" />
-    <circle cx={16} cy={24} r={5.5} fill="#8c6b52" />
-    <path d="M10.5 22 C11 16.5 21 16.5 21.5 22 C19 19.5 13 19.5 10.5 22 Z" fill="#3b2a20" />
-    <path d="M6.5 42 C7.5 33 24.5 33 25.5 42 Z" fill="#2c4d75" />
+    <rect x={5} y={14} width={22} height={28} rx={2} fill="#eef2f6" stroke="#b9c7d6" strokeWidth={0.4} />
+    <svg x={5} y={14} width={22} height={28} viewBox="9 9 42 54" preserveAspectRatio="xMidYMid slice">
+      <Persona fondo="#eef2f6" />
+    </svg>
     {[
       ["APELLIDO", "PEREZ"],
       ["NOMBRE", "JAVIER"],
@@ -223,17 +257,14 @@ const DniDorso: React.FC = () => (
 
 const Selfie: React.FC = () => (
   <svg viewBox="0 0 60 70" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
-    <rect width={60} height={70} fill="#d9e6ef" />
-    <circle cx={46} cy={14} r={9} fill="#f6e3c4" opacity={0.8} />
-    <path d="M8 70 C10 50 50 50 52 70 Z" fill="#2c4d75" />
-    <path d="M24 50 L30 58 L36 50 Z" fill="white" />
-    <rect x={26} y={40} width={8} height={10} fill="#c69273" />
-    <ellipse cx={30} cy={32} rx={11} ry={13} fill="#d9a382" />
-    <path d="M18.5 30 C17 15 43 15 41.5 30 C39 23 33 22 30 22.5 C26 22 21 23 18.5 30 Z" fill="#3b2a20" />
-    <circle cx={25.5} cy={32} r={1.3} fill="#2b2f38" />
-    <circle cx={34.5} cy={32} r={1.3} fill="#2b2f38" />
-    <path d="M25.5 38.5 C28 41 32 41 34.5 38.5" fill="none" stroke="#8a4f3d" strokeWidth={1.2} strokeLinecap="round" />
-    <rect x={4} y={4} width={52} height={62} rx={26} fill="none" stroke="white" strokeWidth={1.2} strokeDasharray="3 2" opacity={0.9} />
+    <Persona fondo="url(#fondoSelfie)" />
+    <defs>
+      <linearGradient id="fondoSelfie" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#dbe8f2" />
+        <stop offset="1" stopColor="#b9cfe0" />
+      </linearGradient>
+    </defs>
+    <ellipse cx={30} cy={33} rx={17} ry={21} fill="none" stroke="white" strokeWidth={1.1} strokeDasharray="3 2" opacity={0.95} />
   </svg>
 );
 
@@ -786,7 +817,6 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
     MODULOS.length - 1,
     Math.max(0, Math.floor((frame - PRIMERO + 10) / PASO)),
   );
-  const cierre = spring({ frame: frame - ALEJA_FIN + 6, fps, config: { damping: 18 } });
 
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
@@ -903,20 +933,6 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
             </div>
           );
         })}
-      </div>
-      {/* Closing line once the whole suite is in view */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 52,
-          width: "100%",
-          textAlign: "center",
-          opacity: cierre,
-          transform: `translateY(${(1 - cierre) * 20}px)`,
-        }}
-      >
-        <span style={{ fontSize: 34, fontWeight: 800, color: "white" }}>Gestión de Créditos </span>
-        <span style={{ fontSize: 34, fontWeight: 800, color: ACENTO }}>360</span>
       </div>
     </AbsoluteFill>
   );
