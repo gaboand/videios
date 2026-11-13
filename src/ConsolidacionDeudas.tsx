@@ -259,6 +259,28 @@ const Estado: React.FC<{ p: Prestamo; cancelada: number; fs: number; nuevo?: boo
   );
 };
 
+// Line icons for the sidebar, after the Core Lending menu.
+const ICONOS = [
+  "M4 11 L12 4 L20 11 V20 H14 V14 H10 V20 H4 Z", // home
+  "M10 4 A6 6 0 1 1 10 16 A6 6 0 1 1 10 4 M15 15 L20 20", // search
+  "M3 6 H21 V18 H3 Z M7 10 H11 M7 14 H15", // client card
+  "M12 3 A9 9 0 1 1 12 21 A9 9 0 1 1 12 3 M12 8 V16 M8 12 H16", // new loan
+  "M4 12 C4 8 8 6 12 6 C16 6 20 8 20 12 C20 15 18 17 16 18 V20 H13 V18.5 H11 V20 H8 V18 C6 17 4 15 4 12 M15 10 H15.5", // savings
+  "M4 8 H20 M4 12 H20 M4 16 H20 M6 4 H18 V20 H6 Z", // portfolio
+  "M8 6 A3 3 0 1 1 8 12 A3 3 0 1 1 8 6 M16 12 A3 3 0 1 1 16 18 A3 3 0 1 1 16 12 M8 3 V5 M8 13 V15 M16 9 V11 M16 19 V21", // consolidation
+  "M12 3 A9 9 0 1 0 21 12 H12 Z M15 3.5 A9 9 0 0 1 20.5 9 H15 Z", // reports
+  "M6 3 H15 L19 7 V21 H6 Z M9 12 H16 M9 16 H16", // document
+  "M12 8 A4 4 0 1 1 12 16 A4 4 0 1 1 12 8 M12 2 V5 M12 19 V22 M2 12 H5 M19 12 H22 M5 5 L7 7 M17 17 L19 19 M5 19 L7 17 M17 7 L19 5", // settings
+  "M6 3 H18 V21 H6 Z M9 7 H15 M9 11 H10 M14 11 H15 M9 15 H10 M14 15 H15", // calculator
+  "M12 8 V12 L15 15 M4 12 A8 8 0 1 0 6.5 6.3 M4 4 V8 H8", // history
+  "M4 9 H20 V19 H4 Z M8 9 V6 A4 4 0 0 1 16 6 V9 M9 14 H15", // robot
+];
+const ICONO_ACTIVO = 6;
+const ICONOS_PIE = [
+  "M12 4 A4 4 0 1 1 12 12 A4 4 0 1 1 12 4 M4 21 C5 15 19 15 20 21", // user
+  "M10 4 H5 V20 H10 M14 8 L18 12 L14 16 M18 12 H9", // logout
+];
+
 const LOGO_W = 2028;
 const LOGO_H = 693;
 
@@ -565,22 +587,36 @@ const App: React.FC<{ L: Lay; frame: number }> = ({ L, frame }) => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            paddingTop: 22,
-            gap: 26,
+            paddingTop: 20,
+            gap: 22,
           }}
         >
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: 5,
-                background: i === 6 ? ACENTO : "#d9dce1",
-                opacity: i === 6 ? 1 : 0.85,
-              }}
-            />
+          {ICONOS.map((d, i) => (
+            <svg key={i} width={22} height={22} viewBox="0 0 24 24">
+              <path
+                d={d}
+                fill="none"
+                stroke={i === ICONO_ACTIVO ? ACENTO : "#e5e7eb"}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           ))}
+          <div style={{ flex: 1 }} />
+          {ICONOS_PIE.map((d, i) => (
+            <svg key={`p${i}`} width={22} height={22} viewBox="0 0 24 24">
+              <path
+                d={d}
+                fill="none"
+                stroke="#e5e7eb"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          ))}
+          <div style={{ height: 6 }} />
         </div>
       )}
 
