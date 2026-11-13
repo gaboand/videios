@@ -1171,46 +1171,17 @@ export const ConsolidacionDeudas: React.FC<z.infer<typeof consolidacionSchema>> 
   const { W, H } = exteriorDe(dispositivo, w, h);
   const caja = vertical
     ? chico
-      ? { cx: 540, cy: 1080, w: 960, h: 1440 }
-      : { cx: 540, cy: 1010, w: 960, h: 1220 }
+      ? { cx: 540, cy: 960, w: 980, h: 1560 }
+      : { cx: 540, cy: 960, w: 960, h: 1300 }
     : { cx: 960, cy: 540, w: 1560, h: 930 };
   const esc = Math.min(caja.w / W, caja.h / H);
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   const flota = Math.sin(frame / 40) * 6;
   const giro = chico ? -14 : -10;
-  const titulo = spring({ frame: frame - 4, fps, config: { damping: 18 } });
 
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
-      {vertical ? (
-        <div
-          style={{
-            position: "absolute",
-            top: 140,
-            width: "100%",
-            textAlign: "center",
-            opacity: titulo,
-            transform: `translateY(${(1 - titulo) * -30}px)`,
-          }}
-        >
-          <div style={{ fontSize: 56, fontWeight: 800, color: "white" }}>
-            Consolidación de deudas
-          </div>
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 500,
-              letterSpacing: 4,
-              color: ACENTO,
-              textTransform: "uppercase",
-              marginTop: 6,
-            }}
-          >
-            Varias deudas, una nueva operación
-          </div>
-        </div>
-      ) : null}
       <AbsoluteFill style={{ perspective: 2400 }}>
         <div
           style={{

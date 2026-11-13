@@ -730,8 +730,8 @@ export const SegmentacionApp: React.FC<z.infer<typeof segmentacionAppSchema>> = 
   const soloCelular = dispositivo === "celular";
   const caja = vertical
     ? soloCelular
-      ? { cx: 540, cy: 1080, w: 960, h: 1440 }
-      : { cx: 540, cy: 1010, w: 960, h: 1220 }
+      ? { cx: 540, cy: 960, w: 980, h: 1560 }
+      : { cx: 540, cy: 960, w: 960, h: 1300 }
     : { cx: 960, cy: 540, w: 1560, h: 930 };
   const lista: Tipo[] = dispositivo === "secuencia" ? TIPOS : [dispositivo];
   const flota = Math.sin(frame / 40) * 6;
@@ -741,34 +741,6 @@ export const SegmentacionApp: React.FC<z.infer<typeof segmentacionAppSchema>> = 
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
-      {vertical ? (
-        <div
-          style={{
-            position: "absolute",
-            top: 140,
-            width: "100%",
-            textAlign: "center",
-            opacity: titulo,
-            transform: `translateY(${(1 - titulo) * -30}px)`,
-          }}
-        >
-          <div style={{ fontSize: 56, fontWeight: 800, color: "white" }}>
-            Segmentación de Cobranzas
-          </div>
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 500,
-              letterSpacing: 4,
-              color: ACENTO,
-              textTransform: "uppercase",
-              marginTop: 6,
-            }}
-          >
-            Saldo × Mora × Score
-          </div>
-        </div>
-      ) : null}
       <AbsoluteFill style={{ perspective: 2400 }}>
         {lista.map((tipo, i) => {
           const inicio = i * TRAMO;
