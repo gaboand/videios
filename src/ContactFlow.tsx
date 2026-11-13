@@ -124,15 +124,18 @@ const colorAsiento = (i: number, frame: number) => {
 };
 // Desk with a monitor and a chair. Top-row desks have the chair above, the
 // lower row below; side desks are the same desk turned 90 degrees.
+// Desk with a monitor and a chair, filled with the color of its state (gray
+// when idle). Top-row desks have the chair above, the lower row below; side
+// desks are the same desk turned 90 degrees.
 const Puesto: React.FC<{ color: string | null; giro?: number; arriba?: boolean }> = ({ color, giro = 0, arriba }) => {
-  const pantalla = color ?? "#9aa3b2";
+  const fondo = color ?? "#b6bcc6";
   return (
-    <div style={{ width: giro ? 44 : 44, height: giro ? 44 : 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <svg width={44} height={44} viewBox="0 0 44 44" style={{ transform: `rotate(${giro}deg)` }}>
-        {arriba ? <rect x={11} y={1} width={22} height={7} rx={3.5} fill="#c9cfd8" /> : <rect x={11} y={36} width={22} height={7} rx={3.5} fill="#c9cfd8" />}
-        <rect x={2} y={arriba ? 9 : 7} width={40} height={27} rx={5} fill="#eef1f5" stroke="#c3cad5" />
-        <rect x={11} y={arriba ? 13 : 11} width={22} height={12} rx={2} fill={pantalla} />
-        <rect x={16} y={arriba ? 28 : 26} width={12} height={3} rx={1.5} fill="#9aa3b2" />
+        {arriba ? <rect x={11} y={1} width={22} height={7} rx={3.5} fill="#d6dbe2" /> : <rect x={11} y={36} width={22} height={7} rx={3.5} fill="#d6dbe2" />}
+        <rect x={2} y={arriba ? 9 : 7} width={40} height={27} rx={5} fill={fondo} stroke="rgba(0,0,0,0.18)" />
+        <rect x={11} y={arriba ? 13 : 11} width={22} height={12} rx={2} fill="rgba(255,255,255,0.85)" />
+        <rect x={16} y={arriba ? 28 : 26} width={12} height={3} rx={1.5} fill="rgba(255,255,255,0.7)" />
       </svg>
     </div>
   );
@@ -227,7 +230,7 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
         </div>
       </div>
       <div style={{ position: "absolute", left: 0, right: 0, top: 628, display: "flex", justifyContent: "center", gap: 22 }}>
-        {[{ n: "Disponible", c: "#9aa3b2" }, ...ESTADOS].map((e) => (
+        {[{ n: "Disponible", c: "#b6bcc6" }, ...ESTADOS].map((e) => (
           <div key={e.n} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10.5, color: TINTA }}>
             <div style={{ width: 14, height: 12, borderRadius: 3, background: e.c }} />
             {e.n}
