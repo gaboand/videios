@@ -43,12 +43,16 @@ const FondoOndas: React.FC<{ paleta: Paleta }> = ({ paleta }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const p = PALETAS[paleta];
+  // Designed at 1080x1920; blobs and lines stretch to any other format so
+  // they cover the whole frame in 16:9 too.
+  const sx = width / 1080;
+  const sy = height / 1920;
 
   return (
     <AbsoluteFill style={{ backgroundColor: p.base, overflow: "hidden" }}>
       {BLOBS.map((b, i) => {
-        const x = b.x + Math.sin(frame * b.speed + b.phase) * 180;
-        const y = b.y + Math.cos(frame * b.speed * 0.8 + b.phase) * 220;
+        const x = b.x * sx + Math.sin(frame * b.speed + b.phase) * 180;
+        const y = b.y * sy + Math.cos(frame * b.speed * 0.8 + b.phase) * 220;
         return (
           <div
             key={i}
@@ -72,9 +76,10 @@ const FondoOndas: React.FC<{ paleta: Paleta }> = ({ paleta }) => {
         style={{ position: "absolute", inset: 0, opacity: 0.35 }}
       >
         {Array.from({ length: 9 }).map((_, i) => {
-          const y0 = 300 + i * 170;
+          const y0 = (300 + i * 170) * sy;
+          const a = Math.min(1, sy * 1.4);
           const t = frame * 0.03 + i * 0.7;
-          const d = `M -100 ${y0 + Math.sin(t) * 80} C 300 ${y0 - 200 + Math.cos(t) * 120}, 700 ${y0 + 220 + Math.sin(t * 1.3) * 120}, 1180 ${y0 + Math.cos(t) * 80}`;
+          const d = `M -100 ${y0 + Math.sin(t) * 80 * a} C ${300 * sx} ${y0 + (-200 + Math.cos(t) * 120) * a}, ${700 * sx} ${y0 + (220 + Math.sin(t * 1.3) * 120) * a}, ${width + 100} ${y0 + Math.cos(t) * 80 * a}`;
           return (
             <path
               key={i}
