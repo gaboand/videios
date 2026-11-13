@@ -16,19 +16,20 @@ import { FondoAbstracto } from "./FondoAbstracto";
 import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
 import { DniDorso, DniFrente, Persona } from "./Suite360";
 
-// Digital onboarding on a phone held straight (9:16, 39s): the client enters
+// Digital onboarding on a phone held straight (9:16, 44s): the client enters
 // their details, the engine looks for an offer (spinner), picks one of four
 // offers, validates the email code, captures ID front, back and a selfie
 // (each validated by the service, with a spinner) and ends on the WhatsApp
 // confirmation, phone verification, operation summary, finger signature
-// (with its confirmation modal) and the final confirmation.
+// (with its confirmation modal), the final confirmation and the signed
+// contract.
 
 export const onboardingSchema = z.object({
   fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const ONBOARDING_FRAMES = 1170;
+export const ONBOARDING_FRAMES = 1330;
 
 const FUENTE = "Montserrat, sans-serif";
 const TINTA = "#1f2430";
@@ -52,7 +53,8 @@ const ESC = {
   whatsapp: [602, 760],
   resumen: [756, 860],
   firma: [856, 1060],
-  final: [1056, ONBOARDING_FRAMES + 10],
+  final: [1056, 1150],
+  contrato: [1146, ONBOARDING_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
 
@@ -79,6 +81,9 @@ const TAP_FIRMA_CONT = 916;
 const MODAL_FIRMA = 920;
 const TAP_CONFIRMAR = 954;
 const FIRMA_OK = 984;
+const TAP_CONTRATO = 1128;
+const SCROLL = [1176, 1250];
+const SELLO = 1258;
 
 
 const tapsDe = [
@@ -94,6 +99,7 @@ const tapsDe = [
   TAP_FIRMA,
   TAP_FIRMA_CONT,
   TAP_CONFIRMAR,
+  TAP_CONTRATO,
 ];
 
 // Signature drawn with the finger, traced from the reference: a tall narrow
@@ -178,7 +184,9 @@ const DEDO: [number, number, number][] = [
   [TRAZO[1] + 2, PAD.x + TRAZOS[2][TRAZOS[2].length - 1][0], PAD.y + TRAZOS[2][TRAZOS[2].length - 1][1]],
   [TAP_FIRMA_CONT - 2, 280, 534],
   [TAP_CONFIRMAR - 2, 274, 534],
-  [TAP_CONFIRMAR + 40, 320, 720],
+  [TAP_CONFIRMAR + 40, 320, 760],
+  [TAP_CONTRATO - 2, 195, 662],
+  [TAP_CONTRATO + 40, 320, 780],
 ];
 
 const posDedo = (frame: number) => {
@@ -1051,7 +1059,108 @@ const Final: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         ))}
       </div>
-      <Boton x={70} y={640} w={250} texto="Volver al inicio" color={AZUL_OSCURO} />
+      <Boton x={70} y={640} w={250} texto="Ver contrato" color={AZUL_OSCURO} press={pulsado(frame, TAP_CONTRATO)} />
+    </>
+  );
+};
+
+
+// Signed contract as a PDF on the phone: Axonia logo, installment table,
+// payment methods and, below, the client's declaration with the signature.
+const NARANJA_DOC = "#f5a033";
+const VENCIMIENTOS = ["10/12/2026", "10/01/2027", "10/02/2027", "10/03/2027", "10/04/2027", "10/05/2027"];
+const Contrato: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const scroll = interpolate(frame, SCROLL, [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  const sello = spring({ frame: frame - SELLO, fps, config: { damping: 11, stiffness: 140 } });
+  const T: React.FC<{ s?: number; b?: boolean; style?: React.CSSProperties; children: React.ReactNode }> = ({ s = 9, b, style, children }) => (
+    <div style={{ fontSize: s, fontWeight: b ? 700 : 500, color: "#1d1f24", lineHeight: 1.45, ...style }}>{children}</div>
+  );
+  return (
+    <>
+      {/* Viewer toolbar */}
+      <div style={{ position: "absolute", left: 8, top: 86, width: W - 16, height: H - 100, background: "#e3e6ea", borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ height: 40, background: "#3b3f46", display: "flex", alignItems: "center", padding: "0 14px", gap: 8, color: "white" }}>
+          <div style={{ width: 18, height: 22, borderRadius: 3, background: "#e04a3f", fontSize: 6, fontWeight: 800, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 2, boxSizing: "border-box" }}>PDF</div>
+          <div style={{ flex: 1, fontSize: 11.5, fontWeight: 700 }}>Contrato_2026111300002.pdf</div>
+          <div style={{ fontSize: 14 }}>⤓</div>
+        </div>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 40, bottom: 0, overflow: "hidden" }}>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 12, transform: `scale(${1 + scroll * 0.22})`, transformOrigin: "50% 96%" }}>
+          <div style={{ background: "white", boxShadow: "0 4px 14px rgba(0,0,0,0.18)", padding: "20px 20px 26px", boxSizing: "border-box" }}>
+            <Img src={staticFile("axonia-logo-original.png")} style={{ width: 92, height: (92 * 231) / 676 }} />
+            <T s={13} b style={{ textAlign: "center", marginTop: 14 }}>Contrato de préstamo personal</T>
+            <T s={8.5} style={{ textAlign: "center", color: "#5b6270", marginTop: 2 }}>
+              Operación 2026111300002 · Javier Perez · {pesos(850000)} en 6 cuotas
+            </T>
+            <T s={11} b style={{ textAlign: "center", marginTop: 14, marginBottom: 8 }}>Cronograma de pagos</T>
+            <div style={{ margin: "0 14px" }}>
+              <div style={{ display: "flex", background: "#ffe4c4", border: `1px solid ${NARANJA_DOC}` }}>
+                {["Cuota", "Vencimiento", "Importe"].map((c, i) => (
+                  <T key={c} s={9} b style={{ flex: 1, textAlign: "center", padding: "4px 0", borderLeft: i ? `1px solid ${NARANJA_DOC}` : "none" }}>{c}</T>
+                ))}
+              </div>
+              {VENCIMIENTOS.map((v, i) => (
+                <div key={v} style={{ display: "flex", borderBottom: `1px solid ${NARANJA_DOC}` }}>
+                  <T s={9} style={{ flex: 1, textAlign: "center", padding: "3px 0" }}>{i + 1}</T>
+                  <T s={9} style={{ flex: 1, textAlign: "right", padding: "3px 6px" }}>{v}</T>
+                  <T s={9} style={{ flex: 1, textAlign: "right", padding: "3px 6px" }}>{pesos(196180)},00</T>
+                </div>
+              ))}
+            </div>
+            <T s={8.5} style={{ marginTop: 14 }}>
+              <b>Medios de pago disponibles:</b> efectivo en puntos de cobranza autorizados, débito automático en cuenta
+              bancaria, tarjeta de débito, billeteras virtuales con QR habilitadas y empresas de cobranza extrabancaria.
+            </T>
+            <T s={8.5} style={{ marginTop: 6 }}>
+              Podés consultar el detalle de tu préstamo por WhatsApp o escribirnos a consultas@axonia.com.ar.
+            </T>
+            <div style={{ borderTop: `1.5px solid ${NARANJA_DOC}`, margin: "12px 0" }} />
+            <T s={10} b>Declaración y firma</T>
+            <T s={8.5} style={{ marginTop: 4 }}>
+              Declaro haber leído y aceptado las condiciones del presente contrato de préstamo, el cronograma de pagos y
+              la política de privacidad y uso de datos. Presto conformidad mediante firma digital, previa verificación de
+              identidad, email y teléfono.
+            </T>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginTop: 8 }}>
+              <div style={{ width: 170 }}>
+                <svg width={170} height={112} viewBox="20 0 300 230">
+                  <path d={firmaD(1)} fill="none" stroke="#1a3fbf" strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div style={{ borderTop: "1px solid #1d1f24", marginTop: 2 }} />
+                <T s={9} b style={{ marginTop: 3 }}>Javier Perez</T>
+                <T s={7.5} style={{ color: "#5b6270" }}>Firma digital · 13/11/2026 11:44</T>
+              </div>
+              <div
+                style={{
+                  width: 96,
+                  height: 96,
+                  borderRadius: "50%",
+                  border: `2.5px solid ${VERDE}`,
+                  color: VERDE,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  fontSize: 8,
+                  fontWeight: 800,
+                  letterSpacing: 0.5,
+                  transform: `rotate(-14deg) scale(${sello * 1})`,
+                  opacity: Math.min(1, sello),
+                  marginBottom: 14,
+                }}
+              >
+                <div style={{ fontSize: 20 }}>✓</div>
+                FIRMADO
+                <br />
+                DIGITALMENTE
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
     </>
   );
 };
@@ -1066,6 +1175,7 @@ const TITULOS: Record<Escena, string> = {
   resumen: "TÉRMINOS Y CONDICIONES",
   firma: "FIRMA DIGITAL",
   final: "ONBOARDING COMPLETO",
+  contrato: "CONTRATO",
 };
 
 const LOGO_W = 2028;
@@ -1096,6 +1206,7 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
     ["resumen", Resumen],
     ["firma", Firma],
     ["final", Final],
+    ["contrato", Contrato],
   ];
   const actual = (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "datos";
   const buscando = vis("buscando");
@@ -1105,7 +1216,7 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
   const dedoVis =
     interpolate(frame, [6, 14], [0, 1], clamp) *
     (1 - interpolate(frame, [ESC.buscando[0], ESC.buscando[0] + 6, ESC.buscando[1] - 6, ESC.buscando[1]], [0, 1, 1, 0], clamp)) *
-    interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
+    interpolate(frame, [TAP_CONTRATO + 30, TAP_CONTRATO + 44], [1, 0], clamp);
 
   return (
     <div style={{ position: "relative", width: W, height: H, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden" }}>
@@ -1147,7 +1258,10 @@ const App: React.FC<{ frame: number }> = ({ frame }) => {
       />
       <div style={{ position: "absolute", top: 100, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
         {/* Dark-lettered logo for the white page */}
-        <Img src={staticFile("axonia-logo-original.png")} style={{ width: 150, height: (150 * 231) / 676 }} />
+        <Img
+          src={staticFile("axonia-logo-original.png")}
+          style={{ width: 150, height: (150 * 231) / 676, opacity: interpolate(frame, [ESC.contrato[0], ESC.contrato[0] + 6], [1, 0], clamp) }}
+        />
       </div>
       {escenas.map(([e, C]) => {
         const v = vis(e);
