@@ -45,8 +45,8 @@ const MODULOS: { id: Id; nombre: string; x: number; y: number; w: number; h: num
 // Arrow drawn as each module (from the second on) appears.
 const FLECHAS: { d: string; doble?: boolean }[] = [
   { d: "M 235 530 L 235 615", doble: true },
-  { d: "M 415 300 Q 540 270 590 440" },
-  { d: "M 860 440 C 880 380 920 420 925 350 S 945 290 955 265" },
+  { d: "M 415 300 Q 700 250 760 455" },
+  { d: "M 860 458 C 870 400 885 345 935 305" },
   { d: "M 720 690 Q 760 790 940 760" },
   { d: "M 1420 620 Q 1410 430 1470 390" },
   { d: "M 1670 525 L 1670 610", doble: true },
@@ -368,7 +368,7 @@ const Funnel: React.FC<{ t: number }> = ({ t }) => (
               width: w,
               height: 18,
               clipPath: "polygon(0 0, 100% 0, calc(100% - 12px) 100%, 12px 100%)",
-              background: `linear-gradient(90deg, #2b2d31, ${i === ETAPAS.length - 1 ? "#a8521f" : "#4a4d54"}, #2b2d31)`,
+              background: `linear-gradient(90deg, #2b2d31, #4a4d54, #2b2d31)`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -521,7 +521,7 @@ const Marketplace: React.FC<{ t: number }> = ({ t }) => (
         return (
           <div key={e.n} style={{ display: "flex", alignItems: "center", gap: 6, height: 15, opacity: p, transform: `translateX(${(1 - p) * 20}px)` }}>
             <div style={{ width: 74, height: 13, borderRadius: 2, background: e.c, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <T s={6} b c="white">{e.n}</T>
+              <T s={6} b c="white" style={{ lineHeight: "13px" }}>{e.n}</T>
             </div>
             <T s={6.5} b style={{ width: 28 }}>{e.tna}</T>
             <T s={6.5} style={{ flex: 1 }}>$ {e.max}</T>
@@ -691,7 +691,13 @@ const CAMPANIAS = [
   { n: "Promesas", a: 3, avance: 0.45 },
 ];
 const Contact: React.FC<{ t: number }> = ({ t }) => {
-  const estado = (i: number) => [VERDE, AMARILLO, ROJO, AZUL][(i * 7 + Math.floor(t / 10)) % 4];
+  // Fixed seat states; only two seats go from available (blue) to on a
+  // call (green) during the shot.
+  const cambios: Record<number, number> = { 4: 44, 25: 60 };
+  const estado = (i: number) =>
+    i in cambios && t >= cambios[i]
+      ? VERDE
+      : [VERDE, AZUL, VERDE, VERDE, AMARILLO, AZUL, VERDE][(i * 3) % 7];
   const kpis: [string, number, string][] = [
     ["Campañas", 4, ""],
     ["Contactados", 1284, ""],
@@ -749,7 +755,6 @@ const Contact: React.FC<{ t: number }> = ({ t }) => {
             ["En llamada", VERDE],
             ["Disponible", AZUL],
             ["Pausa", AMARILLO],
-            ["Cierre", ROJO],
           ].map(([n, c]) => (
             <div key={n} style={{ display: "flex", alignItems: "center", gap: 2.5 }}>
               <div style={{ width: 5, height: 5, borderRadius: 1, background: c }} />
