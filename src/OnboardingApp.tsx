@@ -1477,7 +1477,6 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
   const { W: EW, H: EH } = exteriorDe(tipo, w, h);
   const esc = vertical ? Math.min(980 / EW, 1560 / EH) : Math.min(1640 / EW, 960 / EH);
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
-  const flota = Math.sin(frame / 45) * 5;
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
@@ -1487,7 +1486,8 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
           left: width / 2,
           top: height / 2,
           opacity: t,
-          transform: `translate(-50%, -50%) translateY(${flota + (1 - t) * 120}px) scale(${esc})`,
+          // Device stays fixed: no floating and no slide-in, only a fade.
+          transform: `translate(-50%, -50%) scale(${esc})`,
         }}
       >
         <Dispositivo tipo={tipo} w={w} h={h}>
