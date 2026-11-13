@@ -11,6 +11,9 @@ import {
 import "@fontsource/montserrat/500.css";
 import "@fontsource/montserrat/700.css";
 import "@fontsource/montserrat/800.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/inter/800.css";
 import { createContext, useContext } from "react";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
@@ -607,24 +610,26 @@ const Ofertas: React.FC<{ frame: number }> = ({ frame }) => {
               top: t4 ? 306 : 300 + Math.floor(i / 2) * 186,
               width: t4 ? 200 : 175,
               height: t4 ? 230 : 172,
-              borderRadius: 12,
-              border: `2px solid ${sel ? "#5b7fb5" : "#c5d0df"}`,
-              background: sel ? "linear-gradient(160deg, #8fb4ea, #4f6f9e)" : "linear-gradient(160deg, #f8fafc, #e9eef5)",
-              color: sel ? "white" : TINTA,
+              // Style 4B: navy cards, light-blue accent, Inter.
+              borderRadius: 14,
+              border: `2px solid ${sel ? "#4fb3ff" : "rgba(255,255,255,0.08)"}`,
+              background: sel ? "linear-gradient(165deg, #1d4f8a, #123462)" : "linear-gradient(165deg, #1b2a44, #111b2e)",
+              color: "white",
+              fontFamily: "Inter, sans-serif",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: 4,
+              gap: 5,
               opacity: t,
               transform: `scale(${(0.85 + 0.15 * t) * (1 - p * 0.05) * (sel ? 1.03 : 1)})`,
-              boxShadow: sel ? "0 12px 26px rgba(40,70,120,0.35)" : "0 3px 8px rgba(20,30,50,0.06)",
+              boxShadow: sel ? "0 0 0 4px rgba(79,179,255,0.25), 0 14px 28px rgba(0,0,0,0.35)" : "0 6px 14px rgba(0,0,0,0.2)",
             }}
           >
-            <div style={{ fontSize: 12, opacity: 0.9 }}>{o.n} cuotas</div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: sel ? "#4fb3ff" : "#9fb2cc" }}>{o.n} CUOTAS</div>
             <div style={{ fontSize: 24, fontWeight: 800 }}>{pesos(o.cuota)}</div>
-            <div style={{ fontSize: 10.5, opacity: 0.85 }}>Monto total {pesos(o.cuota * o.n)}</div>
-            <div style={{ fontSize: 9.5, marginTop: 6, lineHeight: 1.6, textAlign: "center", opacity: 0.9 }}>
+            <div style={{ fontSize: 10.5, color: "#9fb2cc" }}>Total {pesos(o.cuota * o.n)}</div>
+            <div style={{ fontSize: 9.5, marginTop: 6, lineHeight: 1.6, textAlign: "left", color: "#9fb2cc" }}>
               ✓ Tasa preferencial
               <br />✓ Sin costos ocultos
               <br />✓ Aprobación inmediata
