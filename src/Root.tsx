@@ -15,6 +15,11 @@ import { WorkflowAxonia, workflowSchema } from "./WorkflowAxonia";
 import { ModulosAxonia, modulosSchema } from "./ModulosAxonia";
 import { Transicion, transicionSchema } from "./Transicion";
 import { SegmentacionApp, segmentacionAppSchema } from "./SegmentacionApp";
+import {
+  CONSOLIDACION_FRAMES,
+  ConsolidacionDeudas,
+  consolidacionSchema,
+} from "./ConsolidacionDeudas";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -184,6 +189,36 @@ export const RemotionRoot: React.FC = () => {
           dispositivo: "notebook" as const,
         }}
         durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render ConsolidacionDeudas
+        id="ConsolidacionDeudas"
+        component={ConsolidacionDeudas}
+        schema={consolidacionSchema}
+        defaultProps={{
+          fondo: "ondas",
+          paleta: "gris",
+          dispositivo: "celular" as const,
+        }}
+        durationInFrames={CONSOLIDACION_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render ConsolidacionDeudas169
+        id="ConsolidacionDeudas169"
+        component={ConsolidacionDeudas}
+        schema={consolidacionSchema}
+        defaultProps={{
+          fondo: "ondas",
+          paleta: "gris",
+          dispositivo: "notebook" as const,
+        }}
+        durationInFrames={CONSOLIDACION_FRAMES}
         fps={30}
         width={1920}
         height={1080}
