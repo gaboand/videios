@@ -10,6 +10,7 @@ import {
   segmentacionSchema,
 } from "./SegmentacionCobranzas";
 import { MatrizRiesgo, matrizSchema } from "./MatrizRiesgo";
+import { PlanPagos, planPagosSchema } from "./PlanPagos";
 import { WorkflowAxonia, workflowSchema } from "./WorkflowAxonia";
 import { ModulosAxonia, modulosSchema } from "./ModulosAxonia";
 import { Transicion, transicionSchema } from "./Transicion";
@@ -130,6 +131,17 @@ export const RemotionRoot: React.FC = () => {
           frase: "Todo *conectado* y\nen un *mismo lugar*",
         }}
         durationInFrames={210}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render PlanPagos
+        id="PlanPagos"
+        component={PlanPagos}
+        schema={planPagosSchema}
+        defaultProps={{ fondo: "geometrico", paleta: "gris" }}
+        durationInFrames={270}
         fps={30}
         width={1080}
         height={1920}
