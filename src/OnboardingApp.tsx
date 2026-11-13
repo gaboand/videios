@@ -1362,14 +1362,12 @@ const App: React.FC<{ frame: number; escritorio?: boolean }> = ({ frame, escrito
   );
 };
 
-// Notebook page (1280 x 800): full-width header, centered white card with
+// Landscape page (tablet 1180 x 820 or notebook 1280 x 800): full-width header, centered white card with
 // the onboarding content, full-page spinner overlay and a mouse cursor.
 const ESC_PAGINA = 0.96;
-const Escritorio: React.FC<{ frame: number }> = ({ frame }) => {
-  const PW = 1280;
-  const PH = 800;
+const Escritorio: React.FC<{ frame: number; PW: number; PH: number; tactil?: boolean }> = ({ frame, PW, PH, tactil }) => {
   const HEADER = 58;
-  const CARD = { x: 260, y: HEADER + 14, w: 760, h: PH - HEADER - 26 };
+  const CARD = { x: PW / 2 - 380, y: HEADER + 14, w: 760, h: PH - HEADER - 26 };
   const ox = PW / 2 - (W / 2) * ESC_PAGINA;
   const oy = CARD.y + 4 - 86 * ESC_PAGINA;
   const actual = escenaActual(frame);
@@ -1426,6 +1424,24 @@ const Escritorio: React.FC<{ frame: number }> = ({ frame }) => {
           }}
         />
       ) : null}
+      {tactil ? (
+        <div
+          style={{
+            position: "absolute",
+            left: cx,
+            top: cy,
+            width: 34,
+            height: 34,
+            transform: `translate(-50%, -50%) scale(${1 - presion * 0.2})`,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.55)",
+            border: "2px solid rgba(40,48,64,0.35)",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+            opacity: punteroVisible(frame) * 0.9,
+            zIndex: 7,
+          }}
+        />
+      ) : (
       <svg
         width={26}
         height={26}
@@ -1442,6 +1458,7 @@ const Escritorio: React.FC<{ frame: number }> = ({ frame }) => {
       >
         <path d="M4 2 L4 19 L8.5 15 L11.5 21.5 L14.5 20 L11.5 13.8 L17.5 13.5 Z" fill="white" stroke="#111" strokeWidth={1.4} strokeLinejoin="round" />
       </svg>
+      )}
     </div>
   );
 };
@@ -1450,7 +1467,7 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const vertical = height > width;
-  const tipo = vertical ? "celular" : "notebook";
+  const tipo = vertical ? "celular" : "tablet";
   const { w, h } = pantallaDe(tipo, vertical);
   const { W: EW, H: EH } = exteriorDe(tipo, w, h);
   const esc = vertical ? Math.min(980 / EW, 1560 / EH) : Math.min(1640 / EW, 960 / EH);
@@ -1469,7 +1486,7 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
         }}
       >
         <Dispositivo tipo={tipo} w={w} h={h}>
-          {vertical ? <App frame={frame} /> : <Escritorio frame={frame} />}
+          {vertical ? <App frame={frame} /> : <Escritorio frame={frame} PW={w} PH={h} tactil />}
         </Dispositivo>
       </div>
     </AbsoluteFill>
