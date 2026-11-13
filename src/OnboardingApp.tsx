@@ -415,7 +415,7 @@ const Datos: React.FC<{ frame: number }> = ({ frame }) => {
           boxShadow: "0 4px 14px rgba(20,30,50,0.06)",
         }}
       />
-      <Campo etiqueta="DNI" valor={tipeo(frame, "28456789", TIPEO_DNI)} y={270} activo={enCampo(TIPEO_DNI)} cursor={enCampo(TIPEO_DNI) && Math.floor(frame / 8) % 2 === 0} gris={ident > 0.5} />
+      <Campo etiqueta="DNI" valor={tipeo(frame, "2845678", TIPEO_DNI)} y={270} activo={enCampo(TIPEO_DNI)} cursor={enCampo(TIPEO_DNI) && Math.floor(frame / 8) % 2 === 0} gris={ident > 0.5} />
       <Campo etiqueta="GÉNERO" valor="MASCULINO" y={340} select gris={ident > 0.5} />
       {/* Consultar turns into the identified client card */}
       <Boton
