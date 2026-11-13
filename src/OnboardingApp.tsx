@@ -96,22 +96,29 @@ const tapsDe = [
   TAP_CONFIRMAR,
 ];
 
-// Signature drawn with the finger: Catmull-Rom through a few points, in
-// signature-pad coordinates (330 x 230).
-const PUNTOS_FIRMA: [number, number][] = [
-  [48, 150], [70, 92], [92, 160], [78, 188], [60, 172], [104, 128], [140, 72], [176, 64],
-  [164, 112], [126, 148], [176, 126], [222, 74], [252, 86], [234, 136], [184, 170], [252, 148], [296, 104],
+// Signature drawn with the finger, cursive like a real one: a big "C"
+// loop running into small letters and a tall stroke, then a crossing
+// flourish. Catmull-Rom through a few points per stroke, in signature-pad
+// coordinates (330 x 230).
+const TRAZOS: [number, number][][] = [
+  [
+    [132, 60], [104, 60], [78, 88], [60, 132], [54, 172], [66, 190], [94, 180], [118, 156],
+    [134, 134], [138, 120], [140, 150], [150, 136], [164, 126], [154, 150], [168, 152],
+    [182, 128], [180, 154], [198, 142], [214, 102], [228, 44], [224, 108], [220, 180],
+  ],
+  [
+    [168, 122], [214, 112], [262, 98], [292, 92],
+  ],
 ];
-const FIRMA: [number, number][] = (() => {
+const muestrear = (P: [number, number][]) => {
   const out: [number, number][] = [];
-  const P = PUNTOS_FIRMA;
   for (let i = 0; i < P.length - 1; i++) {
     const p0 = P[Math.max(0, i - 1)];
     const p1 = P[i];
     const p2 = P[i + 1];
     const p3 = P[Math.min(P.length - 1, i + 2)];
-    for (let k = 0; k < 10; k++) {
-      const t = k / 10;
+    for (let k = 0; k < 8; k++) {
+      const t = k / 8;
       const t2 = t * t;
       const t3 = t2 * t;
       const c = (a: number, b: number, cc: number, d: number) =>
@@ -121,8 +128,31 @@ const FIRMA: [number, number][] = (() => {
   }
   out.push(P[P.length - 1]);
   return out;
-})();
-const FIRMA_D = FIRMA.map(([x, y], i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+};
+// Every sampled point, tagged with its stroke.
+const FIRMA: { x: number; y: number; trazo: number }[] = TRAZOS.flatMap((tr, k) =>
+  muestrear(tr).map(([x, y]) => ({ x, y, trazo: k })),
+);
+// SVG path of the signature drawn up to `progreso` (0 to 1).
+const firmaD = (progreso: number) => {
+  const n = progreso * (FIRMA.length - 1);
+  let d = "";
+  for (let i = 0; i <= Math.min(Math.floor(n) + 1, FIRMA.length - 1); i++) {
+    let { x, y } = FIRMA[i];
+    if (i > n) {
+      const a = FIRMA[i - 1];
+      if (a.trazo !== FIRMA[i].trazo) {
+        break;
+      }
+      const f = n - (i - 1);
+      x = a.x + (x - a.x) * f;
+      y = a.y + (y - a.y) * f;
+    }
+    const nuevo = i === 0 || FIRMA[i - 1].trazo !== FIRMA[i].trazo;
+    d += `${nuevo ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)} `;
+  }
+  return d;
+};
 const PAD = { x: 30, y: 262, w: 330, h: 230 };
 const puntoFirma = (frame: number) => {
   const t = interpolate(frame, TRAZO, [0, FIRMA.length - 1], clamp);
@@ -130,7 +160,7 @@ const puntoFirma = (frame: number) => {
   const a = FIRMA[i];
   const b = FIRMA[Math.min(FIRMA.length - 1, i + 1)];
   const f = t - i;
-  return { x: PAD.x + a[0] + (b[0] - a[0]) * f, y: PAD.y + a[1] + (b[1] - a[1]) * f };
+  return { x: PAD.x + a.x + (b.x - a.x) * f, y: PAD.y + a.y + (b.y - a.y) * f };
 };
 
 // Finger path: [arrival frame, x, y] in screen coordinates.
@@ -149,8 +179,8 @@ const DEDO: [number, number, number][] = [
   [TAP_WA - 2, 195, 452],
   [TAP_WA + 40, 300, 700],
   [TAP_FIRMA - 2, 195, 604],
-  [TRAZO[0], PAD.x + PUNTOS_FIRMA[0][0], PAD.y + PUNTOS_FIRMA[0][1]],
-  [TRAZO[1] + 2, PAD.x + 296, PAD.y + 104],
+  [TRAZO[0], PAD.x + TRAZOS[0][0][0], PAD.y + TRAZOS[0][0][1]],
+  [TRAZO[1] + 2, PAD.x + 292, PAD.y + 92],
   [TAP_FIRMA_CONT - 2, 280, 534],
   [TAP_CONFIRMAR - 2, 274, 534],
   [TAP_CONFIRMAR + 40, 320, 720],
@@ -869,15 +899,12 @@ const Firma: React.FC<{ frame: number }> = ({ frame }) => {
   const firma = (w: number, h: number, progreso = 1) => (
     <svg width={w} height={h} viewBox="0 0 330 230">
       <path
-        d={FIRMA_D}
+        d={firmaD(progreso)}
         fill="none"
-        stroke="#1e3f8a"
-        strokeWidth={3.2}
+        stroke="#1a3fbf"
+        strokeWidth={4.2}
         strokeLinecap="round"
         strokeLinejoin="round"
-        pathLength={1}
-        strokeDasharray={1}
-        strokeDashoffset={1 - progreso}
       />
     </svg>
   );
