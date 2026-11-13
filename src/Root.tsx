@@ -27,6 +27,7 @@ import {
   onboardingSchema,
 } from "./OnboardingApp";
 import { OfertasOpciones } from "./OfertasOpciones";
+import { TIENDA_FRAMES, TiendaAxonia, tiendaSchema } from "./TiendaAxonia";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -282,6 +283,17 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={2000}
         height={1500}
+      />
+      <Composition
+        // npx remotion render TiendaAxonia
+        id="TiendaAxonia"
+        component={TiendaAxonia}
+        schema={tiendaSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={TIENDA_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
       />
     </>
   );
