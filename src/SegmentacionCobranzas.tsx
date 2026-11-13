@@ -26,6 +26,11 @@ const FUENTE = "Montserrat, sans-serif";
 const ACENTO = "#FF8C42";
 const TEXTO_2 = "#b8bcc4";
 
+const LADO = 86;
+const CUBO_Y = 720;
+// Vertical gap between segments when the cube opens up.
+const HUECO = 46;
+
 type SegId = "S1" | "S2" | "S3" | "S4";
 const SEGMENTOS: Record<
   SegId,
@@ -44,55 +49,49 @@ const SEGMENTOS: Record<
   S1: {
     color: "#2f6fe0",
     nombre: "Preventivo",
-    perfil: "Mora 0-30 días · saldo bajo",
+    perfil: "Mora 0-30 días · riesgo bajo",
     accion: "Recordatorio por WhatsApp",
-    celdas: 24,
-    apertura: [0, 0, 70],
-    origen: [500, 760],
+    celdas: 25,
+    apertura: [0, 1.5 * HUECO, 0],
+    origen: [540, 930],
   },
   S2: {
     color: "#2e9e4a",
-    nombre: "Prioritario",
-    perfil: "Saldo alto · buen score",
-    accion: "Ejecutivo de cuenta asignado",
-    celdas: 1,
-    apertura: [40, -90, 130],
-    origen: [640, 560],
+    nombre: "Mora temprana",
+    perfil: "31-60 días · riesgo moderado",
+    accion: "Recordatorio + llamada",
+    celdas: 15,
+    apertura: [0, 0.5 * HUECO, 0],
+    origen: [540, 800],
   },
   S3: {
     color: "#f08a2c",
-    nombre: "Mora temprana",
-    perfil: "31-90 días de atraso",
+    nombre: "Mora media",
+    perfil: "61-90 días · riesgo alto",
     accion: "Propuesta de refinanciación",
-    celdas: 10,
-    apertura: [110, 0, 0],
-    origen: [720, 700],
+    celdas: 15,
+    apertura: [0, -0.5 * HUECO, 0],
+    origen: [540, 660],
   },
   S4: {
     color: "#e0493f",
     nombre: "Mora avanzada",
-    perfil: "+90 días · score bajo",
+    perfil: "+90 días · riesgo crítico",
     accion: "Gestión intensiva y agencia externa",
-    celdas: 40,
-    apertura: [-30, -40, -110],
-    origen: [470, 560],
+    celdas: 20,
+    apertura: [0, -1.5 * HUECO, 0],
+    origen: [540, 520],
   },
 };
 const ORDEN: SegId[] = ["S1", "S2", "S3", "S4"];
 
-const LADO = 74;
-const CUBO_Y = 730;
 
-// Segment of each voxel: front layer blue with one green corner, middle
-// layer orange on the right two columns and red elsewhere, back layer red.
+// Segment of each voxel by risk: days past due (Y) sets the band and a low
+// score (back layer, z = 2) pushes the cell one band up. Blue = lowest risk,
+// red = highest.
 const segmentoDe = (x: number, y: number, z: number): SegId => {
-  if (z === 0) {
-    return x === 4 && y === 4 ? "S2" : "S1";
-  }
-  if (z === 1 && x >= 3) {
-    return "S3";
-  }
-  return "S4";
+  const banda = Math.max(0, y - 1) + (z === 2 && y >= 1 && y <= 3 ? 1 : 0);
+  return ORDEN[Math.min(3, banda)];
 };
 
 const VOXELES = Array.from({ length: 3 }).flatMap((_, z) =>
@@ -326,8 +325,8 @@ export const SegmentacionCobranzas: React.FC<
       <div
         style={{
           position: "absolute",
-          left: 100,
-          top: 330,
+          left: 70,
+          top: 290,
           opacity: leyenda,
           fontSize: 18,
           fontWeight: 500,
@@ -341,7 +340,7 @@ export const SegmentacionCobranzas: React.FC<
       >
         <div>X → Saldo de deuda</div>
         <div>Y ↑ Días de mora</div>
-        <div>Z ⊙ Score</div>
+        <div>Z ⊙ Score (atrás = bajo)</div>
       </div>
       {/* Cube */}
       <div
@@ -367,6 +366,50 @@ export const SegmentacionCobranzas: React.FC<
               foco={foco}
             />
           ))}
+        </div>
+      </div>
+      {/* Risk scale: red on top (worst), blue at the bottom (least risky) */}
+      <div
+        style={{
+          position: "absolute",
+          left: 900,
+          top: 470,
+          height: 520,
+          display: "flex",
+          gap: 14,
+          opacity: apertura,
+          fontFamily: FUENTE,
+        }}
+      >
+        <div
+          style={{
+            width: 12,
+            borderRadius: 6,
+            background: `linear-gradient(${SEGMENTOS.S4.color}, ${SEGMENTOS.S3.color}, ${SEGMENTOS.S2.color}, ${SEGMENTOS.S1.color})`,
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            fontSize: 17,
+            fontWeight: 800,
+            color: "white",
+            textTransform: "uppercase",
+            letterSpacing: 1,
+          }}
+        >
+          <div>
+            Más
+            <br />
+            riesgo
+          </div>
+          <div>
+            Menos
+            <br />
+            riesgo
+          </div>
         </div>
       </div>
       {ORDEN.map((id, i) => (
