@@ -147,7 +147,7 @@ export const RemotionRoot: React.FC = () => {
         id="PlanPagos"
         component={PlanPagos}
         schema={planPagosSchema}
-        defaultProps={{ fondo: "geometrico", paleta: "gris" }}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={270}
         fps={30}
         width={1080}
@@ -158,7 +158,7 @@ export const RemotionRoot: React.FC = () => {
         id="PlanPagos169"
         component={PlanPagos}
         schema={planPagosSchema}
-        defaultProps={{ fondo: "geometrico", paleta: "gris" }}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={270}
         fps={30}
         width={1920}
