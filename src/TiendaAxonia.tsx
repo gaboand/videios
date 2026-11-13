@@ -1417,7 +1417,7 @@ const CatalogoMovil: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
-const M_SCROLL_PROD = [ESC.producto[0] + 18, ESC.producto[0] + 40];
+const M_SCROLL_PROD = [ESC.producto[0] + 28, ESC.producto[0] + 46];
 const ProductoMovil: React.FC<{ frame: number }> = ({ frame }) => {
   const { fps } = useVideoConfig();
   const f0 = ESC.producto[0];
