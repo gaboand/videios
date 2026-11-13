@@ -1266,3 +1266,531 @@ export const TiendaAxonia: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, pa
     </AbsoluteFill>
   );
 };
+
+// ---------- 9:16 version: the same store as a mobile site on a phone ----------
+const MW = 390;
+const MH = 844;
+const M_HEADER = 134;
+const M_TOP = 180; // content starts under the header and the category chips
+const CHIPS: [string, number][] = [
+  ["Inicio", 58],
+  ["Celulares", 84],
+  ["Relojes", 70],
+  ["Tablets", 70],
+  ["Notebooks", 88],
+  ["Hogar", 62],
+];
+const chipX = (i: number) => 12 + CHIPS.slice(0, i).reduce((a, [, w]) => a + w + 8, 0);
+
+const HeaderMovil: React.FC<{ frame: number; seccion: string }> = ({ frame, seccion }) => {
+  const carrito = frame >= TAP_AGREGAR + 4 ? 2 : 1;
+  const pop = interpolate(frame, [TAP_AGREGAR + 4, TAP_AGREGAR + 9, TAP_AGREGAR + 18], [0, 1, 0], clamp);
+  return (
+    <div style={{ position: "absolute", left: 0, top: 0, width: MW, zIndex: 5 }}>
+      <div style={{ height: M_HEADER, background: OSCURO, position: "relative" }}>
+        <div style={{ position: "absolute", left: 16, top: 50 }}>
+          <Logo w={96} />
+        </div>
+        <div style={{ position: "absolute", right: 16, top: 50, display: "flex", gap: 16, alignItems: "center" }}>
+          <Icono d={I_CORAZON} s={22} />
+          <div style={{ position: "relative" }}>
+            <Icono d={I_CARRITO} s={22} />
+            <div style={{ position: "absolute", right: -9, top: -7 }}>
+              <Badge n={carrito} pop={pop} />
+            </div>
+          </div>
+          <Icono d="M4 7 H20 M4 12 H20 M4 17 H20" s={22} />
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 88, height: 36, background: "white", borderRadius: 7, display: "flex", alignItems: "center", overflow: "hidden" }}>
+          <div style={{ flex: 1, fontSize: 12, color: "#8a929e", paddingLeft: 12 }}>Buscar productos, marcas y más…</div>
+          <div style={{ width: 44, height: "100%", background: AZUL, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icono d={I_LUPA} s={18} />
+          </div>
+        </div>
+      </div>
+      <div style={{ height: 44, background: OSCURO_2, position: "relative" }}>
+        {CHIPS.map(([n, w], i) => {
+          const sel = n === seccion;
+          return (
+            <div
+              key={n}
+              style={{
+                position: "absolute",
+                left: chipX(i),
+                top: 8,
+                width: w,
+                height: 28,
+                borderRadius: 14,
+                background: sel ? AZUL : "rgba(255,255,255,0.08)",
+                color: "white",
+                fontSize: 11.5,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transform: `scale(${n === "Celulares" ? 1 - pulsado(frame, TAP_CELULARES) * 0.08 : 1})`,
+              }}
+            >
+              {n}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const HomeMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const scroll = interpolate(frame, SCROLL_HOME, [0, 400], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  const brillo = 0.75 + Math.sin(frame / 12) * 0.25;
+  const entra = (d: number) => spring({ frame: frame - d, fps, config: { damping: 16, stiffness: 120 } });
+  return (
+    <div style={{ position: "absolute", left: 0, top: M_TOP, width: MW, transform: `translateY(${-scroll}px)` }}>
+      <div style={{ margin: "0 12px", height: 330, borderRadius: 16, background: "radial-gradient(ellipse at 50% 80%, #0d2a5c 0%, #050912 65%)", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", left: 20, top: 22, right: 20, opacity: entra(4) }}>
+          <div style={{ display: "inline-block", background: AZUL, color: "white", fontSize: 9.5, fontWeight: 800, letterSpacing: 1, padding: "5px 12px", borderRadius: 12 }}>BIENVENIDO A</div>
+          <div style={{ fontSize: 25, fontWeight: 800, color: "white", marginTop: 10 }}>Axonia Online Store</div>
+          <div style={{ fontSize: 12, color: "#d6dce6", marginTop: 6, lineHeight: 1.45 }}>Descubrí productos seleccionados para cada momento.</div>
+          <div style={{ display: "inline-block", background: AZUL, color: "white", fontSize: 12, fontWeight: 700, padding: "9px 16px", borderRadius: 7, marginTop: 12 }}>Ver todo el catálogo →</div>
+        </div>
+        <div style={{ position: "absolute", left: 63, top: 168, width: 240, height: 240, borderRadius: "50%", border: `4px solid rgba(47,140,255,${brillo})`, boxShadow: `0 0 30px rgba(47,140,255,${0.6 * brillo}), inset 0 0 30px rgba(47,140,255,${0.4 * brillo})` }} />
+        <div style={{ position: "absolute", left: 50, top: 290, width: 266, height: 40, borderRadius: "50%", background: "radial-gradient(ellipse, #1a3a78 0%, #0a1430 70%)" }} />
+        {[
+          { P: Cartera, x: 70, y: 196, w: 120, d: 8 },
+          { P: Celular, x: 176, y: 200, w: 110, d: 12 },
+          { P: Reloj, x: 130, y: 236, w: 90, d: 16 },
+          { P: Anteojos, x: 214, y: 262, w: 80, d: 20 },
+        ].map(({ P, x, y, w, d }, i) => (
+          <div key={i} style={{ position: "absolute", left: x, top: y, width: w, height: w * 0.7, opacity: entra(d), transform: `translateY(${(1 - entra(d)) * 24}px)`, filter: "drop-shadow(0 10px 12px rgba(0,0,0,0.5))" }}>
+            <P id={`mhero${i}`} />
+          </div>
+        ))}
+      </div>
+      <div style={{ margin: "22px 16px 0", fontSize: 17, fontWeight: 800, color: TINTA }}>Explorá por categorías</div>
+      <div style={{ margin: "12px 12px 0", display: "flex", justifyContent: "space-between" }}>
+        {CATEGORIAS.map(([n, P], i) => (
+          <div key={n} style={{ width: 66, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: entra(24 + i * 3) }}>
+            <div style={{ width: 60, height: 60, borderRadius: "50%", background: "white", border: `1px solid ${BORDE}`, padding: 8, boxSizing: "border-box" }}>
+              <P id={`mcat${i}`} />
+            </div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: TINTA }}>{n}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ margin: "22px 16px 0", fontSize: 17, fontWeight: 800, color: TINTA }}>Productos destacados</div>
+      <div style={{ margin: "12px 12px 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {DESTACADOS.slice(0, 4).map((it, i) => (
+          <CardProducto key={it.nombre} it={it} id={`mdest${i}`} w={177} h={250} t={interpolate(frame, [SCROLL_HOME[0] + 20 + i * 5, SCROLL_HOME[0] + 34 + i * 5], [0, 1], clamp)} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const M_SCROLL_CAT = 430;
+const CatalogoMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.catalogo[0];
+  const destacada = interpolate(frame, [TAP_PRODUCTO - 14, TAP_PRODUCTO - 4], [0, 1], clamp);
+  const scroll = interpolate(frame, SCROLL_CATALOGO, [0, M_SCROLL_CAT], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  return (
+    <div style={{ position: "absolute", left: 0, top: M_TOP, width: MW, height: MH - M_TOP, background: "#f4f6f9", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: MW, transform: `translateY(${-scroll}px)` }}>
+        <div style={{ margin: "6px 16px 0", display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: TINTA }}>Celulares</div>
+          <div style={{ fontSize: 11.5, color: TINTA_2 }}>12 productos</div>
+        </div>
+        <div style={{ margin: "10px 12px 0", display: "flex", gap: 8 }}>
+          {["Filtros (1)", "Más nuevos ▾", "Marca ▾"].map((t, i) => (
+            <div key={t} style={{ height: 32, padding: "0 14px", borderRadius: 16, border: `1px solid ${i === 0 ? AZUL : BORDE}`, background: "white", color: i === 0 ? AZUL : TINTA, fontSize: 11.5, fontWeight: 700, display: "flex", alignItems: "center" }}>
+              {t}
+            </div>
+          ))}
+        </div>
+        <div style={{ margin: "12px 12px 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {CELULARES.map((it, i) => (
+            <CardProducto key={it.nombre} it={it} id={`mcelu${i}`} w={177} h={250} t={interpolate(frame, [f0 + 6 + i * 3, f0 + 20 + i * 3], [0, 1], clamp)} destacada={i === 5 ? destacada : 0} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const M_SCROLL_PROD = [ESC.producto[0] + 18, ESC.producto[0] + 40];
+const ProductoMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const f0 = ESC.producto[0];
+  const entra = (d: number) => spring({ frame: frame - f0 - d, fps, config: { damping: 16, stiffness: 120 } });
+  const vista = Math.floor(interpolate(frame, [f0 + 6, f0 + 30], [0, 2.99], clamp));
+  const scroll = interpolate(frame, M_SCROLL_PROD, [0, 150], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  const hoja = spring({ frame: frame - TAP_AGREGAR - 4, fps, config: { damping: 18, stiffness: 110 } });
+  return (
+    <div style={{ position: "absolute", left: 0, top: M_TOP, width: MW, height: MH - M_TOP, background: "white", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: MW, transform: `translateY(${-scroll}px)` }}>
+        <div style={{ margin: "8px 16px 0", fontSize: 10.5, color: TINTA_2 }}>Catálogo / Celulares</div>
+        <div style={{ margin: "8px 12px 0", height: 260, borderRadius: 14, background: "radial-gradient(circle at 50% 45%, #ffffff, #eef1f6)", display: "flex", alignItems: "center", justifyContent: "center", opacity: entra(0) }}>
+          <div style={{ width: 340, height: 240, filter: "drop-shadow(0 16px 14px rgba(15,25,45,0.25))" }}>
+            <LumenUltra id="mprincipal" vista={VISTAS[vista]} />
+          </div>
+        </div>
+        <div style={{ margin: "10px 12px 0", display: "flex", gap: 8, justifyContent: "center" }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{ width: 52, height: 52, borderRadius: 8, border: `2px solid ${i === vista ? AZUL : BORDE}`, background: "#f6f7fa", padding: 3, boxSizing: "border-box" }}>
+              <LumenUltra id={`mthumb${i}`} vista={VISTAS[i]} />
+            </div>
+          ))}
+        </div>
+        <div style={{ margin: "14px 16px 0", opacity: entra(6) }}>
+          <div style={{ fontSize: 11, color: AZUL }}>Ver más productos de Lumen</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: TINTA, marginTop: 6 }}>Lumen S9 Ultra</div>
+          <div style={{ fontSize: 11.5, color: "#f5b301", marginTop: 4 }}>
+            ★★★★★ <span style={{ color: TINTA_2 }}>(128)</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 8 }}>
+            <div style={{ fontSize: 26, fontWeight: 800, color: TINTA }}>{pesos(1149900)}</div>
+            <div style={{ fontSize: 11.5, color: VERDE, fontWeight: 700 }}>12 cuotas de {pesos(95825)}</div>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            {["#1c1e22", "#c9ccd1", "#be123c"].map((c, i) => (
+              <div key={c} style={{ width: 22, height: 22, borderRadius: "50%", background: c, border: `2px solid ${i === 0 ? AZUL : "white"}`, boxShadow: `0 0 0 1px ${BORDE}` }} />
+            ))}
+          </div>
+          <div style={{ borderTop: `1px solid ${BORDE}`, marginTop: 14, paddingTop: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: TINTA }}>Descripción</div>
+            <div style={{ fontSize: 11.5, color: TINTA_2, marginTop: 6, lineHeight: 1.55 }}>
+              Pantalla AMOLED de 6,8&quot; a 120 Hz y cámara principal de 200 MP con zoom óptico 10x para fotos nítidas de día y de noche. Batería
+              de 5.000 mAh con carga rápida de 45 W, 256 GB de almacenamiento, resistencia al agua IP68 y 12 meses de garantía oficial.
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+              {["Envío gratis", "12 meses de garantía", "Devolución sin cargo"].map((t) => (
+                <span key={t} style={{ fontSize: 10, fontWeight: 700, color: AZUL, background: "#eef5ff", borderRadius: 10, padding: "3px 9px" }}>
+                  ✓ {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Sticky buy bar */}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 72, background: "white", borderTop: `1px solid ${BORDE}`, boxShadow: "0 -6px 16px rgba(15,25,45,0.08)", display: "flex", alignItems: "center", padding: "0 12px", gap: 10, boxSizing: "border-box" }}>
+        <div style={{ flex: 1, height: 44, border: `1.5px solid ${AZUL_BOTON}`, color: AZUL_BOTON, borderRadius: 8, fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>Comprar ahora</div>
+        <div style={{ flex: 1.2, height: 44, background: AZUL_BOTON, color: "white", borderRadius: 8, fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transform: `scale(${1 - pulsado(frame, TAP_AGREGAR) * 0.05})` }}>
+          <Icono d={I_CARRITO} s={15} /> Agregar al carrito
+        </div>
+      </div>
+      {/* Added-to-cart bottom sheet */}
+      {hoja > 0.001 ? (
+        <>
+          <div style={{ position: "absolute", inset: 0, background: `rgba(10,15,25,${0.4 * hoja})` }} />
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 210, background: "white", borderRadius: "18px 18px 0 0", padding: "18px 16px", boxSizing: "border-box", transform: `translateY(${(1 - hoja) * 220}px)` }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: VERDE }}>✓ Agregado al carrito</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
+              <div style={{ width: 56, height: 48, background: "#f6f7fa", borderRadius: 8, padding: 3, boxSizing: "border-box" }}>
+                <LumenUltra id="mhoja" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TINTA }}>Lumen S9 Ultra</div>
+                <div style={{ fontSize: 11, color: TINTA_2 }}>Negro · 256 GB</div>
+              </div>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: TINTA }}>{pesos(1149900)}</div>
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
+              <div style={{ flex: 1, height: 44, border: `1px solid ${BORDE}`, borderRadius: 8, fontSize: 12.5, fontWeight: 700, color: TINTA, display: "flex", alignItems: "center", justifyContent: "center" }}>Seguir comprando</div>
+              <div style={{ flex: 1, height: 44, background: AZUL_BOTON, color: "white", borderRadius: 8, fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${1 - pulsado(frame, TAP_IR_CARRITO) * 0.06})` }}>
+                Ir al carrito
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+};
+
+const CheckoutMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const f0 = ESC.checkout[0];
+  const elegido = frame >= TAP_PRESTAMO + 2;
+  const revision = frame >= REVISION;
+  const plan = spring({ frame: frame - TAP_PRESTAMO - 4, fps, config: { damping: 16 } });
+  const paso = revision ? 2 : 1;
+  return (
+    <div style={{ position: "absolute", left: 0, top: M_TOP, width: MW, height: MH - M_TOP, background: "#f4f6f9", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 16, top: 8, fontSize: 10, fontWeight: 800, color: AZUL, letterSpacing: 1 }}>CHECKOUT</div>
+      <div style={{ position: "absolute", left: 16, top: 22, fontSize: 21, fontWeight: 800, color: TINTA }}>Finalizar compra</div>
+      {/* Steps */}
+      <div style={{ position: "absolute", left: 12, right: 12, top: 58, height: 62, background: "white", borderRadius: 12, border: `1px solid ${BORDE}` }}>
+        <div style={{ position: "absolute", left: 60, right: 60, top: 20, height: 2, background: "#d6dbe3" }}>
+          <div style={{ width: `${paso === 1 ? 50 : 100}%`, height: "100%", background: AZUL }} />
+        </div>
+        {["Entrega", "Pago", "Revisión"].map((n, i) => {
+          const hecho = i < paso;
+          const actual = i === paso;
+          return (
+            <div key={n} style={{ position: "absolute", left: 60 + i * 123 - 30, width: 60, top: 8, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <div style={{ width: 26, height: 26, borderRadius: "50%", background: hecho ? AZUL : "white", border: `2px solid ${hecho || actual ? AZUL : "#c3c9d2"}`, color: hecho ? "white" : actual ? AZUL : TINTA_2, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
+                {hecho ? "✓" : i + 1}
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: hecho || actual ? AZUL : TINTA_2 }}>{n}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 132, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, padding: 14, boxSizing: "border-box", height: 390 }}>
+        {!revision ? (
+          <>
+            <div style={{ fontSize: 14, fontWeight: 800, color: TINTA }}>Método de pago</div>
+            {METODOS.map(([n, d], i) => {
+              const sel = i === 3 && elegido;
+              return (
+                <div
+                  key={n}
+                  style={{
+                    marginTop: 8,
+                    height: 50,
+                    boxSizing: "border-box",
+                    border: `1.5px solid ${sel ? AZUL : BORDE}`,
+                    background: sel ? "#eef5ff" : "white",
+                    borderRadius: 9,
+                    padding: "0 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    opacity: interpolate(frame, [f0 + 6 + i * 3, f0 + 14 + i * 3], [0, 1], clamp),
+                    transform: `scale(${i === 3 ? 1 - pulsado(frame, TAP_PRESTAMO) * 0.03 : 1})`,
+                  }}
+                >
+                  <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${sel ? AZUL : "#aab3c0"}`, display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
+                    {sel ? <div style={{ width: 8, height: 8, borderRadius: "50%", background: AZUL }} /> : null}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: TINTA }}>{n}</div>
+                    {d ? <div style={{ fontSize: 9.5, color: TINTA_2, marginTop: 1 }}>{d}</div> : null}
+                  </div>
+                  {i === 3 ? <div style={{ fontSize: 9, fontWeight: 800, color: "white", background: VERDE, borderRadius: 9, padding: "2px 7px" }}>NUEVO</div> : null}
+                </div>
+              );
+            })}
+            {elegido ? (
+              <div style={{ marginTop: 10, display: "flex", gap: 8, opacity: plan, transform: `translateY(${(1 - plan) * 8}px)` }}>
+                {[3, 6, 9].map((n) => (
+                  <div key={n} style={{ flex: 1, borderRadius: 7, border: `1.5px solid ${n === 6 ? AZUL : BORDE}`, background: n === 6 ? "#f5f9ff" : "white", textAlign: "center", padding: "5px 0" }}>
+                    <div style={{ fontSize: 9.5, color: TINTA_2 }}>{n} cuotas de</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 800, color: n === 6 ? AZUL : TINTA }}>{pesos(Math.round((TOTAL * (1 + n * 0.06)) / n))}</div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <div style={{ fontSize: 14, fontWeight: 800, color: TINTA }}>Revisá tu compra</div>
+            {[
+              ["Entrega", "Retiro en local · Sin costo"],
+              ["Pago", "Préstamo · 6 cuotas de " + pesos(Math.round((TOTAL * 1.36) / 6))],
+              ["Contacto", "11 5328-8468"],
+            ].map(([k, v], i) => (
+              <div key={k} style={{ marginTop: 10, padding: "12px", border: `1px solid ${BORDE}`, borderRadius: 9, opacity: interpolate(frame, [REVISION + 4 + i * 4, REVISION + 12 + i * 4], [0, 1], clamp) }}>
+                <div style={{ fontSize: 10.5, color: TINTA_2 }}>{k}</div>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: TINTA, marginTop: 2 }}>{v}</div>
+              </div>
+            ))}
+            {PEDIDO.map((p, i) => (
+              <div key={p.nombre} style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 10 }}>
+                <div style={{ width: 44, height: 38, background: "#f6f7fa", borderRadius: 7, padding: 2, boxSizing: "border-box" }}>
+                  <p.P id={`mrev${i}`} />
+                </div>
+                <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: TINTA }}>{p.nombre}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: TINTA }}>{pesos(p.precio)}</div>
+              </div>
+            ))}
+            <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: TINTA }}>
+              <div style={{ width: 14, height: 14, borderRadius: 3, background: AZUL, color: "white", fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>✓</div>
+              Acepto los términos y condiciones
+            </div>
+          </>
+        )}
+      </div>
+      {/* Order total and main button */}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 128, background: "white", borderTop: `1px solid ${BORDE}`, boxShadow: "0 -6px 16px rgba(15,25,45,0.08)", padding: "12px 12px 0", boxSizing: "border-box" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <span style={{ fontSize: 12, color: TINTA_2 }}>Tu pedido (2 productos)</span>
+          <span style={{ fontSize: 21, fontWeight: 800, color: TINTA }}>{pesos(TOTAL)}</span>
+        </div>
+        <div
+          style={{
+            marginTop: 12,
+            height: 48,
+            borderRadius: 9,
+            background: revision ? VERDE : AZUL_BOTON,
+            color: "white",
+            fontSize: 14,
+            fontWeight: 800,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: elegido ? 1 : 0.5,
+            transform: `scale(${1 - (revision ? pulsado(frame, TAP_CONFIRMAR) : pulsado(frame, TAP_CONTINUAR)) * 0.05})`,
+          }}
+        >
+          {revision ? "Confirmar compra" : "Continuar"}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ConfirmacionMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const { fps } = useVideoConfig();
+  const f0 = ESC.confirmacion[0];
+  const t = spring({ frame: frame - f0 - 4, fps, config: { damping: 12, stiffness: 120 } });
+  return (
+    <div style={{ position: "absolute", left: 0, top: M_TOP, width: MW, height: MH - M_TOP, background: "#f4f6f9", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 18, bottom: 24, background: "white", borderRadius: 16, border: `1px solid ${BORDE}`, display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 34, overflow: "hidden" }}>
+        {Array.from({ length: 22 }).map((_, i) => {
+          const x = (i * 71) % 366;
+          const y = interpolate(frame - f0 - (i % 7) * 2, [0, 70], [-20, 240 + (i % 5) * 50], clamp);
+          return <div key={i} style={{ position: "absolute", left: x, top: y, width: 6, height: 10, borderRadius: 2, background: [AZUL, "#FF8C42", VERDE, "#f5b301"][i % 4], transform: `rotate(${i * 37 + frame * 6}deg)`, opacity: interpolate(frame - f0, [50, 80], [1, 0], clamp) }} />;
+        })}
+        <div style={{ width: 76, height: 76, borderRadius: "50%", background: VERDE, color: "white", fontSize: 42, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${t})`, boxShadow: `0 0 0 ${10 * t}px rgba(30,138,76,0.15)` }}>✓</div>
+        <div style={{ fontSize: 21, fontWeight: 800, color: TINTA, marginTop: 20, textAlign: "center", padding: "0 20px" }}>¡Gracias por tu compra, Javier!</div>
+        <div style={{ fontSize: 11.5, color: TINTA_2, marginTop: 6 }}>Pedido N.º 2026-111300157</div>
+        <div style={{ fontSize: 11.5, color: VERDE, fontWeight: 700, marginTop: 2 }}>Préstamo aprobado</div>
+        <div style={{ width: 320, marginTop: 20, border: `1px solid ${BORDE}`, borderRadius: 12, padding: "4px 14px", boxSizing: "border-box" }}>
+          {PEDIDO.map((p, i) => (
+            <div key={p.nombre} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: i ? `1px solid ${BORDE}` : "none", opacity: interpolate(frame, [f0 + 12 + i * 5, f0 + 20 + i * 5], [0, 1], clamp) }}>
+              <div style={{ width: 48, height: 40, background: "#f6f7fa", borderRadius: 7, padding: 2, boxSizing: "border-box" }}>
+                <p.P id={`mconf${i}`} />
+              </div>
+              <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: TINTA }}>{p.nombre}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: TINTA }}>{pesos(p.precio)}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 22, marginTop: 16, fontSize: 11.5, color: TINTA }}>
+          <div>
+            Retiro: <b>Local Centro</b>
+          </div>
+          <div>
+            Total: <b>{pesos(TOTAL)}</b>
+          </div>
+        </div>
+        <div style={{ marginTop: 22, height: 44, padding: "0 28px", background: AZUL_BOTON, color: "white", borderRadius: 8, fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center" }}>Seguir comprando</div>
+      </div>
+    </div>
+  );
+};
+
+// Finger path on the phone: [arrival frame, x, y].
+const M_FILA_LUMEN = M_TOP + 6 + 32 + 10 + 32 + 12 + 2 * 262; // top of the third row of cards
+const DEDO_MOVIL: [number, number, number][] = [
+  [0, 300, 760],
+  [TAP_CELULARES - 2, chipX(1) + CHIPS[1][1] / 2, M_HEADER + 22],
+  [TAP_PRODUCTO - 2, 290, M_FILA_LUMEN - M_SCROLL_CAT + 90],
+  [TAP_AGREGAR - 2, 270, MH - 36],
+  [TAP_IR_CARRITO - 2, 290, MH - 50],
+  [TAP_PRESTAMO - 2, 195, M_TOP + 132 + 14 + 18 + 3 * 58 + 33],
+  [TAP_CONTINUAR - 2, 195, MH - 38],
+  [TAP_CONFIRMAR - 2, 195, MH - 38],
+  [TAP_CONFIRMAR + 40, 300, 700],
+];
+const posDedoMovil = (frame: number) => {
+  let p = { x: DEDO_MOVIL[0][1], y: DEDO_MOVIL[0][2] };
+  for (let i = 1; i < DEDO_MOVIL.length; i++) {
+    const [f, x, y] = DEDO_MOVIL[i];
+    const desde = Math.max(DEDO_MOVIL[i - 1][0], f - 18);
+    if (frame >= f) {
+      p = { x, y };
+      continue;
+    }
+    if (frame > desde) {
+      const t = interpolate(frame, [desde, f], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+      p = { x: p.x + (x - p.x) * t, y: p.y + (y - p.y) * t };
+    }
+    break;
+  }
+  return p;
+};
+
+const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const escenas: [Escena, React.FC<{ frame: number }>][] = [
+    ["home", HomeMovil],
+    ["catalogo", CatalogoMovil],
+    ["producto", ProductoMovil],
+    ["checkout", CheckoutMovil],
+    ["confirmacion", ConfirmacionMovil],
+  ];
+  const actual = (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "home";
+  const dedo = posDedoMovil(frame);
+  const tap = TAPS.find((f) => frame >= f && frame < f + 16);
+  const onda = tap === undefined ? 0 : (frame - tap) / 16;
+  const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
+  const dedoVis = interpolate(frame, [100, 116], [0, 1], clamp) * interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
+  return (
+    <div style={{ position: "relative", width: MW, height: MH, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden" }}>
+      {escenas.map(([e, C]) => {
+        const [a, b] = ESC[e];
+        const v = interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
+        if (v <= 0.001) {
+          return null;
+        }
+        return (
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v }}>
+            <C frame={frame} />
+          </div>
+        );
+      })}
+      <HeaderMovil frame={frame} seccion={SECCION[actual]} />
+      {tap !== undefined ? (
+        <div style={{ position: "absolute", left: dedo.x, top: dedo.y, width: 18 + onda * 50, height: 18 + onda * 50, transform: "translate(-50%, -50%)", borderRadius: "50%", border: `3px solid rgba(255,140,66,${1 - onda})`, background: `rgba(255,140,66,${(1 - onda) * 0.2})`, zIndex: 8 }} />
+      ) : null}
+      <div
+        style={{
+          position: "absolute",
+          left: dedo.x,
+          top: dedo.y,
+          width: 34,
+          height: 34,
+          transform: `translate(-50%, -50%) scale(${1 - presion * 0.2})`,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.55)",
+          border: "2px solid rgba(40,48,64,0.35)",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+          opacity: dedoVis * 0.9,
+          zIndex: 9,
+        }}
+      />
+    </div>
+  );
+};
+
+export const TiendaMovil: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, paleta }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  const { w, h } = pantallaDe("celular", true);
+  const { W: EW, H: EH } = exteriorDe("celular", w, h);
+  const esc = Math.min((width * 0.84) / EW, (height * 0.82) / EH);
+  const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
+  return (
+    <AbsoluteFill style={{ fontFamily: FUENTE }}>
+      <FondoAbstracto paleta={paleta} estilo={fondo} />
+      <AbsoluteFill style={{ perspective: 2600 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: width / 2,
+            top: height / 2,
+            opacity: t,
+            // Same tilt as the tablet: seen from the left. Fixed, no floating.
+            transform: `translate(-50%, -50%) scale(${esc}) rotateY(14deg) rotateX(6deg) rotateZ(2deg)`,
+          }}
+        >
+          <Dispositivo tipo="celular" w={w} h={h}>
+            <PaginaMovil frame={frame} />
+          </Dispositivo>
+        </div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};

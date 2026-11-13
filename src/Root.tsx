@@ -27,7 +27,7 @@ import {
   onboardingSchema,
 } from "./OnboardingApp";
 import { OfertasOpciones } from "./OfertasOpciones";
-import { Reloj, TIENDA_FRAMES, TiendaAxonia, tiendaSchema } from "./TiendaAxonia";
+import { Reloj, TIENDA_FRAMES, TiendaAxonia, TiendaMovil, tiendaSchema } from "./TiendaAxonia";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -294,6 +294,17 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        // npx remotion render TiendaMovil
+        id="TiendaMovil"
+        component={TiendaMovil}
+        schema={tiendaSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={TIENDA_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
       />
       <Composition
         // Still: close-up of the store smartwatch drawing
