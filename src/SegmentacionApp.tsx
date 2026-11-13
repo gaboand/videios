@@ -171,7 +171,7 @@ const LOGO_H = 693;
 const App: React.FC<{ w: number; h: number; frame: number }> = ({ w, h, frame }) => {
   const { fps } = useVideoConfig();
   const chico = w < 600;
-  const HEADER = chico ? 52 : 58;
+  const HEADER = chico ? 74 : 58;
   const SIDE = chico ? 0 : 54;
   const PAD = chico ? 10 : 20;
   const lateral = w >= 1500;
@@ -189,6 +189,10 @@ const App: React.FC<{ w: number; h: number; frame: number }> = ({ w, h, frame })
   const conteo = interpolate(frame, [CONTEO, CONTEO + 30], [0, 1], clamp);
   const escala = interpolate(frame, [ESCALA, ESCALA + 18], [0, 1], clamp);
   const fs = chico ? 0.86 : 1;
+  // Bottom sheet with the action per segment where there is no side column.
+  const hoja = lateral
+    ? 0
+    : spring({ frame: frame - CARDS, fps, config: { damping: 18, stiffness: 90 } });
   const logoEsc = (chico ? 110 : 130) / LOGO_W;
 
   return (
@@ -213,7 +217,7 @@ const App: React.FC<{ w: number; h: number; frame: number }> = ({ w, h, frame })
           background: "#2f3b52",
           display: "flex",
           alignItems: "center",
-          paddingTop: chico ? 8 : 0,
+          paddingTop: chico ? 26 : 0,
           boxSizing: "border-box",
         }}
       >
@@ -442,6 +446,7 @@ const App: React.FC<{ w: number; h: number; frame: number }> = ({ w, h, frame })
                   color: TINTA,
                   lineHeight: 1.6,
                   zIndex: 2,
+                  opacity: 1 - hoja,
                 }}
               >
                 <div>X → Saldo de deuda</div>
@@ -452,8 +457,9 @@ const App: React.FC<{ w: number; h: number; frame: number }> = ({ w, h, frame })
                 style={{
                   position: "absolute",
                   left: "50%",
-                  top: "54%",
+                  top: `${54 - hoja * 22}%`,
                   perspective: 1600,
+                  scale: String(1 - hoja * 0.3),
                   transformStyle: "preserve-3d",
                 }}
               >
@@ -479,7 +485,7 @@ const App: React.FC<{ w: number; h: number; frame: number }> = ({ w, h, frame })
                   position: "absolute",
                   right: chico ? 10 : 18,
                   top: "16%",
-                  bottom: "14%",
+                  bottom: `${14 + hoja * 40}%`,
                   display: "flex",
                   gap: 8,
                   opacity: escala,
@@ -517,6 +523,85 @@ const App: React.FC<{ w: number; h: number; frame: number }> = ({ w, h, frame })
                   }}
                 />
               </div>
+              {hoja > 0.001 ? (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "white",
+                    borderTop: `1px solid ${BORDE}`,
+                    borderRadius: "14px 14px 0 0",
+                    boxShadow: "0 -8px 24px rgba(20,30,50,0.14)",
+                    padding: chico ? "10px 12px" : "12px 18px",
+                    transform: `translateY(${(1 - hoja) * 110}%)`,
+                    zIndex: 3,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 11 * fs,
+                      fontWeight: 800,
+                      letterSpacing: 1.2,
+                      color: TINTA_2,
+                      textTransform: "uppercase",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Estrategia por segmento
+                  </div>
+                  {[...ORDEN].reverse().map((id, i) => {
+                    const s = SEGMENTOS[id];
+                    const t = interpolate(
+                      frame,
+                      [CARDS + 8 + i * 6, CARDS + 16 + i * 6],
+                      [0, 1],
+                      clamp,
+                    );
+                    return (
+                      <div
+                        key={id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "6px 0",
+                          borderTop: i ? `1px solid ${BORDE}` : "none",
+                          opacity: t,
+                          transform: `translateX(${(1 - t) * 30}px)`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 6,
+                            alignSelf: "stretch",
+                            borderRadius: 3,
+                            background: s.color,
+                          }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{ fontSize: 13 * fs, fontWeight: 800, color: TINTA }}
+                          >
+                            {id} · {s.nombre}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 11.5 * fs,
+                              fontWeight: 700,
+                              color: ACENTO,
+                              marginTop: 1,
+                            }}
+                          >
+                            {s.accion}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
               {/* Segment in focus */}
               {foco ? (
                 <div
@@ -821,8 +906,11 @@ export const SegmentacionApp: React.FC<z.infer<typeof segmentacionAppSchema>> = 
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const vertical = height > width;
+  const soloCelular = dispositivo === "celular";
   const caja = vertical
-    ? { cx: 540, cy: 1010, w: 960, h: 1220 }
+    ? soloCelular
+      ? { cx: 540, cy: 1080, w: 960, h: 1440 }
+      : { cx: 540, cy: 1010, w: 960, h: 1220 }
     : { cx: 960, cy: 540, w: 1560, h: 930 };
   const lista: Tipo[] = dispositivo === "secuencia" ? TIPOS : [dispositivo];
   const flota = Math.sin(frame / 40) * 6;

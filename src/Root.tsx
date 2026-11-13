@@ -166,7 +166,7 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{
           fondo: "ondas",
           paleta: "gris",
-          dispositivo: "notebook" as const,
+          dispositivo: "celular" as const,
         }}
         durationInFrames={360}
         fps={30}
