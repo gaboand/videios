@@ -146,6 +146,17 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
       />
+      <Composition
+        // npx remotion render PlanPagos169
+        id="PlanPagos169"
+        component={PlanPagos}
+        schema={planPagosSchema}
+        defaultProps={{ fondo: "geometrico", paleta: "gris" }}
+        durationInFrames={270}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
     </>
   );
 };

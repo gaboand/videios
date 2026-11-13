@@ -34,13 +34,70 @@ const NAVY = "#1f2d4d";
 const BOTON = "#2c5a8c";
 const FILA_ALT = "#f5f7fa";
 
-// App window on the 1080x1920 canvas.
-const VENTANA = { x: 50, y: 270, w: 980, h: 1380 };
+// Layout for each format. Vertical (1080x1920): data in 2 columns,
+// buttons in 2 rows of 3, compact table. Horizontal (1920x1080): data in 4
+// columns, buttons in a single row, table with capital and interest.
 const HEADER_H = 84;
 const SIDEBAR_W = 72;
-// Content area inside the window.
-const CX = SIDEBAR_W + 34;
-const CW = VENTANA.w - SIDEBAR_W - 68;
+const layout = (horizontal: boolean) => {
+  const VENTANA = horizontal
+    ? { x: 80, y: 50, w: 1760, h: 980 }
+    : { x: 50, y: 270, w: 980, h: 1380 };
+  const CX = SIDEBAR_W + (horizontal ? 50 : 34);
+  const CW = VENTANA.w - SIDEBAR_W - (horizontal ? 100 : 68);
+  const TITULO_Y = HEADER_H + (horizontal ? 28 : 40);
+  const DATOS_Y = HEADER_H + (horizontal ? 92 : 120);
+  const DATOS_H = horizontal ? 150 : 300;
+  const ACC_Y = DATOS_Y + DATOS_H + (horizontal ? 24 : 40);
+  const BTN_COLS = horizontal ? 6 : 3;
+  const BTN_H = horizontal ? 52 : 58;
+  const BTN_GAP = 14;
+  const BTN_W = (CW - BTN_GAP * (BTN_COLS - 1)) / BTN_COLS;
+  const BTN_FILAS = Math.ceil(6 / BTN_COLS);
+  const PLAN_Y =
+    ACC_Y +
+    40 +
+    BTN_H * BTN_FILAS +
+    BTN_GAP * (BTN_FILAS - 1) +
+    (horizontal ? 30 : 50);
+  return {
+    horizontal,
+    VENTANA,
+    CX,
+    CW,
+    TITULO_Y,
+    DATOS_Y,
+    DATOS_H,
+    DATOS_COLS: horizontal ? 4 : 2,
+    ACC_Y,
+    BTN_COLS,
+    BTN_H,
+    BTN_GAP,
+    BTN_W,
+    PLAN_Y,
+    FILA_H: horizontal ? 52 : 78,
+    COL: horizontal
+      ? {
+          n: 90,
+          vto: 220,
+          capital: 250,
+          interes: 230,
+          cuota: 250,
+          adeudado: 250,
+          estado: 160,
+        }
+      : {
+          n: 60,
+          vto: 175,
+          capital: 0,
+          interes: 0,
+          cuota: 200,
+          adeudado: 200,
+          estado: 140,
+        },
+  };
+};
+type Layout = ReturnType<typeof layout>;
 
 const DATOS = [
   ["Cliente", "Javier Perez"],
@@ -63,22 +120,47 @@ const ACCIONES = [
 ];
 
 const CUOTAS = [
-  { n: 1, vto: "10/10/2026", cuota: 449433.9, pagado: true },
-  { n: 2, vto: "10/11/2026", cuota: 443610.65, pagado: false },
-  { n: 3, vto: "10/12/2026", cuota: 437108.01, pagado: false },
-  { n: 4, vto: "10/01/2027", cuota: 429846.74, pagado: false },
-  { n: 5, vto: "10/02/2027", cuota: 421738.31, pagado: false },
+  {
+    n: 1,
+    vto: "10/10/2026",
+    capital: 237683.9,
+    interes: 175000,
+    cuota: 449433.9,
+    pagado: true,
+  },
+  {
+    n: 2,
+    vto: "10/11/2026",
+    capital: 265413.69,
+    interes: 147270.21,
+    cuota: 443610.65,
+    pagado: false,
+  },
+  {
+    n: 3,
+    vto: "10/12/2026",
+    capital: 296378.62,
+    interes: 116305.28,
+    cuota: 437108.01,
+    pagado: false,
+  },
+  {
+    n: 4,
+    vto: "10/01/2027",
+    capital: 330956.12,
+    interes: 81727.78,
+    cuota: 429846.74,
+    pagado: false,
+  },
+  {
+    n: 5,
+    vto: "10/02/2027",
+    capital: 369567.67,
+    interes: 43116.23,
+    cuota: 421738.31,
+    pagado: false,
+  },
 ];
-
-// Vertical layout inside the window (window coordinates).
-const TITULO_Y = HEADER_H + 40;
-const DATOS_Y = HEADER_H + 120;
-const DATOS_H = 300;
-const ACC_Y = DATOS_Y + DATOS_H + 40;
-const BTN_H = 58;
-const BTN_GAP = 14;
-const BTN_W = (CW - BTN_GAP * 2) / 3;
-const PLAN_Y = ACC_Y + 40 + BTN_H * 2 + BTN_GAP + 50;
 
 // Timeline (frames).
 const VENTANA_DESDE = 4;
@@ -105,7 +187,7 @@ const ICONOS = [
   "M12 3 L14 6 H18 V10 L21 12 L18 14 V18 H14 L12 21 L10 18 H6 V14 L3 12 L6 10 V6 H10 Z", // gear
 ];
 
-const Ventana: React.FC = () => {
+const Ventana: React.FC<{ L: Layout }> = ({ L }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -129,7 +211,7 @@ const Ventana: React.FC = () => {
     (a, c) => a + c.cuota,
     0,
   );
-  const COL = { n: 60, vto: 175, cuota: 200, adeudado: 200, estado: 140 };
+  const COL = L.COL;
 
   const aparece = (desde: number) =>
     spring({
@@ -150,7 +232,7 @@ const Ventana: React.FC = () => {
           position: "absolute",
           left: 0,
           top: 0,
-          width: VENTANA.w,
+          width: L.VENTANA.w,
           height: HEADER_H,
           background: "#4a4a4a",
           display: "flex",
@@ -273,9 +355,9 @@ const Ventana: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          left: CX,
-          width: CW,
-          top: TITULO_Y,
+          left: L.CX,
+          width: L.CW,
+          top: L.TITULO_Y,
           textAlign: "center",
           fontSize: 34,
           fontWeight: 700,
@@ -290,16 +372,16 @@ const Ventana: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          left: CX,
-          width: CW,
-          top: DATOS_Y,
-          height: DATOS_H,
+          left: L.CX,
+          width: L.CW,
+          top: L.DATOS_Y,
+          height: L.DATOS_H,
           borderRadius: 16,
           background: "#f3f5f8",
           padding: "30px 36px",
           boxSizing: "border-box",
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: `repeat(${L.DATOS_COLS}, 1fr)`,
           rowGap: 26,
           columnGap: 30,
           opacity: aparece(DATOS_DESDE),
@@ -363,8 +445,8 @@ const Ventana: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          left: CX,
-          top: ACC_Y,
+          left: L.CX,
+          top: L.ACC_Y,
           fontSize: 17,
           fontWeight: 800,
           letterSpacing: 1.5,
@@ -386,10 +468,13 @@ const Ventana: React.FC = () => {
             key={a}
             style={{
               position: "absolute",
-              left: CX + (i % 3) * (BTN_W + BTN_GAP),
-              top: ACC_Y + 40 + Math.floor(i / 3) * (BTN_H + BTN_GAP),
-              width: BTN_W,
-              height: BTN_H,
+              left: L.CX + (i % L.BTN_COLS) * (L.BTN_W + L.BTN_GAP),
+              top:
+                L.ACC_Y +
+                40 +
+                Math.floor(i / L.BTN_COLS) * (L.BTN_H + L.BTN_GAP),
+              width: L.BTN_W,
+              height: L.BTN_H,
               borderRadius: 10,
               display: "flex",
               alignItems: "center",
@@ -418,9 +503,9 @@ const Ventana: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          left: CX,
-          width: CW,
-          top: PLAN_Y,
+          left: L.CX,
+          width: L.CW,
+          top: L.PLAN_Y,
           opacity: aparece(FILAS_DESDE - 8),
         }}
       >
@@ -452,6 +537,16 @@ const Ventana: React.FC = () => {
         >
           <div style={{ width: COL.n }}>Cta</div>
           <div style={{ width: COL.vto }}>Vencimiento</div>
+          {L.horizontal ? (
+            <>
+              <div style={{ width: COL.capital, textAlign: "right" }}>
+                Capital
+              </div>
+              <div style={{ width: COL.interes, textAlign: "right" }}>
+                Interés
+              </div>
+            </>
+          ) : null}
           <div style={{ width: COL.cuota, textAlign: "right" }}>Cuota</div>
           <div style={{ width: COL.adeudado, textAlign: "right" }}>
             Adeudado
@@ -476,7 +571,7 @@ const Ventana: React.FC = () => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                height: 78,
+                height: L.FILA_H,
                 paddingLeft: 16,
                 fontSize: 21,
                 fontWeight: 500,
@@ -493,6 +588,16 @@ const Ventana: React.FC = () => {
             >
               <div style={{ width: COL.n, fontWeight: 700 }}>{c.n}</div>
               <div style={{ width: COL.vto }}>{c.vto}</div>
+              {L.horizontal ? (
+                <>
+                  <div style={{ width: COL.capital, textAlign: "right" }}>
+                    {pesos(c.capital)}
+                  </div>
+                  <div style={{ width: COL.interes, textAlign: "right" }}>
+                    {pesos(c.interes)}
+                  </div>
+                </>
+              ) : null}
               <div style={{ width: COL.cuota, textAlign: "right" }}>
                 {pesos(c.cuota)}
               </div>
@@ -580,7 +685,8 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
   paleta,
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
+  const L = layout(width > height);
   const t = spring({
     frame: frame - VENTANA_DESDE,
     fps,
@@ -595,8 +701,8 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
 
   // Cursor travels to the center of the "Cobranza" button.
   const objetivo = {
-    x: VENTANA.x + CX + BTN_W / 2,
-    y: VENTANA.y + ACC_Y + 40 + BTN_H / 2,
+    x: L.VENTANA.x + L.CX + L.BTN_W / 2,
+    y: L.VENTANA.y + L.ACC_Y + 40 + L.BTN_H / 2,
   };
   const llega = interpolate(frame, [CLIC - 30, CLIC], [0, 1], {
     ...clamp,
@@ -604,25 +710,104 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
   });
   const sale = interpolate(frame, [PAGO + 20, PAGO + 35], [1, 0], clamp);
 
+  // Window-local point of the "Cobranza" button, for the tablet tap.
+  const toque = { x: objetivo.x - L.VENTANA.x, y: objetivo.y - L.VENTANA.y };
+  const onda = interpolate(frame, [CLIC, CLIC + 18], [0, 1], clamp);
+
+  const pantalla = (
+    <div
+      style={{
+        position: "relative",
+        width: L.VENTANA.w,
+        height: L.VENTANA.h,
+        borderRadius: L.horizontal ? 14 : 22,
+        overflow: "hidden",
+        background: "white",
+        boxShadow: L.horizontal ? "none" : "0 30px 80px rgba(0,0,0,0.55)",
+      }}
+    >
+      <Ventana L={L} />
+      {/* Finger tap on the tablet */}
+      {L.horizontal && onda > 0 && onda < 1 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: toque.x,
+            top: toque.y,
+            width: 30 + onda * 90,
+            height: 30 + onda * 90,
+            transform: "translate(-50%, -50%)",
+            borderRadius: "50%",
+            background: `rgba(255,255,255,${(1 - onda) * 0.55})`,
+            border: `3px solid rgba(255,140,66,${1 - onda})`,
+          }}
+        />
+      ) : null}
+    </div>
+  );
+
+  if (L.horizontal) {
+    // Landscape tablet, tilted in 3D, floating gently.
+    const BISEL = 34;
+    const flota = Math.sin(frame / 40) * 6;
+    const giro = interpolate(t, [0, 1], [-30, -16]);
+    return (
+      <AbsoluteFill style={{ fontFamily: FUENTE }}>
+        <FondoAbstracto paleta={paleta} estilo={fondo} />
+        <AbsoluteFill
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            perspective: 2400,
+          }}
+        >
+          <div
+            style={{
+              padding: BISEL,
+              borderRadius: 52,
+              background: "linear-gradient(145deg, #2b2e35, #0d0e11)",
+              border: "3px solid #3a3e46",
+              boxShadow:
+                "0 60px 120px rgba(0,0,0,0.65), inset 0 0 0 2px rgba(255,255,255,0.05)",
+              position: "relative",
+              opacity: t,
+              transform: `translateY(${flota + (1 - t) * 120}px) scale(0.78) rotateY(${giro}deg) rotateX(10deg) rotateZ(-2deg)`,
+            }}
+          >
+            {/* Front camera */}
+            <div
+              style={{
+                position: "absolute",
+                left: 13,
+                top: "50%",
+                width: 10,
+                height: 10,
+                marginTop: -5,
+                borderRadius: "50%",
+                background: "#1b2a3a",
+                boxShadow: "inset 0 0 3px rgba(125,211,252,0.6)",
+              }}
+            />
+            {pantalla}
+          </div>
+        </AbsoluteFill>
+      </AbsoluteFill>
+    );
+  }
+
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
       <div
         style={{
           position: "absolute",
-          left: VENTANA.x,
-          top: VENTANA.y,
-          width: VENTANA.w,
-          height: VENTANA.h,
-          borderRadius: 22,
-          overflow: "hidden",
-          background: "white",
-          boxShadow: "0 30px 80px rgba(0,0,0,0.55)",
+          left: L.VENTANA.x,
+          top: L.VENTANA.y,
           opacity: t,
           transform: `translateY(${(1 - t) * 80}px) scale(${0.95 + t * 0.05})`,
         }}
       >
-        <Ventana />
+        {pantalla}
       </div>
       {llega > 0 ? (
         <svg
@@ -631,8 +816,8 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
           viewBox="0 0 22 26"
           style={{
             position: "absolute",
-            left: interpolate(llega, [0, 1], [820, objetivo.x]),
-            top: interpolate(llega, [0, 1], [1550, objetivo.y]),
+            left: interpolate(llega, [0, 1], [width * 0.76, objetivo.x]),
+            top: interpolate(llega, [0, 1], [height * 0.8, objetivo.y]),
             opacity: Math.min(llega * 3, sale),
             transform: `scale(${1 - pulsado * 0.15})`,
             filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
