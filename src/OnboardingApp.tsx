@@ -1364,12 +1364,23 @@ const App: React.FC<{ frame: number; escritorio?: boolean }> = ({ frame, escrito
 
 // Landscape page (tablet 1180 x 820 or notebook 1280 x 800): full-width header, centered white card with
 // the onboarding content, full-page spinner overlay and a mouse cursor.
-const ESC_PAGINA = 0.96;
+// The form is shown larger than on the phone; the page scrolls to keep the
+// spot being touched in view, as on a real tablet.
+const ESC_PAGINA = 1.3;
+const objetivoScroll = (f: number) => (f >= ESC.contrato[0] ? 760 : f < 14 ? 315 : posDedo(f).y);
 const Escritorio: React.FC<{ frame: number; PW: number; PH: number; tactil?: boolean }> = ({ frame, PW, PH, tactil }) => {
   const HEADER = 58;
-  const CARD = { x: PW / 2 - 380, y: HEADER + 14, w: 760, h: PH - HEADER - 26 };
+  const CARD = { x: PW / 2 - 330, y: HEADER + 14, w: 660, h: PH - HEADER + 40 };
+  const visible = PH - CARD.y;
+  const maxScroll = (H - 86) * ESC_PAGINA - visible + 10;
+  let media = 0;
+  for (let k = 0; k < 12; k++) {
+    media += objetivoScroll(Math.max(0, frame - k));
+  }
+  media /= 12;
+  const scroll = Math.max(0, Math.min(maxScroll, (media - 86) * ESC_PAGINA - visible * 0.65));
   const ox = PW / 2 - (W / 2) * ESC_PAGINA;
-  const oy = CARD.y + 4 - 86 * ESC_PAGINA;
+  const oy = CARD.y + 4 - 86 * ESC_PAGINA - scroll;
   const actual = escenaActual(frame);
   const p = posDedo(frame);
   const cx = ox + p.x * ESC_PAGINA;
@@ -1379,7 +1390,22 @@ const Escritorio: React.FC<{ frame: number; PW: number; PH: number; tactil?: boo
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
   return (
     <div style={{ position: "relative", width: PW, height: PH, background: "#f1f3f6", fontFamily: FUENTE, overflow: "hidden" }}>
-      <div style={{ position: "absolute", left: 0, top: 0, width: PW, height: HEADER, background: "#4a4a4a", display: "flex", alignItems: "center" }}>
+      <div
+        style={{
+          position: "absolute",
+          left: CARD.x,
+          top: CARD.y - scroll,
+          width: CARD.w,
+          height: CARD.h + scroll,
+          background: "white",
+          borderRadius: 14,
+          boxShadow: "0 6px 24px rgba(20,30,50,0.1)",
+        }}
+      />
+      <div style={{ position: "absolute", left: ox, top: oy, transform: `scale(${ESC_PAGINA})`, transformOrigin: "0 0" }}>
+        <App frame={frame} escritorio />
+      </div>
+      <div style={{ position: "absolute", left: 0, top: 0, width: PW, height: HEADER, background: "#4a4a4a", display: "flex", alignItems: "center", zIndex: 4 }}>
         <div style={{ marginLeft: 24 }}>
           <Logo w={110} />
         </div>
@@ -1391,21 +1417,6 @@ const Escritorio: React.FC<{ frame: number; PW: number; PH: number; tactil?: boo
           <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#d6d9de" }} />
           <div style={{ color: "white", fontSize: 13, fontWeight: 700 }}>Delfina Martinez</div>
         </div>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: CARD.x,
-          top: CARD.y,
-          width: CARD.w,
-          height: CARD.h,
-          background: "white",
-          borderRadius: 14,
-          boxShadow: "0 6px 24px rgba(20,30,50,0.1)",
-        }}
-      />
-      <div style={{ position: "absolute", left: ox, top: oy, transform: `scale(${ESC_PAGINA})`, transformOrigin: "0 0" }}>
-        <App frame={frame} escritorio />
       </div>
       <Buscando frame={frame} grande />
       {tap !== undefined ? (
