@@ -372,7 +372,7 @@ const CuboPantalla: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => 
 type Cliente = { nombre: string; dni: string; dias: number; deuda: number; tel: string };
 const CLIENTES: Cliente[] = [
   { nombre: "MARTA SUSANA GIMENEZ", dni: "27.481.903", dias: 3, deuda: 212480, tel: "11 XXXXX-4821" },
-  { nombre: "JAVIER PEREZ", dni: "2.845.678", dias: 3, deuda: 200629, tel: "11 XXXXX-0123" },
+  { nombre: "JAVIER PEREZ", dni: "2.845.678", dias: 20, deuda: 200629, tel: "11 XXXXX-0123" },
   { nombre: "LUCAS DANIEL FERREYRA", dni: "35.902.114", dias: 35, deuda: 178350, tel: "351 XXXXX-772" },
   { nombre: "ANDREA NOEMI SOSA", dni: "31.554.087", dias: 3, deuda: 156900, tel: "11 XXXXX-3390" },
   { nombre: "RAMIRO ESTEBAN QUIROGA", dni: "38.017.652", dias: 3, deuda: 149212, tel: "261 XXXXX-118" },
@@ -451,7 +451,7 @@ const OPCIONES_GESTION = ["Llamada saliente", "Promesa de pago", "Mensaje de Wha
 const COMENTARIO = "Se compromete a pagar el 25/11";
 const KPIS: [string, string, boolean][] = [
   ["S4", "CONTENEDOR", false],
-  ["3", "DÍAS MORA", true],
+  ["20", "DÍAS MORA", true],
   ["$ 200.629", "DEUDA TOTAL", false],
   ["$ 184.310", "DEUDA VENCIDA", false],
   ["$ 231.540", "DEUDA ACTUALIZADA", false],
@@ -612,7 +612,7 @@ const ClienteFicha: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => 
           <div style={{ position: "absolute", left: 66, top: 42, fontSize: 11, color: TINTA, letterSpacing: 0.5 }}>• DNI: 2845678</div>
           <div style={{ position: "absolute", right: 14, top: 18, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
             <div style={{ background: "#eaf1fd", color: AZUL, fontSize: 10, fontWeight: 800, borderRadius: 5, padding: "3px 8px" }}>S4</div>
-            <div style={{ background: VERDE, color: "white", fontSize: 10, fontWeight: 800, borderRadius: 10, padding: "3px 8px" }}>3 días</div>
+            <div style={{ background: NARANJA, color: "white", fontSize: 10, fontWeight: 800, borderRadius: 10, padding: "3px 8px" }}>20 días</div>
           </div>
         </Caja>
         {KPIS.slice(2).map(([v, l], i) => (
@@ -661,7 +661,7 @@ const ClienteFicha: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => 
         {KPIS.map(([v, l, rojo], i) => (
           <div key={l} style={{ position: "absolute", left: 330 + i * 106, top: 12, width: 98, height: 66, borderRadius: 8, background: "#f4f6fa", borderLeft: `3px solid ${AZUL}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: e(4 + i * 2) }}>
             {rojo ? (
-              <div style={{ background: VERDE, color: "white", fontSize: 12.5, fontWeight: 800, borderRadius: 10, padding: "1px 9px" }}>{v}</div>
+              <div style={{ background: NARANJA, color: "white", fontSize: 12.5, fontWeight: 800, borderRadius: 10, padding: "1px 9px" }}>{v}</div>
             ) : (
               <div style={{ fontSize: 12.5, fontWeight: 700, color: TINTA }}>{v}</div>
             )}
