@@ -751,8 +751,9 @@ export const PlanPagos: React.FC<z.infer<typeof planPagosSchema>> = ({
               "0 60px 120px rgba(0,0,0,0.65), inset 0 0 0 2px rgba(255,255,255,0.05)",
             position: "relative",
             opacity: t,
-            transform: `translateY(${flota + (1 - t) * 120}px) scale(${
-              L.horizontal ? 0.78 : 0.82
+            // 9:16: phone lowered so its top sits at about 30% of the screen.
+            transform: `translateY(${flota + (1 - t) * 120 + (L.horizontal ? 0 : 200)}px) scale(${
+              L.horizontal ? 0.78 : 0.62
             }) rotateY(${giro}deg) rotateX(${L.horizontal ? 10 : 8}deg) rotateZ(${
               L.horizontal ? -2 : 3
             }deg)`,

@@ -730,7 +730,7 @@ export const SegmentacionApp: React.FC<z.infer<typeof segmentacionAppSchema>> = 
   const soloCelular = dispositivo === "celular";
   const caja = vertical
     ? soloCelular
-      ? { cx: 540, cy: 960, w: 980, h: 1560 }
+      ? { cx: 540, cy: 1190, w: 980, h: 1229 } // phone top at 30% of the screen
       : { cx: 540, cy: 960, w: 960, h: 1300 }
     : { cx: 960, cy: 540, w: 1560, h: 930 };
   const lista: Tipo[] = dispositivo === "secuencia" ? TIPOS : [dispositivo];

@@ -1171,7 +1171,7 @@ export const ConsolidacionDeudas: React.FC<z.infer<typeof consolidacionSchema>> 
   const { W, H } = exteriorDe(dispositivo, w, h);
   const caja = vertical
     ? chico
-      ? { cx: 540, cy: 960, w: 980, h: 1560 }
+      ? { cx: 540, cy: 1190, w: 980, h: 1229 } // phone top at 30% of the screen
       : { cx: 540, cy: 960, w: 960, h: 1300 }
     : { cx: 960, cy: 540, w: 1560, h: 930 };
   const esc = Math.min(caja.w / W, caja.h / H);

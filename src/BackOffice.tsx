@@ -1172,14 +1172,15 @@ export const BackOfficeMovil: React.FC<z.infer<typeof backOfficeSchema>> = ({ fo
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const { w, h } = pantallaDe("celular", true);
-  const { W: EW, H: EH } = exteriorDe("celular", w, h);
-  const esc = Math.min((width * 0.88) / EW, (height * 0.84) / EH);
+  const { H: EH } = exteriorDe("celular", w, h);
+  // Phone top at 30% of the screen height (room for titles), bottom near 94%.
+  const esc = (height * 0.64) / EH;
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
       {/* Straight phone, fixed in place */}
-      <div style={{ position: "absolute", left: width / 2, top: height / 2, opacity: t, transform: `translate(-50%, -50%) scale(${esc})` }}>
+      <div style={{ position: "absolute", left: width / 2, top: height * 0.62, opacity: t, transform: `translate(-50%, -50%) scale(${esc})` }}>
         <Dispositivo tipo="celular" w={w} h={h}>
           <PaginaMovil frame={frame} />
         </Dispositivo>
