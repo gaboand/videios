@@ -1838,8 +1838,11 @@ export const TiendaMovil: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, pal
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const { w, h } = pantallaDe("celular", true);
-  const { W: EW, H: EH } = exteriorDe("celular", w, h);
-  const esc = Math.min((width * 0.84) / EW, (height * 0.82) / EH);
+  const { H: EH } = exteriorDe("celular", w, h);
+  // Phone top at 30% of the screen height (leaving room for titles), bottom near 94%.
+  const ARRIBA = 0.3;
+  const ALTO = 0.64;
+  const esc = (height * ALTO) / EH;
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
@@ -1849,7 +1852,7 @@ export const TiendaMovil: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, pal
           style={{
             position: "absolute",
             left: width / 2,
-            top: height / 2,
+            top: height * (ARRIBA + ALTO / 2),
             opacity: t,
             // Same tilt as the tablet: seen from the left. Fixed, no floating.
             transform: `translate(-50%, -50%) scale(${esc}) rotateY(14deg) rotateX(6deg) rotateZ(2deg)`,
