@@ -1,3 +1,4 @@
+import { createContext, useContext } from "react";
 import {
   AbsoluteFill,
   Easing,
@@ -76,6 +77,10 @@ const TAP_PREVIEW = 724;
 const REPARTO = [728, 762];
 const TAP_CONFIRMAR = 800;
 const TAPS = [TAP_ACTIVOS, TAP_JAVIER, TAP_SELECT, TAP_PROMESA, TAP_GUARDAR, TAP_AUTO, TAP_PREVIEW, TAP_CONFIRMAR];
+
+// Elements that the dynamic version lifts out of the screen are hidden in the
+// page while their copy flies outside it.
+const Ocultos = createContext<(id: string) => boolean>(() => false);
 
 const pulsado = (frame: number, f: number) => interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
 const entra = (frame: number, f: number, d = 10) => interpolate(frame, [f, f + d], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
@@ -339,6 +344,33 @@ const SEG_CARDS = CUBO0 + 70;
 const segCardPos = (m: boolean, i: number) =>
   m ? { x: 24 + (i % 2) * 177, y: 632 + Math.floor(i / 2) * 88, w: 165, h: 82 } : { x: X0 + 18 + i * 262, y: 660, w: 250, h: 112 };
 
+const SegCard: React.FC<{ frame: number; m: boolean; i: number; suelto?: boolean }> = ({ frame, m, i, suelto }) => {
+  const oculto = useContext(Ocultos);
+  if (!suelto && oculto(`seg${i}`)) {
+    return null;
+  }
+  const s = SEGS[i];
+  const p = segCardPos(m, i);
+  const e = entra(frame, SEG_CARDS + i * 8, 14);
+  const info = SEG_INFO[s];
+  const n = Math.round(info.clientes * entra(frame, SEG_CARDS + i * 8, 30));
+  return (
+          <div style={{ position: "absolute", left: suelto ? 0 : p.x, top: suelto ? 0 : p.y, width: p.w, height: p.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: `0 10px 24px ${COLOR[s]}26`, overflow: "hidden", opacity: suelto ? 1 : e, transform: suelto ? undefined : `translateY(${(1 - e) * 30}px)`, boxSizing: "border-box", padding: m ? "9px 10px" : "12px 14px" }}>
+            <div style={{ position: "absolute", left: 0, top: 0, right: 0, height: 4, background: COLOR[s] }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ width: 9, height: 9, borderRadius: "50%", background: COLOR[s] }} />
+              <div style={{ fontSize: m ? 11 : 12.5, fontWeight: 800, color: TINTA }}>{info.nombre}</div>
+            </div>
+            {!m ? <div style={{ fontSize: 10, color: TINTA_2, marginTop: 3 }}>{info.perfil}</div> : null}
+            <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginTop: m ? 4 : 6 }}>
+              <div style={{ fontSize: m ? 16 : 20, fontWeight: 800, color: COLOR[s] }}>{n.toLocaleString("es-AR")}</div>
+              <div style={{ fontSize: m ? 9 : 10.5, color: TINTA_2 }}>clientes</div>
+            </div>
+            <div style={{ display: "inline-block", marginTop: m ? 3 : 6, background: `${COLOR[s]}1a`, color: COLOR[s], fontSize: m ? 8 : 10, fontWeight: 700, borderRadius: 6, padding: "4px 8px", whiteSpace: "nowrap" }}>{info.accion}</div>
+          </div>
+          );
+};
+
 const CuboPantalla: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
   const C = m ? CUBO_M : CUBO_T;
   const area = m ? { y: 320, h: 308 } : { y: 232, h: 414 };
@@ -378,27 +410,9 @@ const CuboPantalla: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => 
           </div>
         );
       })}
-      {SEGS.map((s, i) => {
-        const p = segCardPos(m, i);
-        const e = entra(frame, SEG_CARDS + i * 8, 14);
-        const info = SEG_INFO[s];
-        const n = Math.round(info.clientes * entra(frame, SEG_CARDS + i * 8, 30));
-        return (
-          <div key={`c${s}`} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: `0 10px 24px ${COLOR[s]}26`, overflow: "hidden", opacity: e, transform: `translateY(${(1 - e) * 30}px)`, boxSizing: "border-box", padding: m ? "9px 10px" : "12px 14px" }}>
-            <div style={{ position: "absolute", left: 0, top: 0, right: 0, height: 4, background: COLOR[s] }} />
-            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <div style={{ width: 9, height: 9, borderRadius: "50%", background: COLOR[s] }} />
-              <div style={{ fontSize: m ? 11 : 12.5, fontWeight: 800, color: TINTA }}>{info.nombre}</div>
-            </div>
-            {!m ? <div style={{ fontSize: 10, color: TINTA_2, marginTop: 3 }}>{info.perfil}</div> : null}
-            <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginTop: m ? 4 : 6 }}>
-              <div style={{ fontSize: m ? 16 : 20, fontWeight: 800, color: COLOR[s] }}>{n.toLocaleString("es-AR")}</div>
-              <div style={{ fontSize: m ? 9 : 10.5, color: TINTA_2 }}>clientes</div>
-            </div>
-            <div style={{ display: "inline-block", marginTop: m ? 3 : 6, background: `${COLOR[s]}1a`, color: COLOR[s], fontSize: m ? 8 : 10, fontWeight: 700, borderRadius: 6, padding: "4px 8px", whiteSpace: "nowrap" }}>{info.accion}</div>
-          </div>
-        );
-      })}
+      {SEGS.map((_, i) => (
+        <SegCard key={i} frame={frame} m={m} i={i} />
+      ))}
     </div>
   );
 };
@@ -432,30 +446,20 @@ const clientePos = (m: boolean, i: number) => {
   return { x: x0 + (i % L.cols) * (L.w + L.gap), y: L.y + Math.floor(i / L.cols) * (L.h + L.rowGap), w: L.w, h: L.h };
 };
 
-const Cluster: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
+const TarjetaCliente: React.FC<{ c: Cliente; i: number; frame: number; m: boolean; suelto?: boolean }> = ({ c, i, frame, m, suelto }) => {
+  const oculto = useContext(Ocultos);
+  const es = c.nombre === "JAVIER PEREZ";
+  if (!suelto && es && oculto("javier")) {
+    return null;
+  }
   const f0 = ESC.cluster[0];
-  const n = m ? 6 : 16;
+  const p = clientePos(m, i);
+  const e = entra(frame, f0 + 8 + i * 2);
+  const brillo = es ? interpolate(frame, [TAP_JAVIER - 16, TAP_JAVIER - 6], [0, 1], clamp) : 0;
+  const toque = es ? pulsado(frame, TAP_JAVIER) : 0;
+  const color = c.dias <= 10 ? VERDE : NARANJA;
   return (
-    <div style={{ position: "absolute", inset: 0, background: FONDO }}>
-      <div style={{ position: "absolute", left: m ? 16 : X0, top: m ? 108 : 66, display: "flex", alignItems: "center", gap: 6, fontSize: m ? 10.5 : 12, color: AZUL }}>
-        <Icono d={I_FLECHA_IZQ} s={14} c={AZUL} /> Volver a Segmentos
-      </div>
-      {!m ? (
-        <div style={{ position: "absolute", right: 28, top: 60, display: "flex", border: `1px solid ${BORDE}`, borderRadius: 6, overflow: "hidden", fontSize: 10.5, fontWeight: 700 }}>
-          <div style={{ background: AZUL, color: "white", padding: "6px 12px" }}>Cards</div>
-          <div style={{ background: "white", color: TINTA_2, padding: "6px 12px" }}>Listado</div>
-        </div>
-      ) : null}
-      <div style={{ position: "absolute", left: 0, right: m ? 0 : -SIDE, top: m ? 126 : 96, textAlign: "center", fontSize: m ? 15 : 18, fontWeight: 700, color: TINTA }}>Clientes del Cluster S4</div>
-      {CLIENTES.slice(0, n).map((c, i) => {
-        const p = clientePos(m, i);
-        const e = entra(frame, f0 + 8 + i * 2);
-        const es = c.nombre === "JAVIER PEREZ";
-        const brillo = es ? interpolate(frame, [TAP_JAVIER - 16, TAP_JAVIER - 6], [0, 1], clamp) : 0;
-        const toque = es ? pulsado(frame, TAP_JAVIER) : 0;
-        const color = c.dias <= 10 ? VERDE : NARANJA;
-        return (
-          <div key={c.dni} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, background: "white", borderRadius: 10, border: `1.5px solid ${brillo > 0 ? `rgba(47,111,224,${brillo})` : BORDE}`, boxShadow: brillo > 0 ? `0 10px 24px rgba(47,111,224,${0.22 * brillo})` : "0 3px 10px rgba(15,25,45,0.07)", padding: "14px 14px", boxSizing: "border-box", opacity: e, transform: `translateY(${(1 - e) * 16}px) scale(${1 + brillo * 0.03 - toque * 0.05})` }}>
+          <div style={{ position: "absolute", left: suelto ? 0 : p.x, top: suelto ? 0 : p.y, width: p.w, height: p.h, background: "white", borderRadius: 10, border: `1.5px solid ${brillo > 0 ? `rgba(47,111,224,${brillo})` : BORDE}`, boxShadow: brillo > 0 ? `0 10px 24px rgba(47,111,224,${0.22 * brillo})` : "0 3px 10px rgba(15,25,45,0.07)", padding: "14px 14px", boxSizing: "border-box", opacity: suelto ? 1 : e, transform: suelto ? undefined : `translateY(${(1 - e) * 16}px) scale(${1 + brillo * 0.03 - toque * 0.05})` }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
               <Icono d={I_USUARIO} s={22} c={TINTA} w={2.4} />
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -475,8 +479,26 @@ const Cluster: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
               <Icono d={I_TEL} s={11} c={TINTA} w={2} /> {c.tel}
             </div>
           </div>
-        );
-      })}
+          );
+};
+
+const Cluster: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
+  const n = m ? 6 : 16;
+  return (
+    <div style={{ position: "absolute", inset: 0, background: FONDO }}>
+      <div style={{ position: "absolute", left: m ? 16 : X0, top: m ? 108 : 66, display: "flex", alignItems: "center", gap: 6, fontSize: m ? 10.5 : 12, color: AZUL }}>
+        <Icono d={I_FLECHA_IZQ} s={14} c={AZUL} /> Volver a Segmentos
+      </div>
+      {!m ? (
+        <div style={{ position: "absolute", right: 28, top: 60, display: "flex", border: `1px solid ${BORDE}`, borderRadius: 6, overflow: "hidden", fontSize: 10.5, fontWeight: 700 }}>
+          <div style={{ background: AZUL, color: "white", padding: "6px 12px" }}>Cards</div>
+          <div style={{ background: "white", color: TINTA_2, padding: "6px 12px" }}>Listado</div>
+        </div>
+      ) : null}
+      <div style={{ position: "absolute", left: 0, right: m ? 0 : -SIDE, top: m ? 126 : 96, textAlign: "center", fontSize: m ? 15 : 18, fontWeight: 700, color: TINTA }}>Clientes del Cluster S4</div>
+      {CLIENTES.slice(0, n).map((c, i) => (
+        <TarjetaCliente key={c.dni} c={c} i={i} frame={frame} m={m} />
+      ))}
     </div>
   );
 };
@@ -1048,17 +1070,19 @@ const Barras: React.FC<{ frame: number; f0: number; w: number; h: number }> = ({
   );
 };
 
-const Reportes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
+const KpiCard: React.FC<{ k: (typeof KPIS_R)[0]; i: number; x: number; y: number; w: number; h: number; frame: number; m: boolean; suelto?: boolean }> = ({ k, i, x, y, w, h, frame, m, suelto }) => {
+  const oculto = useContext(Ocultos);
+  if (!suelto && oculto(`kpi${i}`)) {
+    return null;
+  }
   const f0 = ESC.reportes[0];
   const e = (d: number) => entra(frame, f0 + d, 12);
   const cuenta = (d: number) => interpolate(frame, [f0 + d, f0 + d + 40], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
-  const kpis = m ? KPIS_R.slice(0, 4) : KPIS_R;
-  const tarjetaKpi = (k: (typeof KPIS_R)[0], i: number, x: number, y: number, w: number, h: number) => {
-    const [d, l, v, suf, delta, color] = k;
-    const c = cuenta(8 + i * 3);
-    const valor = suf === "%" ? `${(v * c / 10).toFixed(1).replace(".", ",")}%` : num(v * c);
-    return (
-      <div key={l} style={{ position: "absolute", left: x, top: y, width: w, height: h, background: "white", borderRadius: 14, boxShadow: "0 6px 18px rgba(15,25,45,0.07)", border: `1px solid ${BORDE}`, padding: m ? "10px 12px" : "14px 14px", boxSizing: "border-box", opacity: e(4 + i * 3), transform: `translateY(${(1 - e(4 + i * 3)) * 14}px)` }}>
+  const [d, l, v, suf, delta, color] = k;
+  const c = cuenta(8 + i * 3);
+  const valor = suf === "%" ? `${((v * c) / 10).toFixed(1).replace(".", ",")}%` : num(v * c);
+  return (
+      <div style={{ position: "absolute", left: suelto ? 0 : x, top: suelto ? 0 : y, width: w, height: h, background: "white", borderRadius: 14, boxShadow: "0 6px 18px rgba(15,25,45,0.07)", border: `1px solid ${BORDE}`, padding: m ? "10px 12px" : "14px 14px", boxSizing: "border-box", opacity: suelto ? 1 : e(4 + i * 3), transform: suelto ? undefined : `translateY(${(1 - e(4 + i * 3)) * 14}px)` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ width: m ? 26 : 30, height: m ? 26 : 30, borderRadius: 9, background: `${color}1f`, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icono d={d} s={m ? 14 : 16} c={color} w={2.1} />
@@ -1068,8 +1092,14 @@ const Reportes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
         <div style={{ fontSize: m ? 18 : 22, fontWeight: 800, color: TINTA, marginTop: m ? 6 : 10 }}>{valor}</div>
         <div style={{ fontSize: m ? 8.5 : 9.5, color: TINTA_2, marginTop: 2 }}>{l}</div>
       </div>
-    );
-  };
+      );
+};
+
+const Reportes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
+  const f0 = ESC.reportes[0];
+  const e = (d: number) => entra(frame, f0 + d, 12);
+  const cuenta = (d: number) => interpolate(frame, [f0 + d, f0 + d + 40], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+  const kpis = m ? KPIS_R.slice(0, 4) : KPIS_R;
   const periodos = m ? ["Hoy", "Semana", "Mes", "Mes ant."] : ["Hoy", "Ayer", "Semana", "Mes", "Mes anterior"];
   const chips = (
     <div style={{ position: "absolute", ...(m ? { left: 12, top: 150 } : { right: 28, top: 70 }), display: "flex", gap: 6, background: "white", border: `1px solid ${BORDE}`, borderRadius: 10, padding: 4, opacity: e(2) }}>
@@ -1087,7 +1117,9 @@ const Reportes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
         <div style={{ position: "absolute", left: 16, top: 106, fontSize: 17, fontWeight: 800, color: TINTA, opacity: e(0) }}>Performance</div>
         <div style={{ position: "absolute", left: 16, top: 130, fontSize: 9.5, color: TINTA_2, opacity: e(0) }}>Cartera Activa · 01/11 al 14/11/2026</div>
         {chips}
-        {kpis.map((k, i) => tarjetaKpi(k, i, 12 + (i % 2) * 189, 192 + Math.floor(i / 2) * 84, 177, 76))}
+        {kpis.map((k, i) => (
+          <KpiCard key={i} k={k} i={i} x={12 + (i % 2) * 189} y={192 + Math.floor(i / 2) * 84} w={177} h={76} frame={frame} m={m} />
+        ))}
         <Caja x={12} y={364} w={366} h={214} style={{ borderRadius: 14, opacity: e(16), padding: "12px 14px" }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: TINTA }}>Gestiones por semana</div>
           <div style={{ marginTop: 10 }}>
@@ -1123,7 +1155,9 @@ const Reportes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
       <div style={{ position: "absolute", left: X0, top: 62, fontSize: 22, fontWeight: 800, color: TINTA, opacity: e(0) }}>Performance y Reportes</div>
       <div style={{ position: "absolute", left: X0, top: 92, fontSize: 11, color: TINTA_2, opacity: e(0) }}>Cartera Activa · 01/11/2026 al 14/11/2026</div>
       {chips}
-      {kpis.map((k, i) => tarjetaKpi(k, i, X0 + i * 218, 122, 204, 104))}
+      {kpis.map((k, i) => (
+        <KpiCard key={i} k={k} i={i} x={X0 + i * 218} y={122} w={204} h={104} frame={frame} m={m} />
+      ))}
       <Caja x={X0} y={240} w={640} h={290} style={{ borderRadius: 14, opacity: e(16), padding: "14px 18px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: TINTA }}>Evolución semanal de gestiones</div>
@@ -1303,6 +1337,171 @@ export const CollectionsAxonia: React.FC<z.infer<typeof collectionsSchema>> = ({
           <Dispositivo tipo={tipo} w={w} h={h}>
             <Pagina frame={frame} m={m} />
           </Dispositivo>
+        </div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+// ---------- Dynamic 16:9 version: camera moves and elements leaving the screen ----------
+// Camera keyframes: zoom, focus point on the screen (page px), tilt and the
+// vertical position of the device centre (fraction of the video height).
+type Toma = { f: number; z: number; px: number; py: number; ry: number; rx: number; rz: number; cy: number };
+const CENTRO = { px: PW / 2, py: PH / 2 };
+const TOMAS: Toma[] = [
+  { f: 0, z: 0.92, ...CENTRO, ry: 22, rx: 10, rz: 3, cy: 0.62 },
+  { f: 36, z: 1, ...CENTRO, ry: 16, rx: 8, rz: 2, cy: 0.62 },
+  { f: 58, z: 1.5, px: 420, py: 420, ry: 9, rx: 5, rz: 1, cy: 0.56 },
+  { f: 92, z: 1.5, px: 400, py: 420, ry: 9, rx: 5, rz: 1, cy: 0.56 },
+  { f: 122, z: 1, ...CENTRO, ry: -15, rx: 7, rz: -2, cy: 0.62 },
+  { f: 168, z: 1.05, px: 560, py: 380, ry: -12, rx: 6, rz: -1.5, cy: 0.62 },
+  { f: 190, z: 1.55, px: 475, py: 230, ry: -7, rx: 4, rz: -1, cy: 0.56 },
+  { f: 214, z: 1.55, px: 475, py: 230, ry: -7, rx: 4, rz: -1, cy: 0.56 },
+  { f: 242, z: 1.05, ...CENTRO, ry: 13, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 264, z: 1.6, px: 920, py: 440, ry: 6, rx: 3, rz: 0.5, cy: 0.56 },
+  { f: 352, z: 1.6, px: 920, py: 520, ry: 6, rx: 3, rz: 0.5, cy: 0.56 },
+  { f: 376, z: 1.35, px: 520, py: 500, ry: 9, rx: 4, rz: 1, cy: 0.57 },
+  { f: 440, z: 1.35, px: 520, py: 470, ry: 9, rx: 4, rz: 1, cy: 0.57 },
+  { f: 472, z: 1, ...CENTRO, ry: 0, rx: 5, rz: 0, cy: 0.6 },
+  { f: 520, z: 1.4, px: 590, py: 400, ry: -4, rx: 3, rz: 0, cy: 0.56 },
+  { f: 556, z: 1, px: 590, py: 440, ry: 0, rx: 4, rz: 0, cy: 0.6 },
+  { f: 632, z: 1, px: 590, py: 440, ry: 3, rx: 4, rz: 0, cy: 0.6 },
+  { f: 652, z: 1, ...CENTRO, ry: -15, rx: 7, rz: -2, cy: 0.62 },
+  { f: 676, z: 1.45, px: 1000, py: 360, ry: -9, rx: 5, rz: -1, cy: 0.56 },
+  { f: 698, z: 1.35, px: 590, py: 430, ry: -6, rx: 3, rz: -0.5, cy: 0.56 },
+  { f: 812, z: 1.35, px: 590, py: 470, ry: -6, rx: 3, rz: -0.5, cy: 0.56 },
+  { f: 846, z: 1, ...CENTRO, ry: -11, rx: 6, rz: -1.5, cy: 0.62 },
+  { f: 872, z: 1, ...CENTRO, ry: 16, rx: 8, rz: 2, cy: 0.62 },
+  { f: 930, z: 1.3, px: 560, py: 180, ry: 9, rx: 5, rz: 1, cy: 0.56 },
+  { f: 985, z: 1.2, px: 590, py: 540, ry: 7, rx: 4, rz: 1, cy: 0.57 },
+  { f: COLLECTIONS_FRAMES, z: 1, ...CENTRO, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+];
+const toma = (frame: number): Toma => {
+  for (let k = 1; k < TOMAS.length; k++) {
+    const a = TOMAS[k - 1];
+    const b = TOMAS[k];
+    if (frame <= b.f) {
+      const t = interpolate(frame, [a.f, b.f], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+      const mezcla = (u: number, v: number) => u + (v - u) * t;
+      return {
+        f: frame,
+        z: Math.exp(mezcla(Math.log(a.z), Math.log(b.z))),
+        px: mezcla(a.px, b.px),
+        py: mezcla(a.py, b.py),
+        ry: mezcla(a.ry, b.ry),
+        rx: mezcla(a.rx, b.rx),
+        rz: mezcla(a.rz, b.rz),
+        cy: mezcla(a.cy, b.cy),
+      };
+    }
+  }
+  return TOMAS[TOMAS.length - 1];
+};
+
+// Elements that jump out of the screen and settle back.
+const SALTO_JAVIER = [146, 162, 176, 192];
+const saltoKpi = (i: number) => {
+  const a = ESC.reportes[0] + 58 + i * 5;
+  return [a, a + 12, a + 26, a + 42];
+};
+const saltoSeg = (i: number) => [SEG_CARDS + i * 8, SEG_CARDS + i * 8 + 30];
+const ocultoEn = (frame: number) => (id: string) => {
+  const dentro = (r: number[]) => frame > r[0] && frame < r[r.length - 1];
+  if (id === "javier") {
+    return dentro(SALTO_JAVIER);
+  }
+  if (id.startsWith("seg")) {
+    return dentro(saltoSeg(Number(id.slice(3))));
+  }
+  if (id.startsWith("kpi")) {
+    return dentro(saltoKpi(Number(id.slice(3))));
+  }
+  return false;
+};
+
+const Salta: React.FC<{ x: number; y: number; w: number; h: number; transform: string; sombra: number; children: React.ReactNode }> = ({ x, y, w, h, transform, sombra, children }) => (
+  <div style={{ position: "absolute", left: x, top: y, width: w, height: h, transform, transformStyle: "preserve-3d" }}>
+    <div style={{ position: "absolute", inset: 0, borderRadius: 14, boxShadow: `0 ${30 * sombra}px ${60 * sombra}px rgba(0,0,0,${0.35 * sombra})` }} />
+    {children}
+  </div>
+);
+
+const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
+  const oculto = ocultoEn(frame);
+  const piezas: React.ReactNode[] = [];
+  if (oculto("javier")) {
+    const t = interpolate(frame, SALTO_JAVIER, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+    const p = clientePos(false, 1);
+    piezas.push(
+      <Salta key="javier" x={p.x} y={p.y} w={p.w} h={p.h} sombra={t} transform={`translate3d(0, ${-50 * t}px, ${190 * t}px) rotateX(${-14 * t}deg) rotateZ(${-3 * t}deg)`}>
+        <TarjetaCliente c={CLIENTES[1]} i={1} frame={frame} m={false} suelto />
+      </Salta>,
+    );
+  }
+  SEGS.forEach((_, i) => {
+    if (!oculto(`seg${i}`)) {
+      return;
+    }
+    const r = saltoSeg(i);
+    const t = interpolate(frame, r, [1, 0], { ...clamp, easing: Easing.out(Easing.back(1.4)) });
+    const op = interpolate(frame, [r[0], r[0] + 6], [0, 1], clamp);
+    const p = segCardPos(false, i);
+    piezas.push(
+      <Salta key={`seg${i}`} x={p.x} y={p.y} w={p.w} h={p.h} sombra={Math.max(0, t)} transform={`translate3d(${(i - 1.5) * 90 * t}px, ${-360 * t}px, ${420 * t}px) rotateX(${-32 * t}deg) rotateZ(${(i - 1.5) * 9 * t}deg)`}>
+        <div style={{ opacity: op }}>
+          <SegCard frame={frame} m={false} i={i} suelto />
+        </div>
+      </Salta>,
+    );
+  });
+  KPIS_R.forEach((k, i) => {
+    if (!oculto(`kpi${i}`)) {
+      return;
+    }
+    const t = interpolate(frame, saltoKpi(i), [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+    piezas.push(
+      <Salta key={`kpi${i}`} x={X0 + i * 218} y={122} w={204} h={104} sombra={t} transform={`translate3d(0, ${-70 * t}px, ${200 * t}px) rotateX(${-16 * t}deg) rotateZ(${(i - 2) * 3 * t}deg)`}>
+        <KpiCard k={k} i={i} x={0} y={0} w={204} h={104} frame={frame} m={false} suelto />
+      </Salta>,
+    );
+  });
+  return <>{piezas}</>;
+};
+
+export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema>> = ({ fondo, paleta }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  const { w, h } = pantallaDe("tablet", false);
+  const { H: EH } = exteriorDe("tablet", w, h);
+  const c = toma(frame);
+  const esc = ((height * 0.64) / EH) * c.z;
+  const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
+  // Device chrome offset (padding + border) so the overlay lines up with the screen.
+  const BORDE_TABLET = 27;
+  const dx = -(c.px - PW / 2) * esc;
+  const dy = -(c.py - PH / 2) * esc;
+  return (
+    <AbsoluteFill style={{ fontFamily: FUENTE }}>
+      <FondoAbstracto paleta={paleta} estilo={fondo} />
+      <AbsoluteFill style={{ perspective: 2600 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: width / 2,
+            top: height * c.cy,
+            opacity: t,
+            transformStyle: "preserve-3d",
+            transform: `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${esc}) rotateY(${c.ry}deg) rotateX(${c.rx}deg) rotateZ(${c.rz}deg)`,
+          }}
+        >
+          <Ocultos.Provider value={ocultoEn(frame)}>
+            <Dispositivo tipo="tablet" w={w} h={h}>
+              <Pagina frame={frame} m={false} />
+            </Dispositivo>
+            <div style={{ position: "absolute", left: BORDE_TABLET, top: BORDE_TABLET, width: PW, height: PH, transformStyle: "preserve-3d", fontFamily: FUENTE }}>
+              <Saltos frame={frame} />
+            </div>
+          </Ocultos.Provider>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

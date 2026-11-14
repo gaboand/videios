@@ -11,7 +11,7 @@ import {
 } from "./SegmentacionCobranzas";
 import { MatrizRiesgo, matrizSchema } from "./MatrizRiesgo";
 import { PlanPagos, planPagosSchema } from "./PlanPagos";
-import { COLLECTIONS_FRAMES, CollectionsAxonia, collectionsSchema } from "./CollectionsAxonia";
+import { COLLECTIONS_FRAMES, CollectionsAxonia, CollectionsDinamico, collectionsSchema } from "./CollectionsAxonia";
 import { WorkflowAxonia, workflowSchema } from "./WorkflowAxonia";
 import { ModulosAxonia, modulosSchema } from "./ModulosAxonia";
 import { Transicion, transicionSchema } from "./Transicion";
@@ -291,6 +291,17 @@ export const RemotionRoot: React.FC = () => {
         // npx remotion render Collections
         id="Collections"
         component={CollectionsAxonia}
+        schema={collectionsSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={COLLECTIONS_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render CollectionsDinamico
+        id="CollectionsDinamico"
+        component={CollectionsDinamico}
         schema={collectionsSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={COLLECTIONS_FRAMES}
