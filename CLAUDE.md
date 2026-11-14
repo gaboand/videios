@@ -29,7 +29,8 @@ Cada video tiene versión 16:9 y 9:16:
 |---|---|---|---|
 | Contact Flow (sala, editor de flujos, plantillas, campaña, segmentación con detalle, franjas, dashboard) | `ContactFlow` (tablet derecha) | `ContactFlowMovil` (celular derecho) | `src/ContactFlow.tsx` |
 | Back office (configuración del flujo, carpeta de Entrada a Tesorería con check, listado de Tesorería, dashboard) | `BackOffice` (tablet derecha) | `BackOfficeMovil` | `src/BackOffice.tsx` |
-| Tienda online (inicio, catálogo de celulares, producto, pago con préstamo, confirmación) | `TiendaAxonia` (tablet inclinada desde la izquierda) | `TiendaMovil` | `src/TiendaAxonia.tsx` |
+| Tienda online (inicio con cambio de marca, catálogo de celulares, producto, pago con préstamo, confirmación) | `TiendaAxonia` (tablet inclinada desde la izquierda) | `TiendaMovil` | `src/TiendaAxonia.tsx` |
+| Collections / CRM de cobranzas (contenedores, cluster S4, ficha con promesa de pago, cubo con cards de segmentos, asignación extrajudicial, reportes) | `Collections` | `CollectionsMovil` | `src/CollectionsAxonia.tsx` |
 | Onboarding (datos con cambio de marca, ofertas estilo 4B, email, identidad, teléfono, firma, contrato) | `OnboardingApp169` (tablet) | `OnboardingApp` (celular) | `src/OnboardingApp.tsx` |
 | Suite 360 (módulos con zoom) | `Suite360` | `Suite360v` | `src/Suite360.tsx` |
 | Consolidación de deudas | `ConsolidacionDeudas169` | `ConsolidacionDeudas` | `src/ConsolidacionDeudas.tsx` |
@@ -43,3 +44,17 @@ Otras: `MarcaAxonia`, `LogoAxonia`, `DashboardAxonia`, `WorkflowAxonia`, `Matriz
 - La pantalla se dibuja en código dentro de `<Dispositivo>` (tablet 1180×820, celular 390×844).
 - Escenas con una tabla `ESC` de frames, toques `TAP_*` y un recorrido del dedo (`DEDO`) con onda naranja al tocar.
 - Números que cuentan con `sube()` / `interpolate`; las tarjetas de estado fijas (como el panel de la sala de Contact Flow) llevan números fijos.
+
+## Encuadre de dispositivos
+
+- En todos los videos (16:9 y 9:16) el dispositivo arranca al 30% de la altura y llega a ~94%: `esc = (height * 0.64) / EH` y centro en `top: height * 0.62`. El 30% de arriba queda para títulos (los pone el usuario en CapCut).
+
+## Versiones dinámicas
+
+Copias con cámara en movimiento, sin tocar el video original: `CollectionsDinamico`/`CollectionsDinamicoMovil`, `TiendaDinamico`/`TiendaDinamicoMovil`, `OnboardingDinamico`/`OnboardingDinamicoMovil` (mismo componente para 16:9 y 9:16, registradas en `src/Root.tsx`).
+
+- Cámara por keyframes (`TOMAS`: frame, zoom, punto de foco en px de pantalla, rotaciones, centro vertical), interpolada con `Easing.inOut(Easing.cubic)` y zoom en escala log.
+- Siempre libre el 20% de arriba: si el zoom sube el dispositivo, se baja (`arriba >= height * 0.23`). Abajo puede salir de cuadro.
+- Ritmo calmo y de buen gusto: pocos zooms (1,25–1,4), pausas largas, un solo movimiento por momento (zoom o cambio de inclinación, nunca seguidos). Nada de "zamba".
+- Elementos que salen de la pantalla: copia de un rectángulo de la pantalla en una capa `preserve-3d` (con un hueco gris debajo) que va hacia la cámara con `translate3d(0, y, z)` y vuelve, sin rotar ni bailar. Pocos y en momentos clave.
+- Evitar el destello blanco bajo el marco: fondo raíz de la pantalla del color del header y escenas con `clipPath: inset(HEADER px 0 0 0)`.
