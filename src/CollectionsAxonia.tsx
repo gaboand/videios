@@ -16,17 +16,19 @@ import { FondoAbstracto } from "./FondoAbstracto";
 import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
 
 // Axonia Collections CRM (16:9 tablet or 9:16 phone, tilted and seen from
-// the left, 20s): "Contenedores de Gestión" opens on the CRM home and
-// "Cobranzas Clientes Activos" is picked, the S4 cluster's client cards appear, on Javier Perez's
-// file a payment promise is registered and shows up in the table, and at the
-// end the 3D segmentation cube builds and S4 is highlighted.
+// the left, 35s): "Contenedores de Gestión" opens on the CRM home and
+// "Cobranzas Clientes Activos" is picked, the S4 cluster's client cards
+// appear, on Javier Perez's file a payment promise is registered, the 3D
+// segmentation cube builds and ends with one card per segment, the
+// extrajudicial portfolio is auto-assigned to three agencies, and it closes on
+// the performance and reports dashboard.
 
 export const collectionsSchema = z.object({
   fondo: z.enum(["ondas", "red", "aurora", "geometrico"]),
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const COLLECTIONS_FRAMES = 600;
+export const COLLECTIONS_FRAMES = 1050;
 
 const FUENTE = "Montserrat, sans-serif";
 const HEADER_BG = "#3f4247";
@@ -58,7 +60,9 @@ const ESC = {
   home: [0, 100],
   cluster: [94, 230],
   cliente: [224, 460],
-  cubo: [454, COLLECTIONS_FRAMES + 10],
+  cubo: [454, 640],
+  asignacion: [634, 860],
+  reportes: [854, COLLECTIONS_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
 const TAP_ACTIVOS = 70;
@@ -67,8 +71,11 @@ const TAP_SELECT = 270;
 const TAP_PROMESA = 294;
 const TIPEO = [310, 338];
 const TAP_GUARDAR = 356;
-const TAP_S4 = 556;
-const TAPS = [TAP_ACTIVOS, TAP_JAVIER, TAP_SELECT, TAP_PROMESA, TAP_GUARDAR, TAP_S4];
+const TAP_AUTO = 684;
+const TAP_PREVIEW = 724;
+const REPARTO = [728, 762];
+const TAP_CONFIRMAR = 800;
+const TAPS = [TAP_ACTIVOS, TAP_JAVIER, TAP_SELECT, TAP_PROMESA, TAP_GUARDAR, TAP_AUTO, TAP_PREVIEW, TAP_CONFIRMAR];
 
 const pulsado = (frame: number, f: number) => interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
 const entra = (frame: number, f: number, d = 10) => interpolate(frame, [f, f + d], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
@@ -116,7 +123,7 @@ const I_BALANZA = "M12 4 V20 M7 20 H17 M5 7 H19 M5 7 L2 13 C3 15 7 15 8 13 Z M19
 const SIDE_ICONOS = [I_CASA, I_AURI, I_USUARIO, I_ORGANIGRAMA, I_DOC, I_ENGRANAJE];
 
 // Tablet header + sidebar around the content.
-const MarcoTablet: React.FC = () => (
+const MarcoTablet: React.FC<{ activo: number }> = ({ activo }) => (
   <>
     <div style={{ position: "absolute", left: 0, top: 0, width: PW, height: HEADER, background: HEADER_BG, display: "flex", alignItems: "center", zIndex: 6 }}>
       <div style={{ marginLeft: 18 }}>
@@ -138,7 +145,7 @@ const MarcoTablet: React.FC = () => (
     </div>
     <div style={{ position: "absolute", left: 0, top: HEADER, width: SIDE, bottom: 0, background: SIDE_BG, display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 22, gap: 26, zIndex: 6 }}>
       {SIDE_ICONOS.map((d, i) => (
-        <Icono key={i} d={d} s={17} c={i === 1 ? ACENTO : "#e5e7eb"} />
+        <Icono key={i} d={d} s={17} c={i === activo ? ACENTO : "#e5e7eb"} />
       ))}
       <div style={{ width: 26, height: 1, background: "rgba(255,255,255,0.2)" }} />
       <Icono d={I_USUARIO} s={17} c="#e5e7eb" />
@@ -277,7 +284,6 @@ const aclarar = (hex: string, f: number) => {
 
 const Cubo: React.FC<{ frame: number; L: number }> = ({ frame, L }) => {
   const giro = interpolate(frame, [CUBO0, ESC.cubo[1]], [-62, -30], clamp);
-  const foco = interpolate(frame, [TAP_S4 + 2, TAP_S4 + 12], [0, 1], clamp);
   return (
     <div style={{ position: "absolute", left: "50%", top: "50%", perspective: 1400 }}>
       <div style={{ transformStyle: "preserve-3d", transform: `rotateX(-16deg) rotateY(${giro}deg)` }}>
@@ -286,7 +292,6 @@ const Cubo: React.FC<{ frame: number; L: number }> = ({ frame, L }) => {
           if (a <= 0) {
             return null;
           }
-          const apagado = seg !== "S4" ? foco : 0;
           const px = (x - 2) * L;
           const py = -(y - 2) * L - (1 - a) * L * 2;
           const pz = -(z - 1) * L * 1.7;
@@ -300,7 +305,7 @@ const Cubo: React.FC<{ frame: number; L: number }> = ({ frame, L }) => {
             border: "1px solid rgba(0,0,0,0.2)",
             boxSizing: "border-box",
             transform,
-            opacity: Math.min(1, a * 1.5) * (1 - apagado * 0.82),
+            opacity: Math.min(1, a * 1.5),
           });
           return (
             <div key={`${x}${y}${z}`} style={{ position: "absolute", transformStyle: "preserve-3d", transform: `translate3d(${px}px, ${py}px, ${pz}px)` }}>
@@ -323,9 +328,20 @@ const chipPos = (m: boolean, i: number) =>
     ? { x: CUBO_M.x + 14 + (i % 2) * (CUBO_M.chipW + CUBO_M.chipGap), y: CUBO_M.chipY + Math.floor(i / 2) * 40, w: CUBO_M.chipW, h: 32 }
     : { x: CUBO_T.x + 18 + i * (CUBO_T.chipW + CUBO_T.chipGap), y: CUBO_T.chipY, w: CUBO_T.chipW, h: 32 };
 
+// Segment cards shown once the cube is built.
+const SEG_INFO: Record<SegId, { nombre: string; perfil: string; clientes: number; deuda: string; accion: string }> = {
+  S1: { nombre: "Mora preventiva", perfil: "0 a 10 días · al día o por vencer", clientes: 3120, deuda: "$ 42,6 M", accion: "Recordatorio WhatsApp" },
+  S2: { nombre: "Riesgo bajo", perfil: "11 a 30 días de mora", clientes: 1845, deuda: "$ 61,2 M", accion: "Llamada con bot" },
+  S3: { nombre: "Riesgo medio", perfil: "31 a 90 días de mora", clientes: 960, deuda: "$ 74,8 M", accion: "Gestor + refinanciación" },
+  S4: { nombre: "Riesgo alto", perfil: "Más de 90 días de mora", clientes: 412, deuda: "$ 69,7 M", accion: "Agencia externa" },
+};
+const SEG_CARDS = CUBO0 + 70;
+const segCardPos = (m: boolean, i: number) =>
+  m ? { x: 24 + (i % 2) * 177, y: 610 + Math.floor(i / 2) * 106, w: 165, h: 100 } : { x: X0 + 18 + i * 262, y: 606, w: 250, h: 172 };
+
 const CuboPantalla: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
   const C = m ? CUBO_M : CUBO_T;
-  const area = m ? { y: 320, h: 500 } : { y: 232, h: 540 };
+  const area = m ? { y: 320, h: 280 } : { y: 232, h: 360 };
   return (
     <div style={{ position: "absolute", inset: 0, background: FONDO }}>
       <div style={{ position: "absolute", left: C.x, top: C.y, width: C.w, height: C.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: "0 8px 24px rgba(15,25,45,0.08)" }}>
@@ -347,20 +363,40 @@ const CuboPantalla: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => 
             <div>Z ◯ Saldo deuda actualizada</div>
           </div>
           <div style={{ position: "absolute", left: "50%", top: "54%" }}>
-            <Cubo frame={frame} L={m ? 30 : 48} />
+            <Cubo frame={frame} L={m ? 24 : 36} />
           </div>
         </div>
       </div>
       {SEGS.map((s, i) => {
         const p = chipPos(m, i);
-        const sel = s === "S4" ? interpolate(frame, [TAP_S4, TAP_S4 + 6], [0, 1], clamp) : 0;
-        const apagado = s !== "S4" ? interpolate(frame, [TAP_S4 + 2, TAP_S4 + 12], [0, 1], clamp) : 0;
         const n = Math.round(CUENTA[i] * interpolate(frame, [CUBO0 + 10, CUBO0 + 50], [0, 1], clamp));
         return (
-          <div key={s} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, borderRadius: 7, border: `1.5px solid ${sel > 0 ? COLOR.S4 : BORDE}`, background: sel > 0 ? `rgba(217,67,58,${0.1 * sel})` : "white", display: "flex", alignItems: "center", gap: 8, padding: "0 10px", boxSizing: "border-box", opacity: 1 - apagado * 0.5, transform: `scale(${1 - pulsado(frame, TAP_S4) * (s === "S4" ? 0.06 : 0)})` }}>
+          <div key={s} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, borderRadius: 7, border: `1.5px solid ${BORDE}`, background: "white", display: "flex", alignItems: "center", gap: 8, padding: "0 10px", boxSizing: "border-box" }}>
             <div style={{ width: 13, height: 13, borderRadius: 3, background: COLOR[s] }} />
             <div style={{ fontSize: 11.5, fontWeight: 800, color: TINTA }}>{s}</div>
             <div style={{ fontSize: 10.5, color: TINTA_2 }}>{n} cubitos</div>
+          </div>
+        );
+      })}
+      {SEGS.map((s, i) => {
+        const p = segCardPos(m, i);
+        const e = entra(frame, SEG_CARDS + i * 8, 14);
+        const info = SEG_INFO[s];
+        const n = Math.round(info.clientes * entra(frame, SEG_CARDS + i * 8, 30));
+        return (
+          <div key={`c${s}`} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: `0 10px 24px ${COLOR[s]}26`, overflow: "hidden", opacity: e, transform: `translateY(${(1 - e) * 30}px)`, boxSizing: "border-box", padding: m ? "12px 12px" : "16px 16px" }}>
+            <div style={{ position: "absolute", left: 0, top: 0, right: 0, height: 4, background: COLOR[s] }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ width: 9, height: 9, borderRadius: "50%", background: COLOR[s] }} />
+              <div style={{ fontSize: m ? 11.5 : 13.5, fontWeight: 800, color: TINTA }}>{info.nombre}</div>
+            </div>
+            {!m ? <div style={{ fontSize: 10, color: TINTA_2, marginTop: 3 }}>{info.perfil}</div> : null}
+            <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginTop: m ? 8 : 14 }}>
+              <div style={{ fontSize: m ? 18 : 24, fontWeight: 800, color: COLOR[s] }}>{n.toLocaleString("es-AR")}</div>
+              <div style={{ fontSize: m ? 9 : 10.5, color: TINTA_2 }}>clientes</div>
+            </div>
+            {!m ? <div style={{ fontSize: 10.5, color: TINTA, marginTop: 4 }}>Deuda {info.deuda}</div> : null}
+            <div style={{ display: "inline-block", marginTop: m ? 6 : 12, background: `${COLOR[s]}1a`, color: COLOR[s], fontSize: m ? 8 : 10, fontWeight: 700, borderRadius: 6, padding: "4px 8px", whiteSpace: "nowrap" }}>{info.accion}</div>
           </div>
         );
       })}
@@ -716,15 +752,445 @@ const ClienteFicha: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => 
   );
 };
 
-const Toast: React.FC<{ t: number; x: number; y: number }> = ({ t, x, y }) => (
+const Toast: React.FC<{ t: number; x: number; y: number; texto?: string }> = ({ t, x, y, texto = "✓ Gestión guardada" }) => (
   <div style={{ position: "absolute", left: x, top: y, transform: `translate(-50%, ${(1 - t) * -12}px)`, opacity: t, background: VERDE, color: "white", fontSize: 12, fontWeight: 700, borderRadius: 8, padding: "9px 16px", boxShadow: "0 10px 24px rgba(0,0,0,0.2)", whiteSpace: "nowrap", zIndex: 7 }}>
-    ✓ Gestión guardada
+    {texto}
   </div>
 );
 
+// ---------- Extrajudicial portfolio assignment ----------
+const AGENCIAS = [
+  { nombre: "Estudio Lagos", cod: "LAGOS", casos: 85, monto: "$ 33.412.880", mora: 366, rango: "361 - 372" },
+  { nombre: "Estudio Rivas Paz", cod: "RIVASPAZ", casos: 92, monto: "$ 32.904.115", mora: 365, rango: "361 - 371" },
+  { nombre: "Estudio Montes", cod: "MONTES", casos: 83, monto: "$ 32.328.215", mora: 367, rango: "362 - 372" },
+];
+const PENDIENTES: [string, string, string, number][] = [
+  ["39.214.876", "HÉCTOR DAMIÁN FARÍAS", "$ 392.235", 362],
+  ["31.087.552", "GRACIELA BEATRIZ ROJAS", "$ 1.104.300", 371],
+  ["36.540.219", "MAXIMILIANO OSCAR PEREYRA", "$ 288.910", 365],
+  ["28.772.104", "SILVINA ANDREA CORREA", "$ 2.415.300", 368],
+  ["40.336.981", "EZEQUIEL RAMÓN BRITEZ", "$ 74.520", 361],
+  ["33.905.447", "LORENA PATRICIA MEDINA", "$ 512.880", 366],
+  ["27.618.093", "OMAR ALBERTO GODOY", "$ 640.115", 372],
+];
+const RESUMEN: [string, string][] = [
+  ["Casos para Asignar", "260"],
+  ["Deuda Total", "$ 98.645.210"],
+  ["Deuda Promedio", "$ 379.404"],
+  ["Deuda Mínima", "$ 5.120"],
+  ["Deuda Máxima", "$ 2.415.300"],
+];
+const autoPos = (m: boolean) => (m ? { x: 24, y: 352, w: 342, h: 36 } : { x: 942, y: 342, w: 170, h: 36 });
+const modalAsig = (m: boolean) =>
+  m ? { x: 12, y: 108, w: 366, h: 590, preview: 246, confirmar: 510 } : { x: 340, y: 66, w: 500, h: 700, preview: 290, confirmar: 610 };
+
+const Check: React.FC<{ on?: boolean }> = ({ on = true }) => (
+  <div style={{ width: 14, height: 14, borderRadius: 3, background: on ? AZUL : "white", border: `1.5px solid ${on ? AZUL : "#9aa3b2"}`, color: "white", fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{on ? "✓" : ""}</div>
+);
+const Input: React.FC<{ w: number; children?: React.ReactNode; vacio?: boolean }> = ({ w, children, vacio }) => (
+  <div style={{ width: w, height: 32, background: "white", borderRadius: 6, border: `1px solid ${BORDE}`, display: "flex", alignItems: "center", padding: "0 10px", boxSizing: "border-box", fontSize: 11, color: vacio ? "#9aa3b2" : TINTA }}>{children}</div>
+);
+const Boton: React.FC<{ bg: string; children: React.ReactNode; style?: React.CSSProperties }> = ({ bg, children, style }) => (
+  <div style={{ height: 34, background: bg, color: "white", borderRadius: 7, fontSize: 11.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 14px", boxSizing: "border-box", whiteSpace: "nowrap", ...style }}>{children}</div>
+);
+
+const Asignacion: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
+  const f0 = ESC.asignacion[0];
+  const e = (d: number) => entra(frame, f0 + d);
+  const modal = entra(frame, TAP_AUTO + 4, 10) * (1 - entra(frame, TAP_CONFIRMAR + 8, 10));
+  const avance = interpolate(frame, REPARTO, [0, 100], clamp);
+  const asignado = entra(frame, TAP_CONFIRMAR + 12, 16);
+  const casos = Math.round(260 * (1 - asignado));
+  const toast = interpolate(frame, [TAP_CONFIRMAR + 10, TAP_CONFIRMAR + 18, TAP_CONFIRMAR + 52, TAP_CONFIRMAR + 60], [0, 1, 1, 0], clamp);
+  const A = autoPos(m);
+  const MD = modalAsig(m);
+  const valor = (i: number, v: string) => (i === 0 ? String(casos) : v);
+  const chipAg = (i: number) => (
+    <span style={{ opacity: asignado, background: "#eaf1fd", color: AZUL, fontSize: 9, fontWeight: 800, borderRadius: 5, padding: "3px 7px" }}>{AGENCIAS[i % 3].cod}</span>
+  );
+  const fondo = (
+    <div style={{ position: "absolute", inset: 0, filter: modal > 0 ? `blur(${modal * 2.5}px)` : undefined }}>
+      {m ? (
+        <>
+          <div style={{ position: "absolute", left: 16, top: 106, fontSize: 15, fontWeight: 800, color: TINTA, opacity: e(0) }}>Asignación Extrajudicial</div>
+          {RESUMEN.slice(0, 4).map(([l, v], i) => (
+            <Caja key={l} x={12 + (i % 2) * 189} y={134 + Math.floor(i / 2) * 64} w={177} h={56} style={{ borderLeft: `3px solid ${AZUL}`, opacity: e(2 + i * 2), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ fontSize: 8.5, color: TINTA_2, letterSpacing: 0.4 }}>{l}</div>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: TINTA, marginTop: 3 }}>{valor(i, v)}</div>
+            </Caja>
+          ))}
+          <div style={{ position: "absolute", left: 12, top: 268, width: 366, height: 136, background: "#e9ecf1", borderRadius: 10, opacity: e(10) }}>
+            <div style={{ position: "absolute", left: 12, top: 10, fontSize: 10.5, color: TINTA }}>Días de Mora:</div>
+            <div style={{ position: "absolute", left: 12, top: 30, display: "flex", gap: 10 }}>
+              <Input w={166}>360</Input>
+              <Input w={166}>800</Input>
+            </div>
+          </div>
+          <div style={{ position: "absolute", left: 16, right: 16, top: 414, fontSize: 9, color: TINTA_2, opacity: e(12) }}>Las asignaciones se aplican a los {casos} caso(s) del filtro actual.</div>
+          {PENDIENTES.slice(0, 5).map(([dni, n, d, dias], i) => (
+            <Caja key={dni} x={12} y={440 + i * 78} w={366} h={70} style={{ opacity: e(14 + i * 2), padding: "10px 12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Check />
+                <div style={{ fontSize: 11, fontWeight: 700, color: TINTA, flex: 1 }}>{n}</div>
+                {chipAg(i)}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 10, color: TINTA_2 }}>
+                <span>DNI {dni}</span>
+                <span style={{ color: TINTA, fontWeight: 700 }}>{d}</span>
+                <span>{dias} días</span>
+              </div>
+            </Caja>
+          ))}
+        </>
+      ) : (
+        <>
+          <div style={{ position: "absolute", left: X0, width: CW, top: 60, textAlign: "center", fontSize: 16, fontWeight: 700, color: TINTA, opacity: e(0) }}>Asignación de Cartera Extrajudicial</div>
+          <Caja x={X0} y={92} w={CW} h={140} style={{ opacity: e(2) }}>
+            <div style={{ position: "absolute", left: 18, top: 14, fontSize: 15, color: TINTA }}>Resumen de Cartera Pendiente</div>
+            <div style={{ position: "absolute", left: 18, right: 18, top: 42, height: 1.5, background: AZUL_OSC }} />
+            {RESUMEN.map(([l, v], i) => (
+              <div key={l} style={{ position: "absolute", left: 16 + i * 212, top: 56, width: 198, height: 66, borderRadius: 8, background: "#f4f6fa", borderLeft: `3px solid ${AZUL}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: e(4 + i * 2) }}>
+                <div style={{ fontSize: 9.5, color: TINTA_2, letterSpacing: 0.4 }}>{l}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: TINTA, marginTop: 5 }}>{valor(i, v)}</div>
+              </div>
+            ))}
+          </Caja>
+          <Caja x={X0} y={246} w={CW} h={556} style={{ opacity: e(8) }}>
+            <div style={{ position: "absolute", left: 18, top: 14, fontSize: 15, color: TINTA }}>Clientes Pendientes de Asignación</div>
+            <div style={{ position: "absolute", left: 18, right: 18, top: 42, height: 1.5, background: AZUL_OSC }} />
+          </Caja>
+          <div style={{ position: "absolute", left: X0 + 20, top: 304, width: CW - 40, height: 92, background: "#e9ecf1", borderRadius: 10, opacity: e(10) }}>
+            {[
+              ["Días de Mora:", 40, ["360", "800"]],
+              ["Deuda Total:", 226, ["Mín.", "Máx."]],
+              ["Score BCRA:", 412, ["Mín."]],
+            ].map(([l, x, vals]) => (
+              <div key={l as string} style={{ position: "absolute", left: x as number, top: 14 }}>
+                <div style={{ fontSize: 10.5, color: TINTA, marginBottom: 6 }}>{l as string}</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {(vals as string[]).map((v) => (
+                    <Input key={v} w={80} vacio={v.startsWith("M")}>
+                      {v}
+                    </Input>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <Boton bg={AZUL_OSC} style={{ position: "absolute", left: 600, top: 342, width: 80, opacity: e(10) }}>Filtrar</Boton>
+          <Boton bg={AZUL_OSC} style={{ position: "absolute", left: 692, top: 342, width: 80, opacity: e(10), textDecoration: "underline" }}>Limpiar</Boton>
+          <div style={{ position: "absolute", left: X0 + 18, top: 410, fontSize: 11, color: TINTA, opacity: e(12) }}>Las asignaciones se aplican a los {casos} caso(s) del filtro actual. Si tildás casos puntuales, se asignan solo esos.</div>
+          <div style={{ position: "absolute", left: X0 + 18, top: 436, display: "flex", alignItems: "center", gap: 10, opacity: e(12) }}>
+            <div style={{ fontSize: 12, color: TINTA }}>Asignar a:</div>
+            <Input w={720} vacio>
+              Seleccione un agente o agencia… <span style={{ marginLeft: "auto", fontSize: 9 }}>▾</span>
+            </Input>
+            <Boton bg={AZUL_OSC}>Asignar Seleccionados</Boton>
+          </div>
+          <div style={{ position: "absolute", left: X0 + 18, top: 484, width: CW - 36, border: `1px solid ${BORDE}`, borderRadius: 6, overflow: "hidden", opacity: e(14) }}>
+            <div style={{ display: "flex", height: 34, alignItems: "center", background: "#fafbfc", fontSize: 10.5, color: TINTA_2, borderBottom: `1px solid ${BORDE}` }}>
+              <div style={{ width: 50, display: "flex", justifyContent: "center" }}>
+                <Check />
+              </div>
+              {["DNI", "Nombre", "Deuda Total", "Días de Mora", "Asignado a"].map((h, i) => (
+                <div key={h} style={{ flex: i === 1 ? 2.2 : 1, padding: "0 12px" }}>
+                  {h}
+                </div>
+              ))}
+            </div>
+            {PENDIENTES.map(([dni, n, d, dias], i) => (
+              <div key={dni} style={{ display: "flex", height: 38, alignItems: "center", fontSize: 11, color: TINTA, borderBottom: `1px solid ${BORDE}`, opacity: e(16 + i * 2) }}>
+                <div style={{ width: 50, display: "flex", justifyContent: "center" }}>
+                  <Check />
+                </div>
+                <div style={{ flex: 1, padding: "0 12px" }}>{dni}</div>
+                <div style={{ flex: 2.2, padding: "0 12px" }}>{n}</div>
+                <div style={{ flex: 1, padding: "0 12px" }}>{d}</div>
+                <div style={{ flex: 1, padding: "0 12px" }}>{dias}</div>
+                <div style={{ flex: 1, padding: "0 12px" }}>{chipAg(i)}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      <Boton bg="#1fbf75" style={{ position: "absolute", left: A.x, top: A.y, width: A.w, height: A.h, opacity: e(10), transform: `scale(${1 - pulsado(frame, TAP_AUTO) * 0.05})` }}>
+        Asignación Automática
+      </Boton>
+    </div>
+  );
+  const listo = avance >= 100;
+  return (
+    <div style={{ position: "absolute", inset: 0, background: FONDO }}>
+      {fondo}
+      {modal > 0 ? (
+        <>
+          <div style={{ position: "absolute", inset: 0, background: `rgba(30,36,48,${modal * 0.3})` }} />
+          <div style={{ position: "absolute", left: MD.x, top: MD.y, width: MD.w, height: MD.h, background: "white", borderRadius: 14, boxShadow: "0 30px 60px rgba(0,0,0,0.3)", opacity: modal, transform: `scale(${0.95 + 0.05 * modal})`, fontSize: 11, color: TINTA }}>
+            <div style={{ position: "absolute", left: 18, top: m ? 18 : 22, fontSize: m ? 13.5 : 16, fontWeight: 700 }}>Asignación Automática de Cartera</div>
+            <div style={{ position: "absolute", right: 18, top: 14, fontSize: 20, color: TINTA_2 }}>×</div>
+            <div style={{ position: "absolute", left: 0, right: 0, top: m ? 52 : 64, textAlign: "center", fontSize: 12 }}>Criterio de Distribución</div>
+            <div style={{ position: "absolute", left: m ? 24 : 50, right: m ? 24 : 50, top: m ? 70 : 86, height: 32, borderBottom: `1.5px solid ${TINTA_2}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, letterSpacing: 0.3 }}>
+              POR MONTO DE DEUDA <span style={{ position: "absolute", right: 8, fontSize: 9 }}>▾</span>
+            </div>
+            <div style={{ position: "absolute", left: 0, right: 0, top: m ? 114 : 134, textAlign: "center", fontSize: 12 }}>Seleccionar Agencias para el Reparto</div>
+            <div style={{ position: "absolute", left: 18, right: 18, top: m ? 134 : 156, height: m ? 100 : 112, border: `1px solid ${BORDE}`, borderRadius: 8 }}>
+              {AGENCIAS.map((a, i) => (
+                <div key={a.cod} style={{ position: "absolute", left: m ? 14 : 30 + (i % 2) * 230, top: m ? 8 + i * 30 : 12 + Math.floor(i / 2) * 50, display: "flex", alignItems: "center", gap: 10, opacity: entra(frame, TAP_AUTO + 12 + i * 3) }}>
+                  <Check />
+                  <div style={{ lineHeight: 1.35 }}>
+                    <span style={{ fontWeight: 700 }}>{a.nombre}</span>
+                    {m ? <span style={{ color: TINTA_2 }}> · Agencia externa</span> : <div style={{ color: TINTA_2 }}>(Agencia Externa)</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Boton bg={AZUL_OSC} style={{ position: "absolute", left: MD.w / 2 - 95, width: 190, top: MD.preview, height: 32, transform: `scale(${1 - pulsado(frame, TAP_PREVIEW) * 0.05})` }}>
+              Previsualizar Asignación
+            </Boton>
+            <div style={{ position: "absolute", left: 18, top: MD.preview + (m ? 46 : 50), fontSize: m ? 13 : 16, fontWeight: 700 }}>Previsualización del Reparto</div>
+            <div style={{ position: "absolute", left: 18, right: 18, top: MD.preview + (m ? 68 : 78), height: 1.5, background: AZUL_OSC }} />
+            <div style={{ position: "absolute", left: 18, right: 18, top: MD.preview + (m ? 76 : 94), height: 9, background: "#e5e7eb", borderRadius: 5, overflow: "hidden" }}>
+              <div style={{ width: `${avance}%`, height: "100%", background: listo ? VERDE : AZUL, borderRadius: 5 }} />
+            </div>
+            <div style={{ position: "absolute", left: 18, top: MD.preview + (m ? 88 : 110), fontSize: 10.5, fontWeight: 700, color: listo ? VERDE : TINTA }}>{Math.round(avance)}%</div>
+            <div style={{ position: "absolute", left: 18, right: 18, top: MD.preview + (m ? 104 : 134), border: `1px solid ${BORDE}`, borderRadius: 6, overflow: "hidden" }}>
+              <div style={{ display: "flex", height: m ? 30 : 36, alignItems: "center", background: "#fafbfc", fontSize: 9.5, color: TINTA_2, borderBottom: `1px solid ${BORDE}` }}>
+                {(m ? ["Agencia", "Casos", "Monto"] : ["Agencia", "Casos", "Monto Total", "Mora Prom.", "Mín. - Máx."]).map((h, i) => (
+                  <div key={h} style={{ flex: i === 0 || i === 2 ? 1.5 : 1, padding: "0 8px" }}>
+                    {h}
+                  </div>
+                ))}
+              </div>
+              {AGENCIAS.map((a, i) => {
+                const v = interpolate(avance, [20 + i * 25, 35 + i * 25], [0, 1], clamp);
+                const vals = m ? [a.cod, a.casos, a.monto] : [a.cod, a.casos, a.monto, a.mora, a.rango];
+                return (
+                  <div key={a.cod} style={{ display: "flex", height: m ? 36 : 40, alignItems: "center", fontSize: m ? 10 : 11, borderBottom: `1px solid ${BORDE}`, opacity: v, transform: `translateX(${(1 - v) * 12}px)` }}>
+                    {vals.map((x, j) => (
+                      <div key={j} style={{ flex: j === 0 || j === 2 ? 1.5 : 1, padding: "0 8px", fontWeight: j === 0 ? 700 : 500 }}>
+                        {x}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+            <Boton bg={VERDE} style={{ position: "absolute", left: MD.w / 2 - 95, width: 190, top: MD.confirmar, opacity: listo ? 1 : 0.45, transform: `scale(${1 - pulsado(frame, TAP_CONFIRMAR) * 0.05})` }}>
+              Confirmar y Asignar
+            </Boton>
+            <div style={{ position: "absolute", left: 18, top: MD.confirmar + (m ? 46 : 54), fontSize: m ? 12 : 14, fontWeight: 700, color: AZUL }}>Se repartirán 260 caso(s).</div>
+          </div>
+        </>
+      ) : null}
+      {toast > 0 ? <Toast t={toast} x={m ? 195 : X0 + CW / 2} y={m ? 110 : 66} texto="✓ 260 casos asignados" /> : null}
+    </div>
+  );
+};
+
+// ---------- Performance and reports ----------
+const KPIS_R: [string, string, number, string, string, string][] = [
+  [I_USUARIO, "Clientes en cartera", 1452, "", "+3,1%", AZUL],
+  [I_LLAMADA, "Gestiones", 7918, "", "+12,4%", "#7c3aed"],
+  [I_TEL, "Contactos efectivos", 3106, "", "+8,9%", VERDE],
+  [I_DOC, "Promesas de pago", 712, "", "+5,6%", NARANJA],
+  [I_CHART, "Tasa de contacto", 392, "%", "+2,3 pp", "#0ea5b7"],
+];
+const SEMANAS: [string, number][] = [
+  ["Sem 42", 1010],
+  ["Sem 43", 2450],
+  ["Sem 44", 1400],
+  ["Sem 45", 1280],
+  ["Sem 46", 2110],
+  ["Sem 47", 1668],
+];
+const ACCIONES_R: [string, number, string][] = [
+  ["No efectivo", 3040, "#94a3b8"],
+  ["Efectivo", 2390, VERDE],
+  ["Revisión", 1725, AZUL],
+  ["Promesa de pago", 712, NARANJA],
+  ["Rellamado", 38, "#7c3aed"],
+  ["Negativo", 13, "#d9433a"],
+];
+const GESTORES: [string, string, number, number, number, number][] = [
+  ["DM", "Delfina Martinez", 1248, 506, 109, 76.4],
+  ["SC", "Sofía Castillo", 1085, 421, 84, 58.9],
+  ["MI", "Martín Ibarra", 1016, 338, 90, 55.1],
+  ["PF", "Paula Ferrer", 941, 345, 71, 43.8],
+  ["TA", "Tomás Aguirre", 862, 317, 75, 64.2],
+];
+const num = (n: number) => Math.round(n).toLocaleString("es-AR");
+
+const Barras: React.FC<{ frame: number; f0: number; w: number; h: number }> = ({ frame, f0, w, h }) => {
+  const max = 2800;
+  const bw = (w - 40) / SEMANAS.length;
+  return (
+    <div style={{ position: "relative", width: w, height: h }}>
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} style={{ position: "absolute", left: 30, right: 0, top: (h - 22) * (i / 3), height: 1, background: "#eef1f5" }} />
+      ))}
+      {[2800, 1867, 933, 0].map((v, i) => (
+        <div key={v} style={{ position: "absolute", left: 0, top: (h - 22) * (i / 3) - 6, fontSize: 8, color: TINTA_2 }}>
+          {v >= 1000 ? `${(v / 1000).toFixed(1).replace(".", ",")}k` : v}
+        </div>
+      ))}
+      {SEMANAS.map(([l, v], i) => {
+        const t = interpolate(frame, [f0 + i * 5, f0 + i * 5 + 22], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+        const bh = ((h - 22) * v * t) / max;
+        const ultima = i === SEMANAS.length - 1;
+        return (
+          <div key={l} style={{ position: "absolute", left: 36 + i * bw, width: bw - 12, bottom: 0, height: h, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
+            <div style={{ fontSize: 8.5, fontWeight: 700, color: TINTA, opacity: t, marginBottom: 3 }}>{num(v * t)}</div>
+            <div style={{ width: "100%", height: bh, borderRadius: "6px 6px 2px 2px", background: ultima ? `linear-gradient(180deg, ${ACENTO}, #f26a1b)` : "linear-gradient(180deg, #6b9cf5, #2f6fe0)" }} />
+            <div style={{ fontSize: 8, color: TINTA_2, height: 18, marginTop: 4 }}>{l}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const Reportes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
+  const f0 = ESC.reportes[0];
+  const e = (d: number) => entra(frame, f0 + d, 12);
+  const cuenta = (d: number) => interpolate(frame, [f0 + d, f0 + d + 40], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+  const kpis = m ? KPIS_R.slice(0, 4) : KPIS_R;
+  const tarjetaKpi = (k: (typeof KPIS_R)[0], i: number, x: number, y: number, w: number, h: number) => {
+    const [d, l, v, suf, delta, color] = k;
+    const c = cuenta(8 + i * 3);
+    const valor = suf === "%" ? `${(v * c / 10).toFixed(1).replace(".", ",")}%` : num(v * c);
+    return (
+      <div key={l} style={{ position: "absolute", left: x, top: y, width: w, height: h, background: "white", borderRadius: 14, boxShadow: "0 6px 18px rgba(15,25,45,0.07)", border: `1px solid ${BORDE}`, padding: m ? "10px 12px" : "14px 14px", boxSizing: "border-box", opacity: e(4 + i * 3), transform: `translateY(${(1 - e(4 + i * 3)) * 14}px)` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ width: m ? 26 : 30, height: m ? 26 : 30, borderRadius: 9, background: `${color}1f`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icono d={d} s={m ? 14 : 16} c={color} w={2.1} />
+          </div>
+          <div style={{ fontSize: 9, fontWeight: 700, color: VERDE, background: "#e7f6ec", borderRadius: 10, padding: "2px 7px" }}>▲ {delta}</div>
+        </div>
+        <div style={{ fontSize: m ? 18 : 22, fontWeight: 800, color: TINTA, marginTop: m ? 6 : 10 }}>{valor}</div>
+        <div style={{ fontSize: m ? 8.5 : 9.5, color: TINTA_2, marginTop: 2 }}>{l}</div>
+      </div>
+    );
+  };
+  const periodos = m ? ["Hoy", "Semana", "Mes", "Mes ant."] : ["Hoy", "Ayer", "Semana", "Mes", "Mes anterior"];
+  const chips = (
+    <div style={{ position: "absolute", ...(m ? { left: 12, top: 150 } : { right: 28, top: 70 }), display: "flex", gap: 6, background: "white", border: `1px solid ${BORDE}`, borderRadius: 10, padding: 4, opacity: e(2) }}>
+      {periodos.map((p) => (
+        <div key={p} style={{ fontSize: 10.5, fontWeight: 700, padding: m ? "5px 12px" : "6px 14px", borderRadius: 7, color: p === "Mes" ? "white" : TINTA_2, background: p === "Mes" ? "linear-gradient(135deg, #4b86f0, #2556d6)" : "transparent" }}>
+          {p}
+        </div>
+      ))}
+    </div>
+  );
+  const maxAcc = ACCIONES_R[0][1];
+  if (m) {
+    return (
+      <div style={{ position: "absolute", inset: 0, background: FONDO }}>
+        <div style={{ position: "absolute", left: 16, top: 106, fontSize: 17, fontWeight: 800, color: TINTA, opacity: e(0) }}>Performance</div>
+        <div style={{ position: "absolute", left: 16, top: 130, fontSize: 9.5, color: TINTA_2, opacity: e(0) }}>Cartera Activa · 01/11 al 14/11/2026</div>
+        {chips}
+        {kpis.map((k, i) => tarjetaKpi(k, i, 12 + (i % 2) * 189, 192 + Math.floor(i / 2) * 84, 177, 76))}
+        <Caja x={12} y={364} w={366} h={214} style={{ borderRadius: 14, opacity: e(16), padding: "12px 14px" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: TINTA }}>Gestiones por semana</div>
+          <div style={{ marginTop: 10 }}>
+            <Barras frame={frame} f0={f0 + 20} w={338} h={164} />
+          </div>
+        </Caja>
+        <Caja x={12} y={590} w={366} h={244} style={{ borderRadius: 14, opacity: e(24), padding: "12px 14px" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: TINTA }}>Productividad por gestor</div>
+          {GESTORES.slice(0, 4).map(([ini, n, acc, , , pct], i) => {
+            const t = cuenta(30 + i * 5);
+            return (
+              <div key={n} style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, opacity: e(28 + i * 4) }}>
+                <div style={{ width: 30, height: 30, borderRadius: "50%", background: ["#2f6fe0", "#7c3aed", "#2e9e4a", "#f08a2c"][i], color: "white", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{ini}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5 }}>
+                    <span style={{ fontWeight: 700, color: TINTA }}>{n}</span>
+                    <span style={{ color: TINTA_2 }}>{num(acc * t)} acciones</span>
+                  </div>
+                  <div style={{ height: 6, background: "#eef1f5", borderRadius: 3, marginTop: 5 }}>
+                    <div style={{ width: `${pct * t}%`, height: "100%", borderRadius: 3, background: "linear-gradient(90deg, #6b9cf5, #2f6fe0)" }} />
+                  </div>
+                </div>
+                <div style={{ fontSize: 10.5, fontWeight: 800, color: TINTA, width: 38, textAlign: "right" }}>{(pct * t).toFixed(1).replace(".", ",")}%</div>
+              </div>
+            );
+          })}
+        </Caja>
+      </div>
+    );
+  }
+  return (
+    <div style={{ position: "absolute", inset: 0, background: FONDO }}>
+      <div style={{ position: "absolute", left: X0, top: 62, fontSize: 22, fontWeight: 800, color: TINTA, opacity: e(0) }}>Performance y Reportes</div>
+      <div style={{ position: "absolute", left: X0, top: 92, fontSize: 11, color: TINTA_2, opacity: e(0) }}>Cartera Activa · 01/11/2026 al 14/11/2026</div>
+      {chips}
+      {kpis.map((k, i) => tarjetaKpi(k, i, X0 + i * 218, 122, 204, 104))}
+      <Caja x={X0} y={240} w={640} h={290} style={{ borderRadius: 14, opacity: e(16), padding: "14px 18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: TINTA }}>Evolución semanal de gestiones</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            {["CSV", "EXCEL", "JSON"].map((x) => (
+              <div key={x} style={{ fontSize: 9, fontWeight: 700, color: TINTA_2, border: `1px solid ${BORDE}`, borderRadius: 6, padding: "3px 8px" }}>⬇ {x}</div>
+            ))}
+          </div>
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <Barras frame={frame} f0={f0 + 20} w={604} h={220} />
+        </div>
+      </Caja>
+      <Caja x={X0 + 654} y={240} w={424} h={290} style={{ borderRadius: 14, opacity: e(20), padding: "14px 18px" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: TINTA }}>Resultado por tipo de acción</div>
+        {ACCIONES_R.map(([l, v, color], i) => {
+          const t = cuenta(26 + i * 4);
+          return (
+            <div key={l} style={{ marginTop: i === 0 ? 18 : 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5 }}>
+                <span style={{ color: TINTA }}>{l}</span>
+                <span style={{ fontWeight: 700, color: TINTA }}>{num(v * t)}</span>
+              </div>
+              <div style={{ height: 8, background: "#eef1f5", borderRadius: 4, marginTop: 5 }}>
+                <div style={{ width: `${Math.max(1.5, (v / maxAcc) * 100) * t}%`, height: "100%", borderRadius: 4, background: color }} />
+              </div>
+            </div>
+          );
+        })}
+      </Caja>
+      <Caja x={X0} y={544} w={CW} h={256} style={{ borderRadius: 14, opacity: e(26), padding: "14px 18px" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: TINTA }}>Productividad por gestor</div>
+        <div style={{ display: "flex", fontSize: 9.5, color: TINTA_2, marginTop: 12, paddingBottom: 6, borderBottom: `1px solid ${BORDE}` }}>
+          {["Gestor", "Acciones", "Efectivas", "Promesas", "Cumplimiento de promesas"].map((h, i) => (
+            <div key={h} style={{ flex: i === 0 ? 2 : i === 4 ? 2.6 : 1 }}>{h}</div>
+          ))}
+        </div>
+        {GESTORES.map(([ini, n, acc, ef, pr, pct], i) => {
+          const t = cuenta(32 + i * 5);
+          return (
+            <div key={n} style={{ display: "flex", alignItems: "center", height: 36, fontSize: 11, color: TINTA, borderBottom: `1px solid ${BORDE}`, opacity: e(30 + i * 4) }}>
+              <div style={{ flex: 2, display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 24, height: 24, borderRadius: "50%", background: ["#2f6fe0", "#7c3aed", "#2e9e4a", "#f08a2c", "#0ea5b7"][i], color: "white", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{ini}</div>
+                <span style={{ fontWeight: 700 }}>{n}</span>
+              </div>
+              <div style={{ flex: 1 }}>{num(acc * t)}</div>
+              <div style={{ flex: 1 }}>{num(ef * t)}</div>
+              <div style={{ flex: 1 }}>{num(pr * t)}</div>
+              <div style={{ flex: 2.6, display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ flex: 1, height: 7, background: "#eef1f5", borderRadius: 4 }}>
+                  <div style={{ width: `${pct * t}%`, height: "100%", borderRadius: 4, background: pct >= 60 ? "linear-gradient(90deg, #5fd08a, #2e9e4a)" : "linear-gradient(90deg, #ffc27a, #f08a2c)" }} />
+                </div>
+                <div style={{ width: 40, fontWeight: 800 }}>{(pct * t).toFixed(1).replace(".", ",")}%</div>
+              </div>
+            </div>
+          );
+        })}
+      </Caja>
+    </div>
+  );
+};
+
 // ---------- Finger ----------
 const dedoDe = (m: boolean): [number, number, number][] => {
-  const s4 = chipPos(m, 3);
+  const au = autoPos(m);
+  const MD = modalAsig(m);
   const o0 = opcionPos(m, 0);
   const jp = clientePos(m, 1);
   const F = m ? FORM_M : FORM_T;
@@ -737,8 +1203,10 @@ const dedoDe = (m: boolean): [number, number, number][] => {
     [TAP_SELECT - 2, cx, Y.select + 19],
     [TAP_PROMESA - 2, cx, Y.dropdown + 34 + 17],
     [TAP_GUARDAR - 2, cx, guardarY(m, 1) + 17],
-    [TAP_S4 - 2, s4.x + s4.w / 2, s4.y + s4.h / 2],
-    [TAP_S4 + 40, s4.x + s4.w / 2 + 60, s4.y + 200],
+    [TAP_AUTO - 2, au.x + au.w / 2, au.y + au.h / 2],
+    [TAP_PREVIEW - 2, MD.x + MD.w / 2, MD.y + MD.preview + 16],
+    [TAP_CONFIRMAR - 2, MD.x + MD.w / 2, MD.y + MD.confirmar + 17],
+    [TAP_CONFIRMAR + 40, MD.x + MD.w / 2 + 60, MD.y + MD.confirmar + 140],
   ];
 };
 const posDedo = (frame: number, m: boolean) => {
@@ -766,12 +1234,18 @@ const Pagina: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
     ["cluster", Cluster],
     ["cliente", ClienteFicha],
     ["cubo", CuboPantalla],
+    ["asignacion", Asignacion],
+    ["reportes", Reportes],
   ];
+  const actual = (Object.keys(ESC) as Escena[]).filter((e) => frame >= ESC[e][0]).pop() ?? "home";
   const dedo = posDedo(frame, m);
   const tap = TAPS.find((f) => frame >= f && frame < f + 16);
   const onda = tap === undefined ? 0 : (frame - tap) / 16;
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
-  const dedoVis = interpolate(frame, [26, 40], [0, 1], clamp) * interpolate(frame, [TAP_S4 + 30, TAP_S4 + 44], [1, 0], clamp);
+  const dedoVis =
+    interpolate(frame, [26, 40], [0, 1], clamp) *
+    interpolate(frame, [TAP_GUARDAR + 30, TAP_GUARDAR + 44, TAP_AUTO - 30, TAP_AUTO - 18], [1, 0, 0, 1], clamp) *
+    interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
   return (
     <div style={{ position: "relative", width: m ? MW : PW, height: m ? MH : PH, background: FONDO, fontFamily: FUENTE, overflow: "hidden" }}>
       {escenas.map(([e, C]) => {
@@ -786,7 +1260,7 @@ const Pagina: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
           </div>
         );
       })}
-      {m ? <MarcoMovil /> : <MarcoTablet />}
+      {m ? <MarcoMovil /> : <MarcoTablet activo={actual === "asignacion" ? 2 : actual === "reportes" ? 3 : 1} />}
       {tap !== undefined ? (
         <div style={{ position: "absolute", left: dedo.x, top: dedo.y, width: 18 + onda * 54, height: 18 + onda * 54, transform: "translate(-50%, -50%)", borderRadius: "50%", border: `3px solid rgba(255,140,66,${1 - onda})`, background: `rgba(255,140,66,${(1 - onda) * 0.2})`, zIndex: 8 }} />
       ) : null}
