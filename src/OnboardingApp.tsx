@@ -334,7 +334,7 @@ const Campo: React.FC<{
         width: w,
         height: 42,
         boxSizing: "border-box",
-        border: `1.5px solid ${activo ? colorActivo : BORDE}`,
+        border: `1.8px solid ${activo ? colorActivo : "#8f9aab"}`,
         borderRadius: 7,
         display: "flex",
         alignItems: "center",
@@ -1617,40 +1617,36 @@ const tomasDe = (tab: boolean): Toma[] => {
   const foco = (x: number, y: number) => (tab ? { px: x, py: y } : { px: 195, py: y });
   const izq = { ry: 12, rx: 6, rz: 1.5 };
   const der = { ry: -12, rx: 6, rz: -1.5 };
+  // One move per moment: zoom in or out, or a tilt change, never both in a row.
   return [
     { f: 0, z: 0.92, ...c, ry: 20, rx: 9, rz: 2.5, cy: 0.62 },
     { f: 40, z: zz, ...foco(590, tab ? 330 : 300), ry: 9, rx: 5, rz: 1, cy: 0.57 },
-    { f: 130, z: zz, ...foco(590, tab ? 330 : 300), ry: 9, rx: 5, rz: 1, cy: 0.57 },
-    { f: 162, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 236, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 254, z: zz, ...(tab ? { px: 460, py: 520 } : { px: 290, py: 385 }), ry: -8, rx: 4, rz: -1, cy: 0.57 },
-    { f: 300, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 404, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 440, z: zz, ...foco(420, tab ? 520 : 330), ry: 8, rx: 4, rz: 1, cy: 0.57 },
-    { f: 592, z: zz, ...foco(420, tab ? 520 : 330), ry: 8, rx: 4, rz: 1, cy: 0.57 },
-    { f: 624, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 132, z: zz, ...foco(590, tab ? 330 : 300), ry: 9, rx: 5, rz: 1, cy: 0.57 },
+    { f: 172, z: 1, ...c, ry: 9, rx: 5, rz: 1, cy: 0.62 },
+    { f: 226, z: 1, ...c, ry: 9, rx: 5, rz: 1, cy: 0.62 },
+    { f: 250, z: zz, ...(tab ? { px: 520, py: 500 } : { px: 240, py: 385 }), ry: 9, rx: 5, rz: 1, cy: 0.57 },
+    { f: 404, z: zz, ...(tab ? { px: 520, py: 500 } : { px: 240, py: 385 }), ry: 9, rx: 5, rz: 1, cy: 0.57 },
+    { f: 444, z: 1, ...c, ...izq, cy: 0.62 },
     { f: 760, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 792, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 864, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 884, z: zz, ...foco(550, tab ? 470 : 380), ry: -7, rx: 4, rz: -1, cy: 0.57 },
+    { f: 800, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 866, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 890, z: zz, ...foco(550, tab ? 470 : 380), ry: -7, rx: 4, rz: -1, cy: 0.57 },
     { f: 1004, z: zz, ...foco(550, tab ? 470 : 380), ry: -7, rx: 4, rz: -1, cy: 0.57 },
-    { f: 1040, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1150, z: 1, ...c, ry: 10, rx: 5, rz: 1, cy: 0.62 },
-    { f: ONBOARDING_FRAMES, z: 1.08, ...c, ry: 10, rx: 5, rz: 1, cy: 0.62 },
+    { f: 1044, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1150, z: 1, ...c, ...der, cy: 0.62 },
+    { f: ONBOARDING_FRAMES, z: 1.08, ...c, ...der, cy: 0.62 },
   ];
 };
 const TOMAS_TAB = tomasDe(true);
 const TOMAS_CEL = tomasDe(false);
 
-// Pieces that lift out of the screen and settle back: the chosen offer and
-// the payment schedule of the signed contract.
+// Piece that lifts out of the screen and settles back: the payment schedule
+// of the signed contract.
 type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number };
 const SALTOS_TAB: Salto[] = [
-  { x: 332, y: 374, w: 250, h: 286, f: [238, 248, 254, 260], z: 150 },
   { x: 210, y: 212, w: 762, h: 216, f: [1264, 1278, 1296, 1312], z: 110 },
 ];
 const SALTOS_CEL: Salto[] = [
-  { x: 199, y: 299, w: 176, h: 172, f: [238, 248, 254, 260], z: 140 },
   { x: 20, y: 166, w: 350, h: 180, f: [1264, 1278, 1296, 1312], z: 110 },
 ];
 
