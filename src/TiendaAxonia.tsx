@@ -1878,43 +1878,34 @@ export const TiendaMovil: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, pal
 type Toma = { f: number; z: number; px: number; py: number; ry: number; rx: number; rz: number; cy: number };
 const C_T = { px: PW / 2, py: PH / 2 };
 const C_M = { px: MW / 2, py: MH / 2 };
+// Calm rhythm: few zooms, long holds and the same tilt from the product on.
 const TOMAS_T: Toma[] = [
   { f: 0, z: 0.92, ...C_T, ry: 22, rx: 10, rz: 3, cy: 0.62 },
   { f: 34, z: 1.35, px: 420, py: 230, ry: 10, rx: 5, rz: 1, cy: 0.56 },
-  { f: 110, z: 1.35, px: 500, py: 250, ry: 10, rx: 5, rz: 1, cy: 0.56 },
-  { f: 146, z: 1, ...C_T, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 120, z: 1.35, px: 420, py: 230, ry: 10, rx: 5, rz: 1, cy: 0.56 },
+  { f: 150, z: 1, ...C_T, ry: -14, rx: 6, rz: -2, cy: 0.62 },
   { f: 236, z: 1, ...C_T, ry: -14, rx: 6, rz: -2, cy: 0.62 },
-  { f: 252, z: 1.4, px: 600, py: 340, ry: -8, rx: 4, rz: -1, cy: 0.56 },
-  { f: 278, z: 1.05, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
-  { f: 300, z: 1.3, px: 430, py: 380, ry: 8, rx: 4, rz: 1, cy: 0.57 },
-  { f: 334, z: 1.3, px: 840, py: 480, ry: 6, rx: 3, rz: 0.5, cy: 0.57 },
-  { f: 380, z: 1.3, px: 840, py: 520, ry: 6, rx: 3, rz: 0.5, cy: 0.57 },
-  { f: 402, z: 1, ...C_T, ry: -14, rx: 6, rz: -2, cy: 0.62 },
-  { f: 428, z: 1.4, px: 420, py: 480, ry: -7, rx: 4, rz: -1, cy: 0.56 },
-  { f: 466, z: 1.4, px: 460, py: 560, ry: -7, rx: 4, rz: -1, cy: 0.56 },
-  { f: 494, z: 1.1, ...C_T, ry: -10, rx: 5, rz: -1.5, cy: 0.6 },
-  { f: 528, z: 1, ...C_T, ry: 14, rx: 7, rz: 2, cy: 0.62 },
-  { f: 560, z: 1.3, px: 590, py: 380, ry: 6, rx: 3, rz: 0.5, cy: 0.56 },
-  { f: TIENDA_FRAMES, z: 1.05, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 254, z: 1.35, px: 600, py: 340, ry: -9, rx: 5, rz: -1, cy: 0.56 },
+  { f: 292, z: 1, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 408, z: 1, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 432, z: 1.3, px: 430, py: 480, ry: 9, rx: 5, rz: 1, cy: 0.57 },
+  { f: 482, z: 1.3, px: 430, py: 480, ry: 9, rx: 5, rz: 1, cy: 0.57 },
+  { f: 512, z: 1, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: TIENDA_FRAMES, z: 1.06, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
 ];
 const TOMAS_MV: Toma[] = [
   { f: 0, z: 0.92, ...C_M, ry: 20, rx: 9, rz: 3, cy: 0.62 },
   { f: 34, z: 1.3, px: 195, py: 270, ry: 9, rx: 5, rz: 1, cy: 0.58 },
-  { f: 110, z: 1.3, px: 195, py: 290, ry: 9, rx: 5, rz: 1, cy: 0.58 },
-  { f: 146, z: 1, ...C_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 120, z: 1.3, px: 195, py: 270, ry: 9, rx: 5, rz: 1, cy: 0.58 },
+  { f: 150, z: 1, ...C_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
   { f: 236, z: 1, ...C_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
-  { f: 252, z: 1.3, px: 290, py: 470, ry: -7, rx: 4, rz: -1, cy: 0.58 },
-  { f: 278, z: 1.02, ...C_M, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
-  { f: 300, z: 1.25, px: 195, py: 380, ry: 7, rx: 4, rz: 1, cy: 0.58 },
-  { f: 334, z: 1, ...C_M, ry: 10, rx: 5, rz: 1, cy: 0.62 },
-  { f: 380, z: 1, ...C_M, ry: 10, rx: 5, rz: 1, cy: 0.62 },
-  { f: 402, z: 1, ...C_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
-  { f: 428, z: 1.3, px: 195, py: 520, ry: -7, rx: 4, rz: -1, cy: 0.58 },
-  { f: 462, z: 1.3, px: 195, py: 540, ry: -7, rx: 4, rz: -1, cy: 0.58 },
-  { f: 486, z: 1.02, ...C_M, ry: -10, rx: 5, rz: -1.5, cy: 0.62 },
-  { f: 528, z: 1, ...C_M, ry: 14, rx: 7, rz: 2, cy: 0.62 },
-  { f: 560, z: 1.25, px: 195, py: 400, ry: 6, rx: 3, rz: 0.5, cy: 0.58 },
-  { f: TIENDA_FRAMES, z: 1.02, ...C_M, ry: 10, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 254, z: 1.3, px: 290, py: 470, ry: -8, rx: 4, rz: -1, cy: 0.58 },
+  { f: 292, z: 1, ...C_M, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 408, z: 1, ...C_M, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 432, z: 1.25, px: 195, py: 520, ry: 9, rx: 5, rz: 1, cy: 0.58 },
+  { f: 482, z: 1.25, px: 195, py: 520, ry: 9, rx: 5, rz: 1, cy: 0.58 },
+  { f: 512, z: 1, ...C_M, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: TIENDA_FRAMES, z: 1.04, ...C_M, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
 ];
 const toma = (frame: number, tomas: Toma[]): Toma => {
   for (let k = 1; k < tomas.length; k++) {
@@ -1943,7 +1934,6 @@ const toma = (frame: number, tomas: Toma[]): Toma => {
 type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number };
 const SALTOS_T: Salto[] = [
   { x: 491, y: 196, w: 207, h: 300, f: [236, 246, 251, 257], z: 170 },
-  { x: 144, y: 172, w: 430, h: 420, f: [298, 312, 330, 346], z: 120 },
   { x: 140, y: 492, w: 560, h: 50, f: [438, 448, 458, 468], z: 150 },
   { x: 290, y: 146, w: 600, h: 600, f: [548, 562, 582, 598], z: 90 },
 ];
