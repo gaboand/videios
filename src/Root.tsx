@@ -310,6 +310,17 @@ export const RemotionRoot: React.FC = () => {
         height={1080}
       />
       <Composition
+        // npx remotion render CollectionsDinamicoMovil
+        id="CollectionsDinamicoMovil"
+        component={CollectionsDinamico}
+        schema={collectionsSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={COLLECTIONS_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
         // npx remotion render CollectionsMovil
         id="CollectionsMovil"
         component={CollectionsAxonia}

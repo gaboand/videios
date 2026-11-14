@@ -1346,7 +1346,7 @@ export const CollectionsAxonia: React.FC<z.infer<typeof collectionsSchema>> = ({
   );
 };
 
-// ---------- Dynamic 16:9 version: camera moves and elements leaving the screen ----------
+// ---------- Dynamic version (16:9 tablet or 9:16 phone): camera moves and elements leaving the screen ----------
 // Camera keyframes: zoom, focus point on the screen (page px), tilt and the
 // vertical position of the device centre (fraction of the video height).
 type Toma = { f: number; z: number; px: number; py: number; ry: number; rx: number; rz: number; cy: number };
@@ -1373,10 +1373,34 @@ const TOMAS: Toma[] = [
   { f: 930, z: 1.3, px: 560, py: 180, ry: 9, rx: 5, rz: 1, cy: 0.56 },
   { f: COLLECTIONS_FRAMES, z: 1, ...CENTRO, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
 ];
-const toma = (frame: number): Toma => {
-  for (let k = 1; k < TOMAS.length; k++) {
-    const a = TOMAS[k - 1];
-    const b = TOMAS[k];
+// 9:16: the same takes on the phone screen (390 x 844).
+const CENTRO_M = { px: MW / 2, py: MH / 2 };
+const TOMAS_M: Toma[] = [
+  { f: 0, z: 0.92, ...CENTRO_M, ry: 20, rx: 9, rz: 3, cy: 0.62 },
+  { f: 58, z: 1.35, px: 195, py: 306, ry: 9, rx: 5, rz: 1, cy: 0.58 },
+  { f: 92, z: 1.35, px: 195, py: 306, ry: 9, rx: 5, rz: 1, cy: 0.58 },
+  { f: 122, z: 1, ...CENTRO_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 190, z: 1.35, px: 195, py: 327, ry: -7, rx: 4, rz: -1, cy: 0.58 },
+  { f: 214, z: 1.35, px: 195, py: 327, ry: -7, rx: 4, rz: -1, cy: 0.58 },
+  { f: 242, z: 1.02, ...CENTRO_M, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 264, z: 1.35, px: 195, py: 480, ry: 6, rx: 3, rz: 0.5, cy: 0.58 },
+  { f: 352, z: 1.35, px: 195, py: 520, ry: 6, rx: 3, rz: 0.5, cy: 0.58 },
+  { f: 380, z: 1.25, px: 195, py: 640, ry: 9, rx: 4, rz: 1, cy: 0.58 },
+  { f: 444, z: 1.25, px: 195, py: 640, ry: 9, rx: 4, rz: 1, cy: 0.58 },
+  { f: 472, z: 1, ...CENTRO_M, ry: 0, rx: 5, rz: 0, cy: 0.62 },
+  { f: 632, z: 1, ...CENTRO_M, ry: 3, rx: 5, rz: 0, cy: 0.62 },
+  { f: 652, z: 1, ...CENTRO_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 698, z: 1.3, px: 195, py: 420, ry: -6, rx: 3, rz: -0.5, cy: 0.58 },
+  { f: 812, z: 1.3, px: 195, py: 460, ry: -6, rx: 3, rz: -0.5, cy: 0.58 },
+  { f: 846, z: 1, ...CENTRO_M, ry: -10, rx: 6, rz: -1.5, cy: 0.62 },
+  { f: 872, z: 1, ...CENTRO_M, ry: 14, rx: 7, rz: 2, cy: 0.62 },
+  { f: 930, z: 1.3, px: 195, py: 260, ry: 8, rx: 4, rz: 1, cy: 0.58 },
+  { f: COLLECTIONS_FRAMES, z: 1, ...CENTRO_M, ry: 10, rx: 6, rz: 1.5, cy: 0.62 },
+];
+const toma = (frame: number, tomas: Toma[]): Toma => {
+  for (let k = 1; k < tomas.length; k++) {
+    const a = tomas[k - 1];
+    const b = tomas[k];
     if (frame <= b.f) {
       const t = interpolate(frame, [a.f, b.f], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
       const mezcla = (u: number, v: number) => u + (v - u) * t;
@@ -1392,7 +1416,7 @@ const toma = (frame: number): Toma => {
       };
     }
   }
-  return TOMAS[TOMAS.length - 1];
+  return tomas[tomas.length - 1];
 };
 
 // Elements that jump out of the screen and settle back.
@@ -1420,15 +1444,15 @@ const Salta: React.FC<{ x: number; y: number; w: number; h: number; transform: s
   </div>
 );
 
-const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
+const Saltos: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
   const oculto = ocultoEn(frame);
   const piezas: React.ReactNode[] = [];
   if (oculto("javier")) {
     const t = interpolate(frame, SALTO_JAVIER, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
-    const p = clientePos(false, 1);
+    const p = clientePos(m, 1);
     piezas.push(
       <Salta key="javier" x={p.x} y={p.y} w={p.w} h={p.h} sombra={t} transform={`translate3d(0, ${10 * t}px, ${170 * t}px) rotateX(${-12 * t}deg) rotateZ(${-3 * t}deg)`}>
-        <TarjetaCliente c={CLIENTES[1]} i={1} frame={frame} m={false} suelto />
+        <TarjetaCliente c={CLIENTES[1]} i={1} frame={frame} m={m} suelto />
       </Salta>,
     );
   }
@@ -1439,23 +1463,24 @@ const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
     const r = saltoSeg(i);
     const t = interpolate(frame, r, [1, 0], { ...clamp, easing: Easing.out(Easing.cubic) });
     const op = interpolate(frame, [r[0], r[0] + 6], [0, 1], clamp);
-    const p = segCardPos(false, i);
+    const p = segCardPos(m, i);
     piezas.push(
       <Salta key={`seg${i}`} x={p.x} y={p.y} w={p.w} h={p.h} sombra={Math.max(0, t)} transform={`translate3d(0, 0, ${380 * t}px)`}>
         <div style={{ opacity: op }}>
-          <SegCard frame={frame} m={false} i={i} suelto />
+          <SegCard frame={frame} m={m} i={i} suelto />
         </div>
       </Salta>,
     );
   });
-  KPIS_R.forEach((k, i) => {
+  (m ? KPIS_R.slice(0, 4) : KPIS_R).forEach((k, i) => {
     if (!oculto(`kpi${i}`)) {
       return;
     }
+    const q = m ? { x: 12 + (i % 2) * 189, y: 192 + Math.floor(i / 2) * 84, w: 177, h: 76 } : { x: X0 + i * 218, y: 122, w: 204, h: 104 };
     const t = interpolate(frame, SALTO_KPI, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
     piezas.push(
-      <Salta key={`kpi${i}`} x={X0 + i * 218} y={122} w={204} h={104} sombra={t} transform={`translate3d(0, ${18 * t}px, ${140 * t}px)`}>
-        <KpiCard k={k} i={i} x={0} y={0} w={204} h={104} frame={frame} m={false} suelto />
+      <Salta key={`kpi${i}`} x={q.x} y={q.y} w={q.w} h={q.h} sombra={t} transform={`translate3d(0, ${18 * t}px, ${140 * t}px)`}>
+        <KpiCard k={k} i={i} x={0} y={0} w={q.w} h={q.h} frame={frame} m={m} suelto />
       </Salta>,
     );
   });
@@ -1465,17 +1490,21 @@ const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
 export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema>> = ({ fondo, paleta }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  const { w, h } = pantallaDe("tablet", false);
-  const { H: EH } = exteriorDe("tablet", w, h);
-  const c = toma(frame);
+  const m = height > width;
+  const tipo = m ? "celular" : "tablet";
+  const { w, h } = pantallaDe(tipo, m);
+  const { H: EH } = exteriorDe(tipo, w, h);
+  const c = toma(frame, m ? TOMAS_M : TOMAS);
+  const SW = m ? MW : PW;
+  const SH = m ? MH : PH;
   const esc = ((height * 0.64) / EH) * c.z;
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   // Device chrome offset (padding + border) so the overlay lines up with the screen.
-  const BORDE_TABLET = 27;
-  const dx = -(c.px - PW / 2) * esc;
+  const MARCO = m ? 17 : 27;
+  const dx = -(c.px - SW / 2) * esc;
   // Keep the top 20% of the video free (for titles): if the zoom pushes the
   // device above that line, move it down (with a margin for the tilt).
-  const dy0 = -(c.py - PH / 2) * esc;
+  const dy0 = -(c.py - SH / 2) * esc;
   const arriba = height * c.cy + dy0 - (EH * esc) / 2;
   const dy = dy0 + Math.max(0, height * 0.23 - arriba);
   return (
@@ -1493,11 +1522,11 @@ export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema>> = 
           }}
         >
           <Ocultos.Provider value={ocultoEn(frame)}>
-            <Dispositivo tipo="tablet" w={w} h={h}>
-              <Pagina frame={frame} m={false} />
+            <Dispositivo tipo={tipo} w={w} h={h}>
+              <Pagina frame={frame} m={m} />
             </Dispositivo>
-            <div style={{ position: "absolute", left: BORDE_TABLET, top: BORDE_TABLET, width: PW, height: PH, transformStyle: "preserve-3d", fontFamily: FUENTE }}>
-              <Saltos frame={frame} />
+            <div style={{ position: "absolute", left: MARCO, top: MARCO, width: SW, height: SH, transformStyle: "preserve-3d", fontFamily: FUENTE }}>
+              <Saltos frame={frame} m={m} />
             </div>
           </Ocultos.Provider>
         </div>
