@@ -1400,10 +1400,7 @@ const toma = (frame: number): Toma => {
 
 // Elements that jump out of the screen and settle back.
 const SALTO_JAVIER = [146, 162, 176, 192];
-const saltoKpi = (i: number) => {
-  const a = ESC.reportes[0] + 58 + i * 5;
-  return [a, a + 12, a + 26, a + 42];
-};
+const SALTO_KPI = [ESC.reportes[0] + 58, ESC.reportes[0] + 72, ESC.reportes[0] + 88, ESC.reportes[0] + 104];
 const saltoSeg = (i: number) => [SEG_CARDS + i * 8, SEG_CARDS + i * 8 + 30];
 const ocultoEn = (frame: number) => (id: string) => {
   const dentro = (r: number[]) => frame > r[0] && frame < r[r.length - 1];
@@ -1414,7 +1411,7 @@ const ocultoEn = (frame: number) => (id: string) => {
     return dentro(saltoSeg(Number(id.slice(3))));
   }
   if (id.startsWith("kpi")) {
-    return dentro(saltoKpi(Number(id.slice(3))));
+    return dentro(SALTO_KPI);
   }
   return false;
 };
@@ -1443,11 +1440,11 @@ const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
       return;
     }
     const r = saltoSeg(i);
-    const t = interpolate(frame, r, [1, 0], { ...clamp, easing: Easing.out(Easing.back(1.4)) });
+    const t = interpolate(frame, r, [1, 0], { ...clamp, easing: Easing.out(Easing.cubic) });
     const op = interpolate(frame, [r[0], r[0] + 6], [0, 1], clamp);
     const p = segCardPos(false, i);
     piezas.push(
-      <Salta key={`seg${i}`} x={p.x} y={p.y} w={p.w} h={p.h} sombra={Math.max(0, t)} transform={`translate3d(${(i - 1.5) * 260 * t}px, ${80 * t}px, ${420 * t}px) rotateX(${28 * t}deg) rotateZ(${(i - 1.5) * 9 * t}deg)`}>
+      <Salta key={`seg${i}`} x={p.x} y={p.y} w={p.w} h={p.h} sombra={Math.max(0, t)} transform={`translate3d(0, 0, ${380 * t}px)`}>
         <div style={{ opacity: op }}>
           <SegCard frame={frame} m={false} i={i} suelto />
         </div>
@@ -1458,9 +1455,9 @@ const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
     if (!oculto(`kpi${i}`)) {
       return;
     }
-    const t = interpolate(frame, saltoKpi(i), [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+    const t = interpolate(frame, SALTO_KPI, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
     piezas.push(
-      <Salta key={`kpi${i}`} x={X0 + i * 218} y={122} w={204} h={104} sombra={t} transform={`translate3d(0, ${40 * t}px, ${170 * t}px) rotateX(${-14 * t}deg) rotateZ(${(i - 2) * 3 * t}deg)`}>
+      <Salta key={`kpi${i}`} x={X0 + i * 218} y={122} w={204} h={104} sombra={t} transform={`translate3d(0, ${18 * t}px, ${140 * t}px)`}>
         <KpiCard k={k} i={i} x={0} y={0} w={204} h={104} frame={frame} m={false} suelto />
       </Salta>,
     );
