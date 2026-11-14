@@ -1269,7 +1269,9 @@ const Pagina: React.FC<{ frame: number }> = ({ frame }) => {
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
   const dedoVis = interpolate(frame, [100, 116], [0, 1], clamp) * interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
   return (
-    <div style={{ position: "relative", width: PW, height: PH, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden", ...varsMarca(frame) }}>
+    <div style={{ position: "relative", width: PW, height: PH, background: OSCURO, fontFamily: FUENTE, overflow: "hidden", ...varsMarca(frame) }}>
+      {/* Light page background starts under the dark header, so no light edge shows at the top. */}
+      <div style={{ position: "absolute", left: 0, right: 0, top: HEADER_H, bottom: 0, background: "#f4f6f9" }} />
       {escenas.map(([e, C]) => {
         const [a, b] = ESC[e];
         const v = interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
@@ -1277,7 +1279,7 @@ const Pagina: React.FC<{ frame: number }> = ({ frame }) => {
           return null;
         }
         return (
-          <div key={e} style={{ position: "absolute", inset: 0, opacity: v }}>
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v, clipPath: `inset(${HEADER_H}px 0 0 0)` }}>
             <C frame={frame} />
           </div>
         );
@@ -1798,7 +1800,9 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
   const dedoVis = interpolate(frame, [100, 116], [0, 1], clamp) * interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
   return (
-    <div style={{ position: "relative", width: MW, height: MH, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden", ...varsMarca(frame) }}>
+    <div style={{ position: "relative", width: MW, height: MH, background: OSCURO, fontFamily: FUENTE, overflow: "hidden", ...varsMarca(frame) }}>
+      {/* Light page background starts under the dark header, so no light edge shows at the top. */}
+      <div style={{ position: "absolute", left: 0, right: 0, top: M_TOP - 2, bottom: 0, background: "#f4f6f9" }} />
       {escenas.map(([e, C]) => {
         const [a, b] = ESC[e];
         const v = interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
@@ -1806,7 +1810,7 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
           return null;
         }
         return (
-          <div key={e} style={{ position: "absolute", inset: 0, opacity: v }}>
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v, clipPath: `inset(${M_TOP - 2}px 0 0 0)` }}>
             <C frame={frame} />
           </div>
         );
@@ -1862,6 +1866,152 @@ export const TiendaMovil: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, pal
           <Dispositivo tipo="celular" w={w} h={h}>
             <PaginaMovil frame={frame} />
           </Dispositivo>
+        </div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+// ---------- Dynamic version (16:9 tablet or 9:16 phone) ----------
+// Camera keyframes: zoom, focus point on the screen (page px), tilt and the
+// vertical position of the device centre (fraction of the video height).
+type Toma = { f: number; z: number; px: number; py: number; ry: number; rx: number; rz: number; cy: number };
+const C_T = { px: PW / 2, py: PH / 2 };
+const C_M = { px: MW / 2, py: MH / 2 };
+const TOMAS_T: Toma[] = [
+  { f: 0, z: 0.92, ...C_T, ry: 22, rx: 10, rz: 3, cy: 0.62 },
+  { f: 34, z: 1.35, px: 420, py: 230, ry: 10, rx: 5, rz: 1, cy: 0.56 },
+  { f: 110, z: 1.35, px: 500, py: 250, ry: 10, rx: 5, rz: 1, cy: 0.56 },
+  { f: 146, z: 1, ...C_T, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 236, z: 1, ...C_T, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 252, z: 1.4, px: 600, py: 340, ry: -8, rx: 4, rz: -1, cy: 0.56 },
+  { f: 278, z: 1.05, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 300, z: 1.3, px: 430, py: 380, ry: 8, rx: 4, rz: 1, cy: 0.57 },
+  { f: 334, z: 1.3, px: 840, py: 480, ry: 6, rx: 3, rz: 0.5, cy: 0.57 },
+  { f: 380, z: 1.3, px: 840, py: 520, ry: 6, rx: 3, rz: 0.5, cy: 0.57 },
+  { f: 402, z: 1, ...C_T, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 428, z: 1.4, px: 420, py: 480, ry: -7, rx: 4, rz: -1, cy: 0.56 },
+  { f: 466, z: 1.4, px: 460, py: 560, ry: -7, rx: 4, rz: -1, cy: 0.56 },
+  { f: 494, z: 1.1, ...C_T, ry: -10, rx: 5, rz: -1.5, cy: 0.6 },
+  { f: 528, z: 1, ...C_T, ry: 14, rx: 7, rz: 2, cy: 0.62 },
+  { f: 560, z: 1.3, px: 590, py: 380, ry: 6, rx: 3, rz: 0.5, cy: 0.56 },
+  { f: TIENDA_FRAMES, z: 1.05, ...C_T, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+];
+const TOMAS_MV: Toma[] = [
+  { f: 0, z: 0.92, ...C_M, ry: 20, rx: 9, rz: 3, cy: 0.62 },
+  { f: 34, z: 1.3, px: 195, py: 270, ry: 9, rx: 5, rz: 1, cy: 0.58 },
+  { f: 110, z: 1.3, px: 195, py: 290, ry: 9, rx: 5, rz: 1, cy: 0.58 },
+  { f: 146, z: 1, ...C_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 236, z: 1, ...C_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 252, z: 1.3, px: 290, py: 470, ry: -7, rx: 4, rz: -1, cy: 0.58 },
+  { f: 278, z: 1.02, ...C_M, ry: 12, rx: 6, rz: 1.5, cy: 0.62 },
+  { f: 300, z: 1.25, px: 195, py: 380, ry: 7, rx: 4, rz: 1, cy: 0.58 },
+  { f: 334, z: 1, ...C_M, ry: 10, rx: 5, rz: 1, cy: 0.62 },
+  { f: 380, z: 1, ...C_M, ry: 10, rx: 5, rz: 1, cy: 0.62 },
+  { f: 402, z: 1, ...C_M, ry: -14, rx: 6, rz: -2, cy: 0.62 },
+  { f: 428, z: 1.3, px: 195, py: 520, ry: -7, rx: 4, rz: -1, cy: 0.58 },
+  { f: 462, z: 1.3, px: 195, py: 540, ry: -7, rx: 4, rz: -1, cy: 0.58 },
+  { f: 486, z: 1.02, ...C_M, ry: -10, rx: 5, rz: -1.5, cy: 0.62 },
+  { f: 528, z: 1, ...C_M, ry: 14, rx: 7, rz: 2, cy: 0.62 },
+  { f: 560, z: 1.25, px: 195, py: 400, ry: 6, rx: 3, rz: 0.5, cy: 0.58 },
+  { f: TIENDA_FRAMES, z: 1.02, ...C_M, ry: 10, rx: 6, rz: 1.5, cy: 0.62 },
+];
+const toma = (frame: number, tomas: Toma[]): Toma => {
+  for (let k = 1; k < tomas.length; k++) {
+    const a = tomas[k - 1];
+    const b = tomas[k];
+    if (frame <= b.f) {
+      const t = interpolate(frame, [a.f, b.f], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+      const mezcla = (u: number, v: number) => u + (v - u) * t;
+      return {
+        f: frame,
+        z: Math.exp(mezcla(Math.log(a.z), Math.log(b.z))),
+        px: mezcla(a.px, b.px),
+        py: mezcla(a.py, b.py),
+        ry: mezcla(a.ry, b.ry),
+        rx: mezcla(a.rx, b.rx),
+        rz: mezcla(a.rz, b.rz),
+        cy: mezcla(a.cy, b.cy),
+      };
+    }
+  }
+  return tomas[tomas.length - 1];
+};
+
+// Pieces of the screen that lift out towards the camera and settle back: a
+// copy of that rectangle of the page, over a hole where it was.
+type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number };
+const SALTOS_T: Salto[] = [
+  { x: 491, y: 196, w: 207, h: 300, f: [236, 246, 251, 257], z: 170 },
+  { x: 144, y: 172, w: 430, h: 420, f: [298, 312, 330, 346], z: 120 },
+  { x: 140, y: 492, w: 560, h: 50, f: [438, 448, 458, 468], z: 150 },
+  { x: 290, y: 146, w: 600, h: 600, f: [548, 562, 582, 598], z: 90 },
+];
+const SALTOS_MV: Salto[] = [
+  { x: 201, y: 366, w: 177, h: 250, f: [236, 246, 251, 257], z: 150 },
+  { x: 16, y: 525, w: 358, h: 52, f: [438, 448, 458, 468], z: 130 },
+];
+
+const Recortes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => (
+  <>
+    {(m ? SALTOS_MV : SALTOS_T).map((s, i) => {
+      if (frame <= s.f[0] || frame >= s.f[3]) {
+        return null;
+      }
+      const t = interpolate(frame, s.f, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+      return (
+        <div key={i}>
+          <div style={{ position: "absolute", left: s.x, top: s.y, width: s.w, height: s.h, borderRadius: 12, background: "#e6eaf0", opacity: Math.min(1, t * 3) }} />
+          <div style={{ position: "absolute", left: s.x, top: s.y, width: s.w, height: s.h, borderRadius: 12, overflow: "hidden", transform: `translate3d(0, ${10 * t}px, ${s.z * t}px)`, boxShadow: `0 ${30 * t}px ${60 * t}px rgba(0,0,0,${0.35 * t})` }}>
+            <div style={{ position: "absolute", left: -s.x, top: -s.y, width: m ? MW : PW, height: m ? MH : PH }}>
+              {m ? <PaginaMovil frame={frame} /> : <Pagina frame={frame} />}
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </>
+);
+
+export const TiendaDinamico: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, paleta }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  const m = height > width;
+  const tipo = m ? "celular" : "tablet";
+  const { w, h } = pantallaDe(tipo, m);
+  const { H: EH } = exteriorDe(tipo, w, h);
+  const c = toma(frame, m ? TOMAS_MV : TOMAS_T);
+  const esc = ((height * 0.64) / EH) * c.z;
+  const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
+  const SW = m ? MW : PW;
+  const SH = m ? MH : PH;
+  // Device chrome offset (padding + border) so the overlay lines up with the screen.
+  const MARCO = m ? 17 : 27;
+  const dx = -(c.px - SW / 2) * esc;
+  // Keep the top 20% of the video free (for titles), with a margin for the tilt.
+  const dy0 = -(c.py - SH / 2) * esc;
+  const arriba = height * c.cy + dy0 - (EH * esc) / 2;
+  const dy = dy0 + Math.max(0, height * 0.23 - arriba);
+  return (
+    <AbsoluteFill style={{ fontFamily: FUENTE }}>
+      <FondoAbstracto paleta={paleta} estilo={fondo} />
+      <AbsoluteFill style={{ perspective: 2600 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: width / 2,
+            top: height * c.cy,
+            opacity: t,
+            transformStyle: "preserve-3d",
+            transform: `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${esc}) rotateY(${c.ry}deg) rotateX(${c.rx}deg) rotateZ(${c.rz}deg)`,
+          }}
+        >
+          <Dispositivo tipo={tipo} w={w} h={h}>
+            {m ? <PaginaMovil frame={frame} /> : <Pagina frame={frame} />}
+          </Dispositivo>
+          <div style={{ position: "absolute", left: MARCO, top: MARCO, width: SW, height: SH, transformStyle: "preserve-3d", fontFamily: FUENTE }}>
+            <Recortes frame={frame} m={m} />
+          </div>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
