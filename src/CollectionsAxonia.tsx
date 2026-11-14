@@ -16,7 +16,8 @@ import { FondoAbstracto } from "./FondoAbstracto";
 import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
 
 // Axonia Collections CRM (16:9 tablet or 9:16 phone, tilted and seen from
-// the left, 20s): the S4 cluster's client cards appear, on Javier Perez's
+// the left, 20s): "Contenedores de Gestión" opens on the CRM home and
+// "Cobranzas Clientes Activos" is picked, the S4 cluster's client cards appear, on Javier Perez's
 // file a payment promise is registered and shows up in the table, and at the
 // end the 3D segmentation cube builds and S4 is highlighted.
 
@@ -31,6 +32,7 @@ const FUENTE = "Montserrat, sans-serif";
 const HEADER_BG = "#3f4247";
 const SIDE_BG = "#1c2130";
 const AZUL = "#2f6fe0";
+const AZUL_OSC = "#1e3a6e";
 const TINTA = "#1f2430";
 const TINTA_2 = "#6b7280";
 const BORDE = "#e1e5ec";
@@ -53,18 +55,20 @@ const M_HEADER = 96;
 
 // Timeline (frames).
 const ESC = {
-  cluster: [0, 150],
-  cliente: [144, 420],
-  cubo: [414, COLLECTIONS_FRAMES + 10],
+  home: [0, 100],
+  cluster: [94, 230],
+  cliente: [224, 460],
+  cubo: [454, COLLECTIONS_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
-const TAP_JAVIER = 120;
-const TAP_SELECT = 196;
-const TAP_PROMESA = 220;
-const TIPEO = [236, 264];
-const TAP_GUARDAR = 282;
-const TAP_S4 = 540;
-const TAPS = [TAP_JAVIER, TAP_SELECT, TAP_PROMESA, TAP_GUARDAR, TAP_S4];
+const TAP_ACTIVOS = 70;
+const TAP_JAVIER = 200;
+const TAP_SELECT = 270;
+const TAP_PROMESA = 294;
+const TIPEO = [310, 338];
+const TAP_GUARDAR = 356;
+const TAP_S4 = 556;
+const TAPS = [TAP_ACTIVOS, TAP_JAVIER, TAP_SELECT, TAP_PROMESA, TAP_GUARDAR, TAP_S4];
 
 const pulsado = (frame: number, f: number) => interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
 const entra = (frame: number, f: number, d = 10) => interpolate(frame, [f, f + d], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
@@ -104,6 +108,11 @@ const I_FLECHA_IZQ = "M19 12 H5 M11 6 L5 12 L11 18";
 const I_SIGUIENTE = "M5 12 H19 M13 6 L19 12 L13 18";
 const I_LLAMADA = "M8 6 C5 9 5 15 8 18 M16 6 C19 9 19 15 16 18 M11 9 C10 10.5 10 13.5 11 15 M13 9 C14 10.5 14 13.5 13 15";
 
+const I_LUPA = "M10 4 A6 6 0 1 1 10 16 A6 6 0 1 1 10 4 M15 15 L20 20";
+const I_CHART = "M4 20 V10 M10 20 V4 M16 20 V13 M22 20 H2";
+const I_ESTRELLA = "M12 3 L14.6 8.6 L20.6 9.2 L16 13.3 L17.4 19.3 L12 16.2 L6.6 19.3 L8 13.3 L3.4 9.2 L9.4 8.6 Z";
+const I_MANOS = "M3 11 L7 7 L11 9 L15 6 L21 11 L16 16 L12 13 L9 16 Z";
+const I_BALANZA = "M12 4 V20 M7 20 H17 M5 7 H19 M5 7 L2 13 C3 15 7 15 8 13 Z M19 7 L16 13 C17 15 21 15 22 13 Z";
 const SIDE_ICONOS = [I_CASA, I_AURI, I_USUARIO, I_ORGANIGRAMA, I_DOC, I_ENGRANAJE];
 
 // Tablet header + sidebar around the content.
@@ -149,6 +158,96 @@ const MarcoMovil: React.FC = () => (
     </div>
   </div>
 );
+
+const Titulo: React.FC<{ x: number; y: number; s?: number; children: React.ReactNode }> = ({ x, y, s = 22, children }) => (
+  <div style={{ position: "absolute", left: x, top: y, display: "flex", alignItems: "center", gap: 10 }}>
+    <div style={{ width: 3, height: s + 4, background: TINTA }} />
+    <div style={{ fontSize: s, fontWeight: 700, color: TINTA }}>{children}</div>
+  </div>
+);
+
+// ---------- Home: CRM Cobranzas + "Contenedores de Gestión" modal ----------
+const TARJETAS: [string, string, string][] = [
+  [I_LUPA, "Buscar Clientes", "Búsqueda por DNI, nombre o número de crédito"],
+  [I_CARPETA, "Contenedores de Gestión", "Carteras de trabajo por segmento"],
+  [I_ORGANIGRAMA, "Asignaciones", "Distribución de la cartera entre gestores"],
+  [I_ENGRANAJE, "Estrategia", "Reglas y acciones por segmento"],
+  [I_CHART, "Reportes de Gestión", "Resultados y productividad del equipo"],
+];
+const HOME_T = { cols: 4, w: 254, h: 130, gap: 20, y: 138 };
+const HOME_M = { cols: 2, w: 173, h: 128, gap: 12, y: 166 };
+const tarjetaPos = (m: boolean, i: number) => {
+  const L = m ? HOME_M : HOME_T;
+  const x0 = m ? 16 : X0;
+  return { x: x0 + (i % L.cols) * (L.w + L.gap), y: L.y + Math.floor(i / L.cols) * (L.h + (m ? 12 : 20)), w: L.w, h: L.h };
+};
+const MODAL_T = { x: 130, y: 280, w: 920, h: 250 };
+const MODAL_M = { x: 20, y: 200, w: 350, h: 356 };
+const OPCIONES: [string, string, string][] = [
+  [I_LLAMADA, "Cobranzas Clientes Activos", "Gestión de clientes de cartera viva por segmentos"],
+  [I_MANOS, "Mi Cartera Extrajudicial", "Gestionar mi cartera de clientes extrajudiciales asignada"],
+  [I_BALANZA, "Mi Cartera Judicial", "Gestionar mi cartera de clientes judiciales asignada"],
+];
+const opcionPos = (m: boolean, i: number) =>
+  m
+    ? { x: MODAL_M.x + 14, y: MODAL_M.y + 64 + i * 92, w: MODAL_M.w - 28, h: 84 }
+    : { x: MODAL_T.x + 26 + i * 289, y: MODAL_T.y + 70, w: 279, h: 150 };
+
+const Home: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
+  const modal = entra(frame, 4, 10);
+  const M = m ? MODAL_M : MODAL_T;
+  return (
+    <div style={{ position: "absolute", inset: 0, background: FONDO }}>
+      <div style={{ position: "absolute", inset: 0, filter: modal > 0 ? `blur(${modal * 3}px)` : undefined }}>
+        <Titulo x={m ? 18 : X0} y={m ? 114 : 74} s={m ? 19 : 22}>
+          CRM Cobranzas
+        </Titulo>
+        {TARJETAS.map(([d, t, s], i) => {
+          const p = tarjetaPos(m, i);
+          const e = 1;
+          return (
+            <div key={t} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: "0 3px 10px rgba(15,25,45,0.06)", padding: m ? 14 : 18, boxSizing: "border-box", opacity: e, transform: `translateY(${(1 - e) * 14}px)` }}>
+              <div style={{ width: 40, height: 40, borderRadius: 9, background: "#3a3d44", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icono d={d} s={20} />
+              </div>
+              <div style={{ fontSize: m ? 12.5 : 14, fontWeight: 800, color: TINTA, marginTop: 12 }}>{t}</div>
+              <div style={{ fontSize: m ? 9.5 : 10.5, color: TINTA_2, marginTop: 4, lineHeight: 1.35 }}>{s}</div>
+            </div>
+          );
+        })}
+      </div>
+      {modal > 0 ? (
+        <>
+          <div style={{ position: "absolute", inset: 0, background: `rgba(30,36,48,${modal * 0.35})` }} />
+          <div style={{ position: "absolute", left: M.x, top: M.y, width: M.w, height: M.h, background: "white", borderRadius: 18, boxShadow: "0 30px 60px rgba(0,0,0,0.3)", opacity: modal, transform: `scale(${0.94 + 0.06 * modal})` }}>
+            <div style={{ position: "absolute", left: m ? 18 : 26, top: m ? 20 : 26, fontSize: m ? 17 : 20, fontWeight: 700, color: AZUL_OSC }}>Contenedores de Gestión</div>
+            <div style={{ position: "absolute", right: m ? 18 : 26, top: m ? 18 : 24, fontSize: 22, color: TINTA_2 }}>×</div>
+          </div>
+          {OPCIONES.map(([d, t, s], i) => {
+            const p = opcionPos(m, i);
+            const e = entra(frame, 10 + i * 3);
+            const sel = i === 0 ? pulsado(frame, TAP_ACTIVOS) : 0;
+            const hover = i === 0 ? interpolate(frame, [TAP_ACTIVOS - 12, TAP_ACTIVOS - 4], [0, 1], clamp) : 0;
+            return (
+              <div key={t} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, borderRadius: 12, background: hover > 0 ? `rgba(47,111,224,${0.07 * hover})` : "white", border: `1.5px solid ${hover > 0 ? `rgba(47,111,224,${0.6 * hover})` : "transparent"}`, padding: m ? "12px 14px" : "16px 14px", boxSizing: "border-box", opacity: e * modal, transform: `scale(${1 - sel * 0.04})`, display: m ? "flex" : "block", gap: 12, alignItems: "center" }}>
+                <div style={{ position: "absolute", right: 12, top: 10 }}>
+                  <Icono d={I_ESTRELLA} s={13} c={TINTA} w={1.6} />
+                </div>
+                <div style={{ width: 40, height: 40, flexShrink: 0, borderRadius: 9, background: "#3a3d44", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icono d={d} s={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: m ? 13 : 15, fontWeight: 700, color: TINTA, marginTop: m ? 0 : 18 }}>{t}</div>
+                  <div style={{ fontSize: m ? 9.5 : 10.5, color: TINTA_2, marginTop: 5, lineHeight: 1.4 }}>{s}</div>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      ) : null}
+    </div>
+  );
+};
 
 // ---------- 3D segmentation cube ----------
 type SegId = "S1" | "S2" | "S3" | "S4";
@@ -626,12 +725,14 @@ const Toast: React.FC<{ t: number; x: number; y: number }> = ({ t, x, y }) => (
 // ---------- Finger ----------
 const dedoDe = (m: boolean): [number, number, number][] => {
   const s4 = chipPos(m, 3);
+  const o0 = opcionPos(m, 0);
   const jp = clientePos(m, 1);
   const F = m ? FORM_M : FORM_T;
   const cx = F.x + F.w / 2;
   const Y = formY(m);
   return [
     [0, m ? 260 : 700, m ? 700 : 640],
+    [TAP_ACTIVOS - 2, o0.x + o0.w / 2, o0.y + o0.h / 2],
     [TAP_JAVIER - 2, jp.x + jp.w / 2, jp.y + jp.h / 2],
     [TAP_SELECT - 2, cx, Y.select + 19],
     [TAP_PROMESA - 2, cx, Y.dropdown + 34 + 17],
@@ -661,6 +762,7 @@ const posDedo = (frame: number, m: boolean) => {
 
 const Pagina: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
   const escenas: [Escena, React.FC<{ frame: number; m: boolean }>][] = [
+    ["home", Home],
     ["cluster", Cluster],
     ["cliente", ClienteFicha],
     ["cubo", CuboPantalla],
@@ -669,7 +771,7 @@ const Pagina: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
   const tap = TAPS.find((f) => frame >= f && frame < f + 16);
   const onda = tap === undefined ? 0 : (frame - tap) / 16;
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
-  const dedoVis = interpolate(frame, [40, 54], [0, 1], clamp) * interpolate(frame, [TAP_S4 + 30, TAP_S4 + 44], [1, 0], clamp);
+  const dedoVis = interpolate(frame, [26, 40], [0, 1], clamp) * interpolate(frame, [TAP_S4 + 30, TAP_S4 + 44], [1, 0], clamp);
   return (
     <div style={{ position: "relative", width: m ? MW : PW, height: m ? MH : PH, background: FONDO, fontFamily: FUENTE, overflow: "hidden" }}>
       {escenas.map(([e, C]) => {
