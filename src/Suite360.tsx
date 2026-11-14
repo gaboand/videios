@@ -93,7 +93,7 @@ const HORIZONTAL: Escena = {
     { d: "M 1408 740 C 1452 700 1428 470 1466 405" },
     { d: "M 1670 525 L 1670 610", doble: true },
   ],
-  general: { x: 960, y: 540, z: 1 },
+  general: { x: 960, y: 440, z: 0.82 },
 };
 
 // 9:16: the same flow top to bottom.
@@ -117,7 +117,7 @@ const VERTICAL: Escena = {
     { d: "M 950 1282 C 966 1320 934 1352 950 1393" },
     { d: "M 625 1540 L 457 1540", doble: true },
   ],
-  general: { x: 540, y: 965, z: 0.86 },
+  general: { x: 540, y: 888, z: 0.74 },
 };
 
 // Timeline (frames).
@@ -1054,6 +1054,11 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
           }
           const activo = i === actual && general < 1 ? 1 - general : 0;
           const ola = interpolate(frame - ALEJA_FIN - i * 4, [0, 8, 22], [0, 1, 0], clamp);
+          // Modules already presented go grey until the final overview.
+          const pasado =
+            i < N_MODULOS - 1
+              ? interpolate(frame, [aparicion(i + 1) - 12, aparicion(i + 1) + 8], [0, 1], clamp) * (1 - general)
+              : 0;
           const Contenido = CONTENIDO[m.id];
           return (
             <div key={m.id}>
@@ -1067,7 +1072,7 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
                   fontSize: 21,
                   fontWeight: 800,
                   color: "white",
-                  opacity: interpolate(t, [6, 16], [0, 1], clamp),
+                  opacity: interpolate(t, [6, 16], [0, 1], clamp) * (1 - 0.5 * pasado),
                   transform: `translateY(${interpolate(t, [6, 16], [8, 0], clamp)}px)`,
                   whiteSpace: "nowrap",
                 }}
@@ -1097,6 +1102,7 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
                   overflow: "hidden",
                   opacity: Math.min(1, s * 1.4),
                   transform: `scale(${0.85 + 0.15 * s}) translateY(${(1 - s) * 20}px)`,
+                  filter: pasado > 0 ? `grayscale(${pasado}) brightness(${1 - 0.6 * pasado})` : undefined,
                   boxShadow: `0 18px 40px rgba(0,0,0,0.45), 0 0 0 ${2 + activo * 1 + ola * 2}px rgba(255,140,66,${0.15 + activo * 0.7 + ola * 0.8})`,
                 }}
               >
