@@ -93,7 +93,7 @@ const HORIZONTAL: Escena = {
     { d: "M 1408 740 C 1452 700 1428 470 1466 405" },
     { d: "M 1670 525 L 1670 610", doble: true },
   ],
-  general: { x: 960, y: 429, z: 0.7 },
+  general: { x: 960, y: 344, z: 0.62 },
 };
 
 // 9:16: the same flow top to bottom.
@@ -117,7 +117,7 @@ const VERTICAL: Escena = {
     { d: "M 950 1282 C 966 1320 934 1352 950 1393" },
     { d: "M 625 1540 L 457 1540", doble: true },
   ],
-  general: { x: 540, y: 891, z: 0.64 },
+  general: { x: 540, y: 730, z: 0.56 },
 };
 
 // Timeline (frames).
@@ -128,6 +128,10 @@ const aparicion = (i: number) => PRIMERO + i * PASO;
 const ULTIMO = aparicion(N_MODULOS - 1);
 const ALEJA = ULTIMO + 40;
 const ALEJA_FIN = ALEJA + 48;
+
+// 0 → 1 as module i stops being the current one (back to 0 in the overview).
+const pasadoDe = (frame: number, i: number, general: number) =>
+  interpolate(frame, [aparicion(i + 1) - 12, aparicion(i + 1) + 8], [0, 1], clamp) * (1 - general);
 
 const camDe = (e: Escena, i: number): Cam => {
   const m = e.mods[i];
@@ -1020,8 +1024,10 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
             if (p <= 0) {
               return null;
             }
+            // Once the module it points to has been presented, the arrow greys out too.
+            const gris = i + 1 < N_MODULOS - 1 ? pasadoDe(frame, i + 1, general) : 0;
             return (
-              <g key={i}>
+              <g key={i} opacity={1 - 0.65 * gris}>
                 <path
                   d={f.d}
                   fill="none"
@@ -1055,10 +1061,7 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
           const activo = i === actual && general < 1 ? 1 - general : 0;
           const ola = interpolate(frame - ALEJA_FIN - i * 4, [0, 8, 22], [0, 1, 0], clamp);
           // Modules already presented go grey until the final overview.
-          const pasado =
-            i < N_MODULOS - 1
-              ? interpolate(frame, [aparicion(i + 1) - 12, aparicion(i + 1) + 8], [0, 1], clamp) * (1 - general)
-              : 0;
+          const pasado = i < N_MODULOS - 1 ? pasadoDe(frame, i, general) : 0;
           const Contenido = CONTENIDO[m.id];
           return (
             <div key={m.id}>
