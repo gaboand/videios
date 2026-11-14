@@ -329,19 +329,19 @@ const chipPos = (m: boolean, i: number) =>
     : { x: CUBO_T.x + 18 + i * (CUBO_T.chipW + CUBO_T.chipGap), y: CUBO_T.chipY, w: CUBO_T.chipW, h: 32 };
 
 // Segment cards shown once the cube is built.
-const SEG_INFO: Record<SegId, { nombre: string; perfil: string; clientes: number; deuda: string; accion: string }> = {
-  S1: { nombre: "Mora preventiva", perfil: "0 a 10 días · al día o por vencer", clientes: 3120, deuda: "$ 42,6 M", accion: "Recordatorio WhatsApp" },
-  S2: { nombre: "Riesgo bajo", perfil: "11 a 30 días de mora", clientes: 1845, deuda: "$ 61,2 M", accion: "Llamada con bot" },
-  S3: { nombre: "Riesgo medio", perfil: "31 a 90 días de mora", clientes: 960, deuda: "$ 74,8 M", accion: "Gestor + refinanciación" },
-  S4: { nombre: "Riesgo alto", perfil: "Más de 90 días de mora", clientes: 412, deuda: "$ 69,7 M", accion: "Agencia externa" },
+const SEG_INFO: Record<SegId, { nombre: string; perfil: string; clientes: number; accion: string }> = {
+  S1: { nombre: "Mora preventiva", perfil: "0 a 10 días · al día o por vencer", clientes: 3120, accion: "Recordatorio WhatsApp" },
+  S2: { nombre: "Riesgo bajo", perfil: "11 a 30 días de mora", clientes: 1845, accion: "Llamada con bot" },
+  S3: { nombre: "Riesgo medio", perfil: "31 a 90 días de mora", clientes: 960, accion: "Gestor + refinanciación" },
+  S4: { nombre: "Riesgo alto", perfil: "Más de 90 días de mora", clientes: 412, accion: "Agencia externa" },
 };
 const SEG_CARDS = CUBO0 + 70;
 const segCardPos = (m: boolean, i: number) =>
-  m ? { x: 24 + (i % 2) * 177, y: 610 + Math.floor(i / 2) * 106, w: 165, h: 100 } : { x: X0 + 18 + i * 262, y: 606, w: 250, h: 172 };
+  m ? { x: 24 + (i % 2) * 177, y: 632 + Math.floor(i / 2) * 88, w: 165, h: 82 } : { x: X0 + 18 + i * 262, y: 660, w: 250, h: 112 };
 
 const CuboPantalla: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
   const C = m ? CUBO_M : CUBO_T;
-  const area = m ? { y: 320, h: 280 } : { y: 232, h: 360 };
+  const area = m ? { y: 320, h: 308 } : { y: 232, h: 414 };
   return (
     <div style={{ position: "absolute", inset: 0, background: FONDO }}>
       <div style={{ position: "absolute", left: C.x, top: C.y, width: C.w, height: C.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: "0 8px 24px rgba(15,25,45,0.08)" }}>
@@ -384,19 +384,18 @@ const CuboPantalla: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => 
         const info = SEG_INFO[s];
         const n = Math.round(info.clientes * entra(frame, SEG_CARDS + i * 8, 30));
         return (
-          <div key={`c${s}`} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: `0 10px 24px ${COLOR[s]}26`, overflow: "hidden", opacity: e, transform: `translateY(${(1 - e) * 30}px)`, boxSizing: "border-box", padding: m ? "12px 12px" : "16px 16px" }}>
+          <div key={`c${s}`} style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, background: "white", borderRadius: 12, border: `1px solid ${BORDE}`, boxShadow: `0 10px 24px ${COLOR[s]}26`, overflow: "hidden", opacity: e, transform: `translateY(${(1 - e) * 30}px)`, boxSizing: "border-box", padding: m ? "9px 10px" : "12px 14px" }}>
             <div style={{ position: "absolute", left: 0, top: 0, right: 0, height: 4, background: COLOR[s] }} />
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <div style={{ width: 9, height: 9, borderRadius: "50%", background: COLOR[s] }} />
-              <div style={{ fontSize: m ? 11.5 : 13.5, fontWeight: 800, color: TINTA }}>{info.nombre}</div>
+              <div style={{ fontSize: m ? 11 : 12.5, fontWeight: 800, color: TINTA }}>{info.nombre}</div>
             </div>
             {!m ? <div style={{ fontSize: 10, color: TINTA_2, marginTop: 3 }}>{info.perfil}</div> : null}
-            <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginTop: m ? 8 : 14 }}>
-              <div style={{ fontSize: m ? 18 : 24, fontWeight: 800, color: COLOR[s] }}>{n.toLocaleString("es-AR")}</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginTop: m ? 4 : 6 }}>
+              <div style={{ fontSize: m ? 16 : 20, fontWeight: 800, color: COLOR[s] }}>{n.toLocaleString("es-AR")}</div>
               <div style={{ fontSize: m ? 9 : 10.5, color: TINTA_2 }}>clientes</div>
             </div>
-            {!m ? <div style={{ fontSize: 10.5, color: TINTA, marginTop: 4 }}>Deuda {info.deuda}</div> : null}
-            <div style={{ display: "inline-block", marginTop: m ? 6 : 12, background: `${COLOR[s]}1a`, color: COLOR[s], fontSize: m ? 8 : 10, fontWeight: 700, borderRadius: 6, padding: "4px 8px", whiteSpace: "nowrap" }}>{info.accion}</div>
+            <div style={{ display: "inline-block", marginTop: m ? 3 : 6, background: `${COLOR[s]}1a`, color: COLOR[s], fontSize: m ? 8 : 10, fontWeight: 700, borderRadius: 6, padding: "4px 8px", whiteSpace: "nowrap" }}>{info.accion}</div>
           </div>
         );
       })}
