@@ -11,6 +11,7 @@ import {
 import "@fontsource/montserrat/500.css";
 import "@fontsource/montserrat/700.css";
 import "@fontsource/montserrat/800.css";
+import { createContext, useContext } from "react";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
@@ -118,6 +119,8 @@ const BASE_ASIENTOS = [
   -1, 1, 0, -1, 1, -1, -1, 0,
   1, -1, -1, 1, 0, -1, 1, -1,
 ];
+// Dynamic phone version: the call room laid out as 3 separate islands of seats.
+const Islas = createContext(false);
 const CAMBIOS_ASIENTOS: Record<number, [number, number]> = { 8: [70, -1], 16: [104, 0] };
 const estadoAsiento = (i: number, frame: number) =>
   i in CAMBIOS_ASIENTOS && frame >= CAMBIOS_ASIENTOS[i][0] ? CAMBIOS_ASIENTOS[i][1] : BASE_ASIENTOS[i];
@@ -140,6 +143,68 @@ const Puesto: React.FC<{ color: string | null; giro?: number; arriba?: boolean }
         <rect x={11} y={arriba ? 13 : 11} width={22} height={12} rx={2} fill="rgba(255,255,255,0.85)" />
         <rect x={16} y={arriba ? 28 : 26} width={12} height={3} rx={1.5} fill="rgba(255,255,255,0.7)" />
       </svg>
+    </div>
+  );
+};
+
+const PanelSala: React.FC<{ frame: number; panel: number; caja: React.CSSProperties}> = ({ frame, panel, caja }) => (
+        <div style={{ position: "absolute", ...caja, background: "#4b5563", borderRadius: 12, overflow: "hidden" }}>
+          <div style={{ position: "absolute", right: 14, top: 10, fontSize: 9, color: "#d1d5db", display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ade80" }} />
+            Estado en vivo · Actualizado 10:{String(15 + Math.floor(frame / 30)).padStart(2, "0")}
+          </div>
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: 1 - panel }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "white" }}>Sin campañas activas</div>
+            <div style={{ fontSize: 11, color: "#d1d5db", marginTop: 4 }}>Contact Flow está en reposo</div>
+          </div>
+          {panel > 0.01 ? (
+            <div style={{ position: "absolute", inset: 0, padding: "24px 30px", opacity: panel }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 9.5, fontWeight: 800, color: "#052e16", background: "#4ade80", borderRadius: 10, padding: "3px 9px" }}>EN CURSO</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: "white" }}>MORA TEMPRANA NOVIEMBRE</span>
+              </div>
+              <div style={{ display: "flex", gap: 14, marginTop: 20 }}>
+                {[
+                  ["Llamados", num(1248)],
+                  ["En conversación", "15"],
+                  ["Llamando", "8"],
+                  ["Contactabilidad", pct(21.3)],
+                ].map(([k, v]) => (
+                  <div key={k} style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 9, padding: "12px 14px" }}>
+                    <div style={{ fontSize: 9.5, color: "#d1d5db" }}>{k}</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: "white", marginTop: 4 }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 18, height: 8, borderRadius: 4, background: "rgba(255,255,255,0.12)" }}>
+                <div style={{ width: "38%", height: "100%", borderRadius: 4, background: "#3b82f6" }} />
+              </div>
+              <div style={{ fontSize: 9.5, color: "#d1d5db", marginTop: 6 }}>Avance de la campaña · 46 agentes virtuales</div>
+            </div>
+          ) : null}
+        </div>
+);
+
+// Island of desks: pairs of facing rows (chairs out, monitors to the middle
+// with a partition between them). Seat index = desde + pair * 2 * cols + row * cols + col.
+const Isla: React.FC<{ frame: number; x: number; y: number; cols: number; pares: number; desde: number; gap?: number }> = ({ frame, x, y, cols, pares, desde, gap = 8 }) => {
+  const PAD = 10;
+  const ancho = cols * 44 + (cols - 1) * gap;
+  const altoPar = 44 * 2 + 6;
+  return (
+    <div style={{ position: "absolute", left: x, top: y, width: ancho + PAD * 2, height: pares * altoPar + (pares - 1) * 12 + PAD * 2, background: "#7d8492", borderRadius: 14, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
+      {Array.from({ length: pares }).map((_, par) => (
+        <div key={par} style={{ position: "absolute", left: PAD, top: PAD + par * (altoPar + 12), width: ancho, height: altoPar }}>
+          {[0, 1].map((fila) => (
+            <div key={fila} style={{ position: "absolute", left: 0, top: fila * 50, display: "flex", gap }}>
+              {Array.from({ length: cols }).map((__, k) => (
+                <Puesto key={k} arriba={fila === 0} color={colorAsiento(desde + par * 2 * cols + fila * cols + k, frame)} />
+              ))}
+            </div>
+          ))}
+          <div style={{ position: "absolute", left: 4, right: 4, top: 45.5, height: 3, background: "#1f2937", borderRadius: 2 }} />
+        </div>
+      ))}
     </div>
   );
 };
@@ -194,42 +259,7 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
             <div style={{ position: "absolute", left: 53, top: 0, width: 3, height: 212, background: "#1f2937", borderRadius: 2 }} />
           </div>
         ))}
-        {/* Center panel */}
-        <div style={{ position: "absolute", left: 160, top: 152, width: 750, height: 236, background: "#4b5563", borderRadius: 12, overflow: "hidden" }}>
-          <div style={{ position: "absolute", right: 14, top: 10, fontSize: 9, color: "#d1d5db", display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ade80" }} />
-            Estado en vivo · Actualizado 10:{String(15 + Math.floor(frame / 30)).padStart(2, "0")}
-          </div>
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: 1 - panel }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "white" }}>Sin campañas activas</div>
-            <div style={{ fontSize: 11, color: "#d1d5db", marginTop: 4 }}>Contact Flow está en reposo</div>
-          </div>
-          {panel > 0.01 ? (
-            <div style={{ position: "absolute", inset: 0, padding: "24px 30px", opacity: panel }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 9.5, fontWeight: 800, color: "#052e16", background: "#4ade80", borderRadius: 10, padding: "3px 9px" }}>EN CURSO</span>
-                <span style={{ fontSize: 15, fontWeight: 800, color: "white" }}>MORA TEMPRANA NOVIEMBRE</span>
-              </div>
-              <div style={{ display: "flex", gap: 14, marginTop: 20 }}>
-                {[
-                  ["Llamados", num(1248)],
-                  ["En conversación", "15"],
-                  ["Llamando", "8"],
-                  ["Contactabilidad", pct(21.3)],
-                ].map(([k, v]) => (
-                  <div key={k} style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 9, padding: "12px 14px" }}>
-                    <div style={{ fontSize: 9.5, color: "#d1d5db" }}>{k}</div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: "white", marginTop: 4 }}>{v}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginTop: 18, height: 8, borderRadius: 4, background: "rgba(255,255,255,0.12)" }}>
-                <div style={{ width: "38%", height: "100%", borderRadius: 4, background: "#3b82f6" }} />
-              </div>
-              <div style={{ fontSize: 9.5, color: "#d1d5db", marginTop: 6 }}>Avance de la campaña · 46 agentes virtuales</div>
-            </div>
-          ) : null}
-        </div>
+        <PanelSala frame={frame} panel={panel} caja={{ left: 160, top: 152, width: 750, height: 236 }} />
       </div>
       <div style={{ position: "absolute", left: 0, right: 0, top: 628, display: "flex", justifyContent: "center", gap: 22 }}>
         {[{ n: "Disponible", c: "#b6bcc6" }, ...ESTADOS].map((e) => (
@@ -1082,6 +1112,7 @@ const Contenido: React.FC<{ fondo?: string; children: React.ReactNode }> = ({ fo
 );
 
 const HomeMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const islas = useContext(Islas);
   const tiles: [string, string][] = [
     ["Campañas", I_CAMPANA],
     ["Estrategias", I_FLUJO],
@@ -1102,11 +1133,19 @@ const HomeMovil: React.FC<{ frame: number }> = ({ frame }) => {
         ))}
       </div>
       <div style={{ position: "absolute", left: 12, right: 12, top: 186, height: 408, background: "#6b7280", borderRadius: 14 }}>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 12, display: "grid", gridTemplateColumns: "repeat(6, 44px)", gap: "6px 8px", justifyContent: "center" }}>
-          {Array.from({ length: 30 }).map((_, i) => (
-            <Puesto key={i} arriba={Math.floor(i / 6) % 2 === 0} color={colorAsiento(i, frame)} />
-          ))}
-        </div>
+        {islas ? (
+          <>
+            <Isla frame={frame} x={26} y={14} cols={6} pares={1} desde={0} gap={6} />
+            <Isla frame={frame} x={14} y={140} cols={3} pares={1} desde={12} gap={6} />
+            <Isla frame={frame} x={188} y={140} cols={3} pares={1} desde={18} gap={6} />
+          </>
+        ) : (
+          <div style={{ position: "absolute", left: 0, right: 0, top: 12, display: "grid", gridTemplateColumns: "repeat(6, 44px)", gap: "6px 8px", justifyContent: "center" }}>
+            {Array.from({ length: 30 }).map((_, i) => (
+              <Puesto key={i} arriba={Math.floor(i / 6) % 2 === 0} color={colorAsiento(i, frame)} />
+            ))}
+          </div>
+        )}
         <div style={{ position: "absolute", left: 12, right: 12, top: 268, height: 128, background: "#4b5563", borderRadius: 10, padding: "12px 14px", boxSizing: "border-box" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 9, fontWeight: 800, color: "#052e16", background: "#4ade80", borderRadius: 9, padding: "2px 7px" }}>EN CURSO</span>
@@ -1720,8 +1759,9 @@ const SALTOS_CEL: Salto[] = [
   { x: 10, y: 184, w: 370, h: 128, f: [912, 926, 946, 962], z: 110, hueco: "#080d18" },
 ];
 
-const PantallaCF: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) =>
-  tab ? <Pagina frame={frame} /> : <PaginaMovil frame={frame} />;
+const PantallaCF: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (
+  <Islas.Provider value>{tab ? <Pagina frame={frame} /> : <PaginaMovil frame={frame} />}</Islas.Provider>
+);
 
 export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema>> = ({ fondo, paleta }) => {
   const frame = useCurrentFrame();
