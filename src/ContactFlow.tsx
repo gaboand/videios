@@ -1038,13 +1038,13 @@ export const ContactFlow: React.FC<z.infer<typeof contactFlowSchema>> = ({ fondo
   const { fps, width, height } = useVideoConfig();
   const { w, h } = pantallaDe("tablet", false);
   const { H: EH } = exteriorDe("tablet", w, h);
-  // Tablet top at 20% of the screen height (room for titles), bottom near 94%.
-  const esc = (height * 0.74) / EH;
+  // Tablet top at 30% of the screen height (room for titles), bottom near 94%.
+  const esc = (height * 0.64) / EH;
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
-      <div style={{ position: "absolute", left: width / 2, top: height * 0.57, opacity: t, transform: `translate(-50%, -50%) scale(${esc})` }}>
+      <div style={{ position: "absolute", left: width / 2, top: height * 0.62, opacity: t, transform: `translate(-50%, -50%) scale(${esc})` }}>
         <Dispositivo tipo="tablet" w={w} h={h}>
           <Pagina frame={frame} />
         </Dispositivo>

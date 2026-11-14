@@ -732,7 +732,7 @@ export const SegmentacionApp: React.FC<z.infer<typeof segmentacionAppSchema>> = 
     ? soloCelular
       ? { cx: 540, cy: 1190, w: 980, h: 1229 } // phone top at 30% of the screen
       : { cx: 540, cy: 960, w: 960, h: 1300 }
-    : { cx: 960, cy: 616, w: 1560, h: 799 }; // device top at 20% of the screen
+    : { cx: 960, cy: 670, w: 1560, h: 691 }; // device top at 30% of the screen
   const lista: Tipo[] = dispositivo === "secuencia" ? TIPOS : [dispositivo];
   const flota = Math.sin(frame / 40) * 6;
   const actual = lista[Math.min(lista.length - 1, Math.floor(frame / TRAMO))];
