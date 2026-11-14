@@ -1280,7 +1280,10 @@ const Pagina: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
     interpolate(frame, [TAP_GUARDAR + 30, TAP_GUARDAR + 44, TAP_AUTO - 30, TAP_AUTO - 18], [1, 0, 0, 1], clamp) *
     interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
   return (
-    <div style={{ position: "relative", width: m ? MW : PW, height: m ? MH : PH, background: FONDO, fontFamily: FUENTE, overflow: "hidden" }}>
+    // Dark root (same as the header) so no light edge shows between the
+    // device bezel and the header; the light page background starts below it.
+    <div style={{ position: "relative", width: m ? MW : PW, height: m ? MH : PH, background: HEADER_BG, fontFamily: FUENTE, overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, right: 0, top: m ? M_HEADER : HEADER, bottom: 0, background: FONDO }} />
       {escenas.map(([e, C]) => {
         const [a, b] = ESC[e];
         const v = interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
@@ -1288,7 +1291,7 @@ const Pagina: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
           return null;
         }
         return (
-          <div key={e} style={{ position: "absolute", inset: 0, opacity: v }}>
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v, clipPath: `inset(${m ? M_HEADER : HEADER}px 0 0 0)` }}>
             <C frame={frame} m={m} />
           </div>
         );
@@ -1351,7 +1354,7 @@ const CENTRO = { px: PW / 2, py: PH / 2 };
 const TOMAS: Toma[] = [
   { f: 0, z: 0.92, ...CENTRO, ry: 22, rx: 10, rz: 3, cy: 0.62 },
   { f: 58, z: 1.5, px: 420, py: 420, ry: 9, rx: 5, rz: 1, cy: 0.56 },
-  { f: 92, z: 1.5, px: 400, py: 420, ry: 9, rx: 5, rz: 1, cy: 0.56 },
+  { f: 92, z: 1.5, px: 420, py: 420, ry: 9, rx: 5, rz: 1, cy: 0.56 },
   { f: 122, z: 1, ...CENTRO, ry: -15, rx: 7, rz: -2, cy: 0.62 },
   { f: 190, z: 1.55, px: 475, py: 230, ry: -7, rx: 4, rz: -1, cy: 0.56 },
   { f: 214, z: 1.55, px: 475, py: 230, ry: -7, rx: 4, rz: -1, cy: 0.56 },
