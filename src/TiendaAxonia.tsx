@@ -1310,8 +1310,9 @@ export const TiendaAxonia: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, pa
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const { w, h } = pantallaDe("tablet", false);
-  const { W: EW, H: EH } = exteriorDe("tablet", w, h);
-  const esc = Math.min((width * 0.8) / EW, (height * 0.84) / EH);
+  const { H: EH } = exteriorDe("tablet", w, h);
+  // Tablet top at 20% of the screen height (room for titles), bottom near 94%.
+  const esc = (height * 0.74) / EH;
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
@@ -1321,7 +1322,7 @@ export const TiendaAxonia: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, pa
           style={{
             position: "absolute",
             left: width / 2,
-            top: height / 2,
+            top: height * 0.57,
             opacity: t,
             // Tilted to the other side: seen from the left. Fixed, no floating.
             transform: `translate(-50%, -50%) scale(${esc}) rotateY(16deg) rotateX(8deg) rotateZ(2deg)`,

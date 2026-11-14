@@ -1550,9 +1550,10 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
   const vertical = height > width;
   const tipo = vertical ? "celular" : "tablet";
   const { w, h } = pantallaDe(tipo, vertical);
-  const { W: EW, H: EH } = exteriorDe(tipo, w, h);
+  const { H: EH } = exteriorDe(tipo, w, h);
   // 9:16: phone top at 30% of the screen height (room for titles), bottom near 94%.
-  const esc = vertical ? (height * 0.64) / EH : Math.min(1640 / EW, 960 / EH);
+  // 16:9: tablet top at 20%, bottom near 94%.
+  const esc = vertical ? (height * 0.64) / EH : (height * 0.74) / EH;
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
@@ -1561,7 +1562,7 @@ export const OnboardingApp: React.FC<z.infer<typeof onboardingSchema>> = ({ fond
         style={{
           position: "absolute",
           left: width / 2,
-          top: vertical ? height * 0.62 : height / 2,
+          top: vertical ? height * 0.62 : height * 0.57,
           opacity: t,
           // Device stays fixed: no floating and no slide-in, only a fade.
           transform: `translate(-50%, -50%) scale(${esc})`,
