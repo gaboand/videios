@@ -1433,7 +1433,7 @@ const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
     const t = interpolate(frame, SALTO_JAVIER, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
     const p = clientePos(false, 1);
     piezas.push(
-      <Salta key="javier" x={p.x} y={p.y} w={p.w} h={p.h} sombra={t} transform={`translate3d(0, ${-50 * t}px, ${190 * t}px) rotateX(${-14 * t}deg) rotateZ(${-3 * t}deg)`}>
+      <Salta key="javier" x={p.x} y={p.y} w={p.w} h={p.h} sombra={t} transform={`translate3d(0, ${10 * t}px, ${170 * t}px) rotateX(${-12 * t}deg) rotateZ(${-3 * t}deg)`}>
         <TarjetaCliente c={CLIENTES[1]} i={1} frame={frame} m={false} suelto />
       </Salta>,
     );
@@ -1447,7 +1447,7 @@ const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
     const op = interpolate(frame, [r[0], r[0] + 6], [0, 1], clamp);
     const p = segCardPos(false, i);
     piezas.push(
-      <Salta key={`seg${i}`} x={p.x} y={p.y} w={p.w} h={p.h} sombra={Math.max(0, t)} transform={`translate3d(${(i - 1.5) * 90 * t}px, ${-360 * t}px, ${420 * t}px) rotateX(${-32 * t}deg) rotateZ(${(i - 1.5) * 9 * t}deg)`}>
+      <Salta key={`seg${i}`} x={p.x} y={p.y} w={p.w} h={p.h} sombra={Math.max(0, t)} transform={`translate3d(${(i - 1.5) * 260 * t}px, ${80 * t}px, ${420 * t}px) rotateX(${28 * t}deg) rotateZ(${(i - 1.5) * 9 * t}deg)`}>
         <div style={{ opacity: op }}>
           <SegCard frame={frame} m={false} i={i} suelto />
         </div>
@@ -1460,7 +1460,7 @@ const Saltos: React.FC<{ frame: number }> = ({ frame }) => {
     }
     const t = interpolate(frame, saltoKpi(i), [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
     piezas.push(
-      <Salta key={`kpi${i}`} x={X0 + i * 218} y={122} w={204} h={104} sombra={t} transform={`translate3d(0, ${-70 * t}px, ${200 * t}px) rotateX(${-16 * t}deg) rotateZ(${(i - 2) * 3 * t}deg)`}>
+      <Salta key={`kpi${i}`} x={X0 + i * 218} y={122} w={204} h={104} sombra={t} transform={`translate3d(0, ${40 * t}px, ${170 * t}px) rotateX(${-14 * t}deg) rotateZ(${(i - 2) * 3 * t}deg)`}>
         <KpiCard k={k} i={i} x={0} y={0} w={204} h={104} frame={frame} m={false} suelto />
       </Salta>,
     );
@@ -1479,7 +1479,11 @@ export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema>> = 
   // Device chrome offset (padding + border) so the overlay lines up with the screen.
   const BORDE_TABLET = 27;
   const dx = -(c.px - PW / 2) * esc;
-  const dy = -(c.py - PH / 2) * esc;
+  // Keep the top 20% of the video free (for titles): if the zoom pushes the
+  // device above that line, move it down (with a margin for the tilt).
+  const dy0 = -(c.py - PH / 2) * esc;
+  const arriba = height * c.cy + dy0 - (EH * esc) / 2;
+  const dy = dy0 + Math.max(0, height * 0.23 - arriba);
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
       <FondoAbstracto paleta={paleta} estilo={fondo} />
