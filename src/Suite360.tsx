@@ -117,7 +117,7 @@ const VERTICAL: Escena = {
     { d: "M 950 1282 C 966 1320 934 1352 950 1393" },
     { d: "M 625 1540 L 457 1540", doble: true },
   ],
-  general: { x: 540, y: 730, z: 0.56 },
+  general: { x: 540, y: 752, z: 0.616 },
 };
 
 // Timeline (frames).
@@ -141,8 +141,8 @@ const camDe = (e: Escena, i: number): Cam => {
     (e.H * (ancho ? 0.46 : 0.36)) / (m.h + 40),
     2.2,
   );
-  // The module sits below the centre, leaving room above for titles.
-  const bajar = (e.H * (ancho ? 0.08 : 0.1)) / z;
+  // 16:9: the module sits below the centre, leaving room above for titles.
+  const bajar = (e.H * (ancho ? 0.08 : -0.02)) / z;
   return { x: m.x + m.w / 2, y: m.y + m.h / 2 - 14 - bajar, z };
 };
 
