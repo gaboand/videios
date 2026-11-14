@@ -25,6 +25,7 @@ import { SUITE_FRAMES, Suite360, suite360Schema } from "./Suite360";
 import {
   ONBOARDING_FRAMES,
   OnboardingApp,
+  OnboardingDinamico,
   onboardingSchema,
 } from "./OnboardingApp";
 import { OfertasOpciones } from "./OfertasOpciones";
@@ -277,6 +278,28 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        // npx remotion render OnboardingDinamico
+        id="OnboardingDinamico"
+        component={OnboardingDinamico}
+        schema={onboardingSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={ONBOARDING_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render OnboardingDinamicoMovil
+        id="OnboardingDinamicoMovil"
+        component={OnboardingDinamico}
+        schema={onboardingSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={ONBOARDING_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
       />
       <Composition
         // Still: npx remotion still OfertasOpciones
