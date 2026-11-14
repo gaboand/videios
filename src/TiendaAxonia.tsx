@@ -14,6 +14,7 @@ import "@fontsource/montserrat/800.css";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 import { Dispositivo, exteriorDe, pantallaDe } from "./Dispositivos";
+import { LogoTuComercio, LogoTuLogo } from "./OnboardingApp";
 
 // Axonia Online Store on a landscape tablet tilted to the other side (seen
 // from the left), 16:9, 20s: home with hero and featured products, the
@@ -29,10 +30,14 @@ export const tiendaSchema = z.object({
 export const TIENDA_FRAMES = 600;
 
 const FUENTE = "Montserrat, sans-serif";
-const OSCURO = "#0b1220";
-const OSCURO_2 = "#111a2c";
-const AZUL = "#2f8cff";
-const AZUL_BOTON = "#2556f5";
+// Brand colours come from CSS variables set on the screen root, so the store
+// can switch brands (see MARCAS).
+const OSCURO = "var(--oscuro)";
+const OSCURO_2 = "var(--oscuro2)";
+const AZUL = "var(--acento)";
+const AZUL_BOTON = "var(--boton)";
+const CLARO = "var(--claro)";
+const acentoA = (a: number) => `color-mix(in srgb, var(--acento) ${(a * 100).toFixed(1)}%, transparent)`;
 const TINTA = "#141821";
 const TINTA_2 = "#6b7280";
 const BORDE = "#e3e7ee";
@@ -557,6 +562,70 @@ const Logo: React.FC<{ w: number }> = ({ w }) => (
   </div>
 );
 
+// White-label demo on the home screen: the store starts as Axonia, turns into
+// a red "Tu Logo" brand, then a green "Tu Comercio" one, and goes back to
+// Axonia as the catalog opens.
+const MARCAS = [
+  { oscuro: "#0b1220", oscuro2: "#111a2c", acento: "#2f8cff", boton: "#2556f5", claro: "#eef5ff", hero: "#0d2a5c", hero2: "#050912", podio: "#1a3a78" },
+  { oscuro: "#8e1a1a", oscuro2: "#6a1212", acento: "#e04444", boton: "#c22e2e", claro: "#fdecec", hero: "#6e1414", hero2: "#160404", podio: "#8a2020" },
+  { oscuro: "#17633a", oscuro2: "#0f4a2a", acento: "#2fae55", boton: "#1f8a40", claro: "#e8f6ee", hero: "#0f5a2c", hero2: "#03140a", podio: "#1a7a3e" },
+];
+const NOMBRES_MARCA = ["Axonia", "Tu Logo", "Tu Comercio"];
+const CAMBIO_MARCA: [number, number, number][] = [
+  // [from, to, start frame]
+  [0, 1, 24],
+  [1, 2, 70],
+  [2, 0, 146],
+];
+const DURA_CAMBIO = 8;
+// Weight of each brand at a frame (at most two are non-zero).
+const pesosMarca = (frame: number) => {
+  const w = [1, 0, 0];
+  for (const [de, a, f] of CAMBIO_MARCA) {
+    if (frame < f) {
+      break;
+    }
+    const t = interpolate(frame, [f, f + DURA_CAMBIO], [0, 1], clamp);
+    w[0] = w[1] = w[2] = 0;
+    w[de] = 1 - t;
+    w[a] = t;
+  }
+  return w;
+};
+const varsMarca = (frame: number) => {
+  const w = pesosMarca(frame);
+  const activos = w.map((v, i) => [v, i] as const).filter(([v]) => v > 0);
+  const vars: Record<string, string> = {};
+  for (const k of Object.keys(MARCAS[0]) as (keyof (typeof MARCAS)[0])[]) {
+    if (activos.length === 1) {
+      vars[`--${k}`] = MARCAS[activos[0][1]][k];
+    } else {
+      const [[va, ia], [, ib]] = activos;
+      vars[`--${k}`] = `color-mix(in srgb, ${MARCAS[ia][k]} ${(va * 100).toFixed(1)}%, ${MARCAS[ib][k]})`;
+    }
+  }
+  return vars as React.CSSProperties;
+};
+// Cross-fades between the brands (logos or store names).
+const Fundido: React.FC<{ frame: number; items: React.ReactNode[] }> = ({ frame, items }) => {
+  const w = pesosMarca(frame);
+  return (
+    <span style={{ display: "inline-grid" }}>
+      {items.map((it, i) => (
+        <span key={i} style={{ gridArea: "1 / 1", opacity: w[i], whiteSpace: "nowrap" }}>
+          {it}
+        </span>
+      ))}
+    </span>
+  );
+};
+const LogoMarca: React.FC<{ frame: number; w: number }> = ({ frame, w }) => (
+  <Fundido frame={frame} items={[<Logo key="a" w={w} />, <LogoTuLogo key="b" w={w} claro />, <LogoTuComercio key="c" w={w} claro />]} />
+);
+const NombreTienda: React.FC<{ frame: number }> = ({ frame }) => (
+  <Fundido frame={frame} items={NOMBRES_MARCA.map((n) => `${n} Online Store`)} />
+);
+
 const Icono: React.FC<{ d: string; s?: number; c?: string }> = ({ d, s = 20, c = "white" }) => (
   <svg width={s} height={s} viewBox="0 0 24 24">
     <path d={d} fill="none" stroke={c} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
@@ -593,7 +662,7 @@ const Header: React.FC<{ frame: number; seccion: string }> = ({ frame, seccion }
   return (
     <div style={{ position: "absolute", left: 0, top: 0, width: PW, zIndex: 5 }}>
       <div style={{ height: 66, background: OSCURO, display: "flex", alignItems: "center", padding: "0 30px", gap: 30 }}>
-        <Logo w={118} />
+        <LogoMarca frame={frame} w={118} />
         <div style={{ flex: 1, height: 40, background: "white", borderRadius: 7, display: "flex", alignItems: "center", overflow: "hidden" }}>
           <div style={{ flex: 1, fontSize: 12.5, color: "#8a929e", paddingLeft: 14 }}>Buscar productos, marcas y más…</div>
           <div style={{ width: 180, borderLeft: `1px solid ${BORDE}`, height: "100%", display: "flex", alignItems: "center", padding: "0 12px", fontSize: 12, color: TINTA, justifyContent: "space-between", boxSizing: "border-box", whiteSpace: "nowrap" }}>
@@ -649,7 +718,7 @@ const CardProducto: React.FC<{ it: ItemTienda; id: string; w: number; h: number;
       background: "white",
       borderRadius: 12,
       border: `1px solid ${destacada > 0.01 ? AZUL : BORDE}`,
-      boxShadow: destacada > 0.01 ? `0 10px 24px rgba(47,140,255,${0.25 * destacada})` : "0 2px 8px rgba(15,25,45,0.05)",
+      boxShadow: destacada > 0.01 ? `0 10px 24px ${acentoA(0.25 * destacada)}` : "0 2px 8px rgba(15,25,45,0.05)",
       padding: 12,
       boxSizing: "border-box",
       display: "flex",
@@ -668,7 +737,7 @@ const CardProducto: React.FC<{ it: ItemTienda; id: string; w: number; h: number;
     <div style={{ fontSize: 12, fontWeight: 800, color: TINTA, marginTop: 9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.nombre}</div>
     <div style={{ fontSize: 10, color: TINTA_2, marginTop: 1 }}>{it.marca}</div>
     <div style={{ fontSize: 15, fontWeight: 800, color: TINTA, marginTop: 5 }}>{pesos(it.precio)}</div>
-    <div style={{ marginTop: 7, height: 28, border: `1.5px solid ${AZUL}`, borderRadius: 6, color: AZUL, fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", background: destacada > 0.5 ? "#eef5ff" : "white" }}>
+    <div style={{ marginTop: 7, height: 28, border: `1.5px solid ${AZUL}`, borderRadius: 6, color: AZUL, fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", background: destacada > 0.5 ? CLARO : "white" }}>
       Ver producto →
     </div>
   </div>
@@ -683,10 +752,10 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
   return (
     <div style={{ position: "absolute", left: 0, top: HEADER_H, width: PW, transform: `translateY(${-scroll}px)` }}>
       {/* Hero */}
-      <div style={{ margin: "18px 24px 0", height: 360, borderRadius: 16, background: "radial-gradient(ellipse at 75% 55%, #0d2a5c 0%, #050912 60%)", position: "relative", overflow: "hidden" }}>
+      <div style={{ margin: "18px 24px 0", height: 360, borderRadius: 16, background: "radial-gradient(ellipse at 75% 55%, var(--hero) 0%, var(--hero2) 60%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", left: 70, top: 48, opacity: entra(4), transform: `translateX(${(1 - entra(4)) * -30}px)` }}>
           <div style={{ display: "inline-block", background: AZUL, color: "white", fontSize: 11, fontWeight: 800, letterSpacing: 1, padding: "7px 16px", borderRadius: 16 }}>BIENVENIDO A</div>
-          <div style={{ fontSize: 40, fontWeight: 800, color: "white", marginTop: 14 }}>Axonia Online Store</div>
+          <div style={{ fontSize: 40, fontWeight: 800, color: "white", marginTop: 14 }}><NombreTienda frame={frame} /></div>
           <div style={{ fontSize: 15, color: "#d6dce6", marginTop: 8, width: 470, lineHeight: 1.45 }}>
             Descubrí productos seleccionados para cada momento, todo en un solo lugar.
           </div>
@@ -708,8 +777,8 @@ const Home: React.FC<{ frame: number }> = ({ frame }) => {
           ))}
         </div>
         {/* Glowing ring with products on a podium */}
-        <div style={{ position: "absolute", left: 700, top: 40, width: 380, height: 380, borderRadius: "50%", border: `5px solid rgba(47,140,255,${brillo})`, boxShadow: `0 0 40px rgba(47,140,255,${0.6 * brillo}), inset 0 0 40px rgba(47,140,255,${0.4 * brillo})` }} />
-        <div style={{ position: "absolute", left: 690, top: 290, width: 400, height: 60, borderRadius: "50%", background: "radial-gradient(ellipse, #1a3a78 0%, #0a1430 70%)", boxShadow: `0 0 30px rgba(47,140,255,${0.5 * brillo})` }} />
+        <div style={{ position: "absolute", left: 700, top: 40, width: 380, height: 380, borderRadius: "50%", border: `5px solid ${acentoA(brillo)}`, boxShadow: `0 0 40px ${acentoA(0.6 * brillo)}, inset 0 0 40px ${acentoA(0.4 * brillo)}` }} />
+        <div style={{ position: "absolute", left: 690, top: 290, width: 400, height: 60, borderRadius: "50%", background: "radial-gradient(ellipse, var(--podio) 0%, var(--hero2) 70%)", boxShadow: `0 0 30px ${acentoA(0.5 * brillo)}` }} />
         {[
           { P: Cartera, x: 730, y: 120, w: 190, d: 8 },
           { P: Celular, x: 900, y: 150, w: 150, d: 12 },
@@ -857,7 +926,7 @@ const ProductoPagina: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
           <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
             {["Envío gratis", "12 meses de garantía", "Devolución sin cargo"].map((t) => (
-              <span key={t} style={{ fontSize: 11, fontWeight: 700, color: AZUL, background: "#eef5ff", borderRadius: 12, padding: "4px 11px" }}>
+              <span key={t} style={{ fontSize: 11, fontWeight: 700, color: AZUL, background: CLARO, borderRadius: 12, padding: "4px 11px" }}>
                 ✓ {t}
               </span>
             ))}
@@ -1012,7 +1081,7 @@ const Checkout: React.FC<{ frame: number }> = ({ frame }) => {
                   style={{
                     marginTop: 8,
                     border: `1.5px solid ${sel ? AZUL : BORDE}`,
-                    background: sel ? "#eef5ff" : "white",
+                    background: sel ? CLARO : "white",
                     borderRadius: 9,
                     padding: "8px 14px",
                     display: "flex",
@@ -1200,7 +1269,7 @@ const Pagina: React.FC<{ frame: number }> = ({ frame }) => {
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
   const dedoVis = interpolate(frame, [100, 116], [0, 1], clamp) * interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
   return (
-    <div style={{ position: "relative", width: PW, height: PH, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden" }}>
+    <div style={{ position: "relative", width: PW, height: PH, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden", ...varsMarca(frame) }}>
       {escenas.map(([e, C]) => {
         const [a, b] = ESC[e];
         const v = interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);
@@ -1289,7 +1358,7 @@ const HeaderMovil: React.FC<{ frame: number; seccion: string }> = ({ frame, secc
     <div style={{ position: "absolute", left: 0, top: 0, width: MW, zIndex: 5 }}>
       <div style={{ height: M_HEADER, background: OSCURO, position: "relative" }}>
         <div style={{ position: "absolute", left: 16, top: 50 }}>
-          <Logo w={96} />
+          <LogoMarca frame={frame} w={96} />
         </div>
         <div style={{ position: "absolute", right: 16, top: 50, display: "flex", gap: 16, alignItems: "center" }}>
           <Icono d={I_CORAZON} s={22} />
@@ -1347,15 +1416,15 @@ const HomeMovil: React.FC<{ frame: number }> = ({ frame }) => {
   const entra = (d: number) => spring({ frame: frame - d, fps, config: { damping: 16, stiffness: 120 } });
   return (
     <div style={{ position: "absolute", left: 0, top: M_TOP, width: MW, transform: `translateY(${-scroll}px)` }}>
-      <div style={{ margin: "0 12px", height: 330, borderRadius: 16, background: "radial-gradient(ellipse at 50% 80%, #0d2a5c 0%, #050912 65%)", position: "relative", overflow: "hidden" }}>
+      <div style={{ margin: "0 12px", height: 330, borderRadius: 16, background: "radial-gradient(ellipse at 50% 80%, var(--hero) 0%, var(--hero2) 65%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", left: 20, top: 22, right: 20, opacity: entra(4) }}>
           <div style={{ display: "inline-block", background: AZUL, color: "white", fontSize: 9.5, fontWeight: 800, letterSpacing: 1, padding: "5px 12px", borderRadius: 12 }}>BIENVENIDO A</div>
-          <div style={{ fontSize: 25, fontWeight: 800, color: "white", marginTop: 10 }}>Axonia Online Store</div>
+          <div style={{ fontSize: 25, fontWeight: 800, color: "white", marginTop: 10 }}><NombreTienda frame={frame} /></div>
           <div style={{ fontSize: 12, color: "#d6dce6", marginTop: 6, lineHeight: 1.45 }}>Descubrí productos seleccionados para cada momento.</div>
           <div style={{ display: "inline-block", background: AZUL, color: "white", fontSize: 12, fontWeight: 700, padding: "9px 16px", borderRadius: 7, marginTop: 12 }}>Ver todo el catálogo →</div>
         </div>
-        <div style={{ position: "absolute", left: 63, top: 168, width: 240, height: 240, borderRadius: "50%", border: `4px solid rgba(47,140,255,${brillo})`, boxShadow: `0 0 30px rgba(47,140,255,${0.6 * brillo}), inset 0 0 30px rgba(47,140,255,${0.4 * brillo})` }} />
-        <div style={{ position: "absolute", left: 50, top: 290, width: 266, height: 40, borderRadius: "50%", background: "radial-gradient(ellipse, #1a3a78 0%, #0a1430 70%)" }} />
+        <div style={{ position: "absolute", left: 63, top: 168, width: 240, height: 240, borderRadius: "50%", border: `4px solid ${acentoA(brillo)}`, boxShadow: `0 0 30px ${acentoA(0.6 * brillo)}, inset 0 0 30px ${acentoA(0.4 * brillo)}` }} />
+        <div style={{ position: "absolute", left: 50, top: 290, width: 266, height: 40, borderRadius: "50%", background: "radial-gradient(ellipse, var(--podio) 0%, var(--hero2) 70%)" }} />
         {[
           { P: Cartera, x: 70, y: 196, w: 120, d: 8 },
           { P: Celular, x: 176, y: 200, w: 110, d: 12 },
@@ -1464,7 +1533,7 @@ const ProductoMovil: React.FC<{ frame: number }> = ({ frame }) => {
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
               {["Envío gratis", "12 meses de garantía", "Devolución sin cargo"].map((t) => (
-                <span key={t} style={{ fontSize: 10, fontWeight: 700, color: AZUL, background: "#eef5ff", borderRadius: 10, padding: "3px 9px" }}>
+                <span key={t} style={{ fontSize: 10, fontWeight: 700, color: AZUL, background: CLARO, borderRadius: 10, padding: "3px 9px" }}>
                   ✓ {t}
                 </span>
               ))}
@@ -1551,7 +1620,7 @@ const CheckoutMovil: React.FC<{ frame: number }> = ({ frame }) => {
                     height: 50,
                     boxSizing: "border-box",
                     border: `1.5px solid ${sel ? AZUL : BORDE}`,
-                    background: sel ? "#eef5ff" : "white",
+                    background: sel ? CLARO : "white",
                     borderRadius: 9,
                     padding: "0 12px",
                     display: "flex",
@@ -1728,7 +1797,7 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
   const dedoVis = interpolate(frame, [100, 116], [0, 1], clamp) * interpolate(frame, [TAP_CONFIRMAR + 30, TAP_CONFIRMAR + 44], [1, 0], clamp);
   return (
-    <div style={{ position: "relative", width: MW, height: MH, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden" }}>
+    <div style={{ position: "relative", width: MW, height: MH, background: "#f4f6f9", fontFamily: FUENTE, overflow: "hidden", ...varsMarca(frame) }}>
       {escenas.map(([e, C]) => {
         const [a, b] = ESC[e];
         const v = interpolate(frame, [a, a + 6, b - 6, b], [0, 1, 1, 0], clamp);

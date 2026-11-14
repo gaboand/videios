@@ -501,7 +501,7 @@ const colorMarca = (frame: number, k: keyof Marca) => {
 };
 
 // Generic brand logos. `claro`: white lettering for the dark header.
-const LogoTuLogo: React.FC<{ w: number; claro?: boolean }> = ({ w, claro }) => (
+export const LogoTuLogo: React.FC<{ w: number; claro?: boolean }> = ({ w, claro }) => (
   <svg width={w} height={w * 0.34} viewBox="0 0 150 51">
     <circle cx={25} cy={25.5} r={20} fill={claro ? "white" : "#d63a3a"} />
     <path d="M15 31 C19 18 31 16 35 22 C30 20 24 23 21 33 Z" fill={claro ? "#9e1c1c" : "white"} />
@@ -511,7 +511,7 @@ const LogoTuLogo: React.FC<{ w: number; claro?: boolean }> = ({ w, claro }) => (
     </text>
   </svg>
 );
-const LogoTuComercio: React.FC<{ w: number; claro?: boolean }> = ({ w, claro }) => (
+export const LogoTuComercio: React.FC<{ w: number; claro?: boolean }> = ({ w, claro }) => (
   <svg width={w} height={w * 0.34} viewBox="0 0 150 51">
     <rect x={6} y={14} width={34} height={28} rx={5} fill={claro ? "white" : "#2e9e4a"} />
     <path d="M15 16 C15 7 31 7 31 16" fill="none" stroke={claro ? "white" : "#2e9e4a"} strokeWidth={3.4} strokeLinecap="round" />
