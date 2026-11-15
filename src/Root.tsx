@@ -33,6 +33,12 @@ import { CONTACTFLOW_FRAMES, ContactFlow, ContactFlowDinamico, ContactFlowMovil,
 import { BACKOFFICE_FRAMES, BackOffice, BackOfficeDinamico, BackOfficeMovil, backOfficeSchema } from "./BackOffice";
 import { Reloj, TIENDA_FRAMES, TiendaAxonia, TiendaDinamico, TiendaMovil, tiendaSchema } from "./TiendaAxonia";
 
+import { CORTOS, componenteCorto, duracionCorto } from "./Cortos";
+
+// Short versions (10 s max): ContactFlowCorto, BackOfficeCorto, TiendaCorto,
+// CollectionsCorto, OnboardingCorto, each with a ...Movil 9:16 twin.
+const CORTOS_COMP = Object.keys(CORTOS).map((id) => ({ id, C: componenteCorto(id), dur: duracionCorto(CORTOS[id].tramos) }));
+
 export const RemotionRoot: React.FC = () => {
   return (
     <>
@@ -499,6 +505,23 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
       />
+      {CORTOS_COMP.flatMap(({ id, C, dur }) =>
+        [
+          [id, 1920, 1080],
+          [`${id}Movil`, 1080, 1920],
+        ].map(([nombre, w, h]) => (
+          <Composition
+            key={nombre}
+            id={String(nombre)}
+            component={C}
+            defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+            durationInFrames={dur}
+            fps={30}
+            width={Number(w)}
+            height={Number(h)}
+          />
+        )),
+      )}
     </>
   );
 };
