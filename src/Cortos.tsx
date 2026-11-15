@@ -1,6 +1,7 @@
 import { AbsoluteFill, Freeze, interpolate, Sequence, useCurrentFrame } from "remotion";
 import { BackOfficeDinamico } from "./BackOffice";
 import { CollectionsDinamico } from "./CollectionsAxonia";
+import { CoreLendingDinamico } from "./CoreLending";
 import { ContactFlowDinamico } from "./ContactFlow";
 import { OnboardingDinamico } from "./OnboardingApp";
 import { TiendaDinamico } from "./TiendaAxonia";
@@ -62,6 +63,9 @@ export const CORTOS: Record<string, { C: React.ComponentType<Props>; tramos: Tra
   CollectionsCorto: { C: CollectionsDinamico, tramos: [[118, 212], [266, 346], [500, 570], [930, 1000]] },
   // Data with brand change, offers, end of the identity check, signed contract.
   OnboardingCorto: { C: OnboardingDinamico, tramos: [[0, 95], [232, 300], [544, 597, 24], [1240, 1316]] },
+  // Home, collection with the receipt sent, consolidation result, financial
+  // statements, portfolio summary chart.
+  CoreLendingCorto: { C: CoreLendingDinamico, tramos: [[0, 50], [156, 240], [528, 592], [772, 826], [934, 1000]] },
 };
 
 export const componenteCorto = (id: string): React.FC<Props> => {
