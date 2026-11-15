@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, Sequence, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Freeze, interpolate, Sequence, useCurrentFrame } from "remotion";
 import { BackOfficeDinamico } from "./BackOffice";
 import { CollectionsDinamico } from "./CollectionsAxonia";
 import { ContactFlowDinamico } from "./ContactFlow";
@@ -10,10 +10,13 @@ import { TiendaDinamico } from "./TiendaAxonia";
 // (the dynamic videos pick tablet or phone from the composition size).
 
 type Props = { fondo: "ondas"; paleta: "gris" };
-type Tramo = [number, number]; // [from, to) in frames of the source video
+// [from, to) in frames of the source video, plus optional frames holding the
+// last one (to let a final state read).
+type Tramo = [number, number] | [number, number, number];
+const largo = ([a, b, extra = 0]: Tramo) => b - a + extra;
 const FUNDIDO = 10;
 
-export const duracionCorto = (tramos: Tramo[]) => tramos.reduce((s, [a, b]) => s + b - a, 0) - FUNDIDO * (tramos.length - 1);
+export const duracionCorto = (tramos: Tramo[]) => tramos.reduce((s, t) => s + largo(t), 0) - FUNDIDO * (tramos.length - 1);
 
 const Fundido: React.FC<{ entra: boolean; children: React.ReactNode }> = ({ entra, children }) => {
   const frame = useCurrentFrame();
@@ -21,16 +24,25 @@ const Fundido: React.FC<{ entra: boolean; children: React.ReactNode }> = ({ entr
   return <AbsoluteFill style={{ opacity: o }}>{children}</AbsoluteFill>;
 };
 
+const Pedazo: React.FC<{ C: React.ComponentType<Props>; desde: number; hasta: number; props: Props }> = ({ C, desde, hasta, props }) => {
+  const frame = useCurrentFrame();
+  return (
+    <Freeze frame={hasta - 1 - desde} active={frame >= hasta - desde}>
+      <Sequence from={-desde}>
+        <C {...props} />
+      </Sequence>
+    </Freeze>
+  );
+};
+
 const Corto: React.FC<Props & { C: React.ComponentType<Props>; tramos: Tramo[] }> = ({ C, tramos, ...props }) => {
-  const inicios = tramos.map((_, i) => tramos.slice(0, i).reduce((s, [a, b]) => s + b - a - FUNDIDO, 0));
+  const inicios = tramos.map((_, i) => tramos.slice(0, i).reduce((s, t) => s + largo(t) - FUNDIDO, 0));
   return (
     <AbsoluteFill style={{ background: "#111" }}>
-      {tramos.map(([a, b], i) => (
-        <Sequence key={i} from={inicios[i]} durationInFrames={b - a}>
+      {tramos.map((t, i) => (
+        <Sequence key={i} from={inicios[i]} durationInFrames={largo(t)}>
           <Fundido entra={i > 0}>
-            <Sequence from={-a}>
-              <C {...props} />
-            </Sequence>
+            <Pedazo C={C} desde={t[0]} hasta={t[1]} props={props} />
           </Fundido>
         </Sequence>
       ))}
@@ -48,8 +60,8 @@ export const CORTOS: Record<string, { C: React.ComponentType<Props>; tramos: Tra
   TiendaCorto: { C: TiendaDinamico, tramos: [[0, 100], [296, 356], [420, 488], [530, 600]] },
   // Containers, client with payment promise, segment cube, reports.
   CollectionsCorto: { C: CollectionsDinamico, tramos: [[0, 85], [266, 346], [500, 570], [930, 1000]] },
-  // Data with brand change, offers, signature, signed contract.
-  OnboardingCorto: { C: OnboardingDinamico, tramos: [[0, 95], [232, 300], [868, 943], [1240, 1316]] },
+  // Data with brand change, offers, end of the identity check, signed contract.
+  OnboardingCorto: { C: OnboardingDinamico, tramos: [[0, 95], [232, 300], [544, 597, 24], [1240, 1316]] },
 };
 
 export const componenteCorto = (id: string): React.FC<Props> => {
