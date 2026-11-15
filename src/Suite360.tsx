@@ -12,9 +12,9 @@ import "@fontsource/montserrat/800.css";
 import { z } from "zod";
 import { FondoAbstracto } from "./FondoAbstracto";
 
-// Credit management suite 360 (16:9 or 9:16, 16s): the modules of the suite
-// (channels, lead funnel, risk manager, loan marketplace, loan core,
-// collections CRM and contact flow) appear one by one, linked by hand-drawn
+// Credit management suite 360 (16:9 or 9:16, 20s): the modules of the suite
+// (online store, onboarding, lead funnel, risk manager, loan marketplace,
+// loan core, virtual branch, collections CRM and contact flow) appear one by one, linked by hand-drawn
 // arrows, while the camera zooms in on each; at the end it pulls back to
 // show the whole suite. Each module is a small mock UI drawn in code.
 
@@ -29,9 +29,9 @@ const NAVY = "#1f2d4d";
 const GRIS = "#dfe3ea";
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-export const SUITE_FRAMES = 480;
+export const SUITE_FRAMES = 592;
 
-type Id = "canales" | "funnel" | "riesgo" | "marketplace" | "core" | "crm" | "contact";
+type Id = "tienda" | "canales" | "funnel" | "riesgo" | "marketplace" | "core" | "sucursal" | "crm" | "contact";
 type Modulo = { id: Id; nombre: string; x: number; y: number; w: number; h: number };
 type Escena = {
   W: number;
@@ -40,28 +40,33 @@ type Escena = {
   // Arrow drawn as each module (from the second on) appears.
   flechas: { d: string; doble?: boolean }[];
   general: Cam;
+  caja: [number, number, number, number];
 };
 type Cam = { x: number; y: number; z: number };
 
 const NOMBRES: Record<Id, string> = {
+  tienda: "Tienda Online",
   canales: "Onboarding",
   funnel: "Lead Funnel",
   riesgo: "Gestor de Riesgo",
   marketplace: "Marketplace de Préstamos",
   core: "Core de Préstamos",
+  sucursal: "Sucursal Virtual",
   crm: "CRM de Cobranzas",
   contact: "Contact Flow",
 };
 const TAM: Record<Id, [number, number]> = {
+  tienda: [400, 210],
   canales: [330, 240],
   funnel: [290, 230],
   riesgo: [400, 190],
   marketplace: [440, 210],
   core: [440, 250],
+  sucursal: [400, 210],
   crm: [380, 240],
   contact: [380, 260],
 };
-const ORDEN_MODULOS: Id[] = ["canales", "funnel", "riesgo", "marketplace", "core", "crm", "contact"];
+const ORDEN_MODULOS: Id[] = ["tienda", "canales", "funnel", "riesgo", "marketplace", "core", "sucursal", "crm", "contact"];
 const ubicar = (pos: Record<Id, [number, number]>): Modulo[] =>
   ORDEN_MODULOS.map((id) => ({
     id,
@@ -77,23 +82,29 @@ const HORIZONTAL: Escena = {
   W: 1920,
   H: 1080,
   mods: ubicar({
+    tienda: [500, 30],
     canales: [70, 250],
     funnel: [90, 660],
     riesgo: [500, 470],
     marketplace: [960, 120],
     core: [960, 640],
+    sucursal: [500, 850],
     crm: [1480, 250],
     contact: [1480, 650],
   }),
   flechas: [
+    { d: "M 490 150 C 430 150 418 190 410 236" },
     { d: "M 235 530 L 235 615", doble: true },
     { d: "M 415 300 Q 700 250 760 455" },
     { d: "M 860 458 C 870 400 885 345 935 305" },
     { d: "M 720 690 Q 760 790 940 760" },
+    { d: "M 1010 905 C 1000 958 962 962 914 958", doble: true },
     { d: "M 1408 740 C 1452 700 1428 470 1466 405" },
     { d: "M 1670 525 L 1670 610", doble: true },
   ],
   general: { x: 960, y: 344, z: 0.62 },
+  // Screen box the overview fits in (same margins as the 7-module version).
+  caja: [408, 380, 1518, 878],
 };
 
 // 9:16: the same flow top to bottom.
@@ -101,23 +112,28 @@ const VERTICAL: Escena = {
   W: 1080,
   H: 1920,
   mods: ubicar({
-    canales: [70, 300],
-    funnel: [710, 305],
-    riesgo: [340, 690],
+    tienda: [50, 300],
+    canales: [690, 300],
+    funnel: [90, 690],
+    riesgo: [590, 690],
     marketplace: [50, 1020],
     core: [590, 1020],
+    sucursal: [50, 1410],
     crm: [640, 1410],
-    contact: [60, 1410],
+    contact: [640, 1800],
   }),
   flechas: [
-    { d: "M 418 422 L 692 422", doble: true },
-    { d: "M 240 556 C 262 640 560 600 612 676" },
-    { d: "M 430 892 C 400 925 452 950 426 1000" },
-    { d: "M 700 892 C 740 968 880 935 900 1003" },
-    { d: "M 950 1282 C 966 1320 934 1352 950 1393" },
-    { d: "M 625 1540 L 457 1540", doble: true },
+    { d: "M 460 405 L 674 405" },
+    { d: "M 700 556 C 640 640 460 620 392 684", doble: true },
+    { d: "M 855 556 L 855 650" },
+    { d: "M 610 890 C 560 940 470 930 444 998" },
+    { d: "M 940 890 C 962 925 962 950 962 978" },
+    { d: "M 600 1284 C 560 1340 480 1330 455 1372", doble: true },
+    { d: "M 860 1284 L 860 1370" },
+    { d: "M 830 1662 L 830 1760", doble: true },
   ],
   general: { x: 540, y: 730, z: 0.56 },
+  caja: [266, 700, 809, 1486],
 };
 
 // Timeline (frames).
@@ -145,6 +161,19 @@ const camDe = (e: Escena, i: number): Cam => {
   const bajar = (e.H * (ancho ? 0.08 : 0.1)) / z;
   return { x: m.x + m.w / 2, y: m.y + m.h / 2 - 14 - bajar, z };
 };
+
+// Overview camera: all modules (with their titles) fit the screen box.
+const generalDe = (e: Escena): Cam => {
+  const x0 = Math.min(...e.mods.map((m) => m.x));
+  const x1 = Math.max(...e.mods.map((m) => m.x + m.w));
+  const y0 = Math.min(...e.mods.map((m) => m.y - 34));
+  const y1 = Math.max(...e.mods.map((m) => m.y + m.h));
+  const [bx0, by0, bx1, by1] = e.caja;
+  const z = Math.min((bx1 - bx0) / (x1 - x0), (by1 - by0) / (y1 - y0));
+  return { x: (x0 + x1) / 2 - ((bx0 + bx1) / 2 - e.W / 2) / z, y: (y0 + y1) / 2 - ((by0 + by1) / 2 - e.H / 2) / z, z };
+};
+HORIZONTAL.general = generalDe(HORIZONTAL);
+VERTICAL.general = generalDe(VERTICAL);
 
 const camara = (e: Escena, frame: number): Cam => {
   const c0 = camDe(e, 0);
@@ -973,7 +1002,115 @@ const Contact: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
+// Online store: a phone paid with a loan at checkout.
+const Tienda: React.FC<{ t: number }> = ({ t }) => {
+  const ok = progreso(t, 26, 0, 1, 8);
+  return (
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ height: 22, background: "#16213a", display: "flex", alignItems: "center", gap: 6, padding: "0 8px" }}>
+        <T s={7.5} b c="white">Tu Comercio</T>
+        <div style={{ flex: 1, height: 11, borderRadius: 6, background: "rgba(255,255,255,0.15)" }} />
+        <T s={6} c="white">🛒 1</T>
+      </div>
+      <div style={{ flex: 1, display: "flex", gap: 8, padding: 8 }}>
+        <div style={{ width: 118, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, border: `1px solid ${GRIS}`, borderRadius: 5, padding: 5, opacity: progreso(t, 4, 0, 1, 10) }}>
+          <div style={{ width: 40, height: 74, borderRadius: 7, background: "linear-gradient(160deg, #3b4a6b, #10172a)", border: "2px solid #2b3550", position: "relative" }}>
+            <div style={{ position: "absolute", left: 6, top: 6, width: 10, height: 10, borderRadius: "50%", background: "#0b1020", border: "1.5px solid #64748b" }} />
+          </div>
+          <T s={7} b>Lumen S9 Ultra</T>
+          <T s={6} c={TINTA_2}>256 GB · Grafito</T>
+          <T s={8.5} b c={AZUL}>{pesos(1149900)}</T>
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+          <T s={7.5} b>Elegí cómo pagar</T>
+          {[
+            ["Tarjeta de crédito", "Hasta 3 cuotas"],
+            ["Transferencia", "10% de descuento"],
+            ["Préstamo personal", `12 cuotas de ${pesos(133400)}`],
+          ].map(([k, v], i) => {
+            const sel = i === 2;
+            return (
+              <div key={k} style={{ border: `1px solid ${sel ? AZUL : GRIS}`, background: sel ? `rgba(47,111,224,${0.08 * ok})` : "white", borderRadius: 4, padding: "3px 5px", display: "flex", alignItems: "center", gap: 4, opacity: progreso(t, 10, i, 3) }}>
+                <div style={{ width: 7, height: 7, borderRadius: "50%", border: `1.5px solid ${sel ? AZUL : "#9aa3b2"}`, background: sel && ok > 0.5 ? AZUL : "white" }} />
+                <div style={{ flex: 1 }}>
+                  <T s={6.3} b>{k}</T>
+                  <T s={5.5} c={TINTA_2}>{v}</T>
+                </div>
+                {sel ? <Pill fondo={VERDE} s={5}>APROBADO</Pill> : null}
+              </div>
+            );
+          })}
+          <div style={{ marginTop: "auto", height: 16, borderRadius: 4, background: AZUL, display: "flex", alignItems: "center", justifyContent: "center", opacity: progreso(t, 30, 0, 1) }}>
+            <T s={6.5} b c="white">Finalizar compra</T>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Virtual branch: the client's home banking with his credit line.
+const Sucursal: React.FC<{ t: number }> = ({ t }) => {
+  const c = progreso(t, 6, 0, 1, 24);
+  return (
+    <div style={{ height: "100%", display: "flex", flexDirection: "column", gap: 5, padding: 8, boxSizing: "border-box" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <T s={8.5} b>Hola, Javier</T>
+        <span style={{ fontSize: 5.5, fontWeight: 800, color: "#1e3a8a", border: "1px solid #1e3a8a", borderRadius: 3, padding: "1px 4px" }}>AYUDA</span>
+      </div>
+      <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ flex: 1.3, borderRadius: 6, background: "linear-gradient(135deg, #1f4f8a, #2f6f99)", padding: "5px 7px", display: "flex", flexDirection: "column", gap: 2 }}>
+          <T s={6.3} b c="white">Tu línea de crédito</T>
+          {(
+            [
+              ["Otorgado", 1400000],
+              ["Pendiente", 1175600],
+              ["Amortizado", 224400],
+            ] as [string, number][]
+          ).map(([k, v]) => (
+            <div key={k} style={{ display: "flex", justifyContent: "space-between" }}>
+              <T s={5.5} c="rgba(255,255,255,0.85)">{k}</T>
+              <T s={6} b c="white">{pesos(v * c)}</T>
+            </div>
+          ))}
+          <div style={{ height: 3, borderRadius: 2, background: "rgba(255,255,255,0.25)", marginTop: 1 }}>
+            <div style={{ width: `${16 * c}%`, height: "100%", borderRadius: 2, background: "#7dd3fc" }} />
+          </div>
+        </div>
+        <div style={{ flex: 1, borderRadius: 6, background: "linear-gradient(110deg, #0f766e, #14b8a6)", padding: "5px 7px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 2, opacity: progreso(t, 16, 0, 1, 10) }}>
+          <T s={5} b c="rgba(255,255,255,0.85)">OFERTA EXCLUSIVA</T>
+          <T s={6.5} b c="white">Seguro de vida</T>
+          <T s={5.5} c="white">desde $ 2.900/mes</T>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 4 }}>
+        {["Mis Préstamos", "Pagar Cuota", "Nuevo Préstamo", "Saldo Cancel.", "Reclamos"].map((a, i) => (
+          <div key={a} style={{ flex: 1, height: 26, borderRadius: 4, background: "#f4f5f7", border: `1px solid ${GRIS}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, opacity: progreso(t, 10, i, 2) }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: "#dbe6f0" }} />
+            <T s={4.8}>{a}</T>
+          </div>
+        ))}
+      </div>
+      <div style={{ border: `1px solid ${GRIS}`, borderRadius: 5, padding: "4px 6px", display: "flex", flexDirection: "column", gap: 2, opacity: progreso(t, 20, 0, 1, 10) }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <T s={6.3} b>Préstamo Personal</T>
+          <Pill fondo={VERDE} s={4.8}>VIGENTE</Pill>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <T s={7.5} b>{pesos(1400000)}</T>
+          <T s={5.5} c={TINTA_2}>3 de 12 cuotas pagas</T>
+        </div>
+        <div style={{ height: 3, borderRadius: 2, background: "#e6eaf0" }}>
+          <div style={{ width: `${25 * progreso(t, 24, 0, 1, 16)}%`, height: "100%", borderRadius: 2, background: VERDE }} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CONTENIDO: Record<Id, React.FC<{ t: number }>> = {
+  tienda: Tienda,
+  sucursal: Sucursal,
   canales: Canales,
   funnel: Funnel,
   riesgo: Riesgo,
