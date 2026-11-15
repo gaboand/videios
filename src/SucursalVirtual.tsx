@@ -250,14 +250,14 @@ const Home: React.FC<{ frame: number; d: Disp }> = ({ frame, d }) => {
             <span>100%</span>
           </div>
         </div>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 250, height: 76, borderRadius: 14, background: "linear-gradient(110deg, #0f766e, #14b8a6)", display: "flex", alignItems: "center", gap: 12, padding: "0 16px", boxSizing: "border-box", color: "white", opacity: Math.min(1, banner * 1.5), transform: `translateX(${(1 - banner) * 40}px)` }}>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 250, height: d.tab ? 76 : 82, borderRadius: 14, background: "linear-gradient(110deg, #0f766e, #14b8a6)", display: "flex", alignItems: "center", gap: 12, padding: "0 16px", boxSizing: "border-box", color: "white", opacity: Math.min(1, banner * 1.5), transform: `translateX(${(1 - banner) * 40}px)` }}>
           <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <Icono d={I.escudo} s={24} w={2} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 0.6, opacity: 0.9 }}>OFERTA EXCLUSIVA</div>
-            <div style={{ fontSize: 13.5, fontWeight: 800, marginTop: 2 }}>Protegé tu préstamo y tu familia</div>
-            <div style={{ fontSize: 10, opacity: 0.9, marginTop: 2 }}>Seguro de vida desde $ 2.900 por mes</div>
+            <div style={{ fontSize: d.tab ? 13.5 : 12.5, fontWeight: 800, marginTop: 2, whiteSpace: "nowrap" }}>{d.tab ? "Protegé tu préstamo y tu familia" : "Protegé tu préstamo"}</div>
+            <div style={{ fontSize: d.tab ? 10 : 9.5, opacity: 0.9, marginTop: 2, whiteSpace: "nowrap" }}>{d.tab ? "Seguro de vida desde $ 2.900 por mes" : "Seguro de vida desde $ 2.900/mes"}</div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 800, background: "white", color: "#0f766e", borderRadius: 18, padding: "7px 12px", whiteSpace: "nowrap" }}>Ver oferta</div>
         </div>
