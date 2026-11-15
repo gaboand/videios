@@ -1,6 +1,8 @@
 import {
   AbsoluteFill,
   Easing,
+  Freeze,
+  Sequence,
   interpolate,
   spring,
   useCurrentFrame,
@@ -1317,5 +1319,44 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
         })}
       </div>
     </AbsoluteFill>
+  );
+};
+
+// Short version: same time on each module in close-up, but the camera moves
+// between modules (and the final pull-back) run faster. The original timeline
+// is replayed through a piecewise-linear time map.
+const TRAMOS_CORTO: [number, number, number][] = (() => {
+  // [from, to, speed] in frames of the original video.
+  const t: [number, number, number][] = [[0, aparicion(0) + 40, 1]];
+  for (let i = 0; i < N_MODULOS - 1; i++) {
+    const sale = i === 0 ? aparicion(0) + 40 : aparicion(i) + 30;
+    if (i > 0) t.push([aparicion(i) + 4, sale, 1]);
+    t.push([sale, aparicion(i + 1) + 4, 2.5]);
+  }
+  t.push([aparicion(N_MODULOS - 1) + 4, aparicion(N_MODULOS - 1) + 30, 1]);
+  t.push([aparicion(N_MODULOS - 1) + 30, ALEJA, 5]);
+  t.push([ALEJA, ALEJA_FIN, 1.5]);
+  t.push([ALEJA_FIN, SUITE_FRAMES, 1]);
+  return t;
+})();
+export const SUITE_CORTO_FRAMES = Math.round(TRAMOS_CORTO.reduce((a, [d, h, v]) => a + (h - d) / v, 0));
+const original = (f: number) => {
+  let a = 0;
+  for (const [d, h, v] of TRAMOS_CORTO) {
+    const largo = (h - d) / v;
+    if (f <= a + largo) return d + (f - a) * v;
+    a += largo;
+  }
+  return SUITE_FRAMES - 1;
+};
+
+export const Suite360Corto: React.FC<z.infer<typeof suite360Schema>> = (props) => {
+  const frame = useCurrentFrame();
+  return (
+    <Freeze frame={0}>
+      <Sequence from={-Math.min(SUITE_FRAMES - 1, Math.round(original(frame)))}>
+        <Suite360 {...props} />
+      </Sequence>
+    </Freeze>
   );
 };

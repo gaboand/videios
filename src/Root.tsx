@@ -21,7 +21,7 @@ import {
   ConsolidacionDeudas,
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
-import { SUITE_FRAMES, Suite360, suite360Schema } from "./Suite360";
+import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
 import {
   ONBOARDING_FRAMES,
   OnboardingApp,
@@ -262,6 +262,28 @@ export const RemotionRoot: React.FC = () => {
         schema={suite360Schema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={SUITE_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render Suite360Corto
+        id="Suite360Corto"
+        component={Suite360Corto}
+        schema={suite360Schema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={SUITE_CORTO_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render Suite360CortoMovil
+        id="Suite360CortoMovil"
+        component={Suite360Corto}
+        schema={suite360Schema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={SUITE_CORTO_FRAMES}
         fps={30}
         width={1080}
         height={1920}
