@@ -25,7 +25,7 @@ export const motorSchema = z.object({
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const MOTOR_FRAMES = 1800;
+export const MOTOR_FRAMES = 1570;
 
 const FUENTE = "Montserrat, sans-serif";
 const HEADER_BG = "#4b4d52";
@@ -50,12 +50,12 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 // ---------- Timeline ----------
 const ESC = {
   variables: [0, 256],
-  workflow: [252, 648],
-  matriz: [644, 930],
-  pricing: [926, 1110],
-  informe: [1106, 1360],
-  analisis: [1356, 1580],
-  dashboard: [1576, MOTOR_FRAMES + 10],
+  workflow: [252, 474],
+  matriz: [470, 698],
+  pricing: [694, 878],
+  informe: [874, 1128],
+  analisis: [1124, 1348],
+  dashboard: [1344, MOTOR_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
 const TAP_SCORE = 70;
@@ -65,43 +65,43 @@ const TIPEO_CONS = [118, 128];
 const TAP_GUARDAR_CFG = 160;
 const TAP_NAV_WF = 244;
 const NODO_0 = 292;
-const NODO_PASO = 13;
-const TAP_GUARDAR_WF = 590;
-const TAP_NAV_MAT = 636;
-const TAP_GENERAR = 676;
-// Each tap pushes one cell a level worse: four orange to red, four yellow to
-// orange, four green to yellow. The matrix stays monotonic after every tap
-// (risk never gets worse as the score rises or better as the NSE drops), so a
-// cell only changes when the cell above and the one to its right are already
-// at least that level.
+const NODO_PASO = 13 / 3;
+const TAP_GUARDAR_WF = 444;
+const TAP_NAV_MAT = 462;
+// The matrix scene opens with the matrix already generated. Each tap pushes
+// one cell a level worse: four orange to red, four yellow to orange, four
+// green to yellow. The matrix stays monotonic after every tap (risk never
+// gets worse as the score rises or better as the NSE drops), so a cell only
+// changes when the cell above and the one to its right are already at least
+// that level.
 const CAMBIOS = [
-  { r: 2, c: 4, f: 748 },
-  { r: 1, c: 3, f: 757 },
-  { r: 1, c: 2, f: 766 },
-  { r: 1, c: 1, f: 775 },
-  { r: 2, c: 3, f: 784 },
-  { r: 2, c: 2, f: 793 },
-  { r: 3, c: 4, f: 802 },
-  { r: 3, c: 3, f: 811 },
-  { r: 5, c: 3, f: 820 },
-  { r: 6, c: 3, f: 829 },
-  { r: 7, c: 4, f: 838 },
-  { r: 7, c: 3, f: 847 },
+  { r: 2, c: 4, f: 500 },
+  { r: 1, c: 3, f: 509 },
+  { r: 1, c: 2, f: 518 },
+  { r: 1, c: 1, f: 527 },
+  { r: 2, c: 3, f: 536 },
+  { r: 2, c: 2, f: 545 },
+  { r: 3, c: 4, f: 554 },
+  { r: 3, c: 3, f: 563 },
+  { r: 5, c: 3, f: 572 },
+  { r: 6, c: 3, f: 581 },
+  { r: 7, c: 4, f: 590 },
+  { r: 7, c: 3, f: 599 },
 ];
-const TAP_ACTUALIZAR = 866;
-const TAP_NAV_PR = 918;
-const TAP_MONTO = 962;
-const TIPEO_MONTO = [968, 990];
-const TAP_GUARDAR_PR = 1030;
-const TAP_NAV_INF = 1100;
-const TAP_DNI = 1124;
-const TIPEO_DNI = [1128, 1144];
-const TAP_BUSCAR_INF = 1152;
-const INFORME = 1160;
-const TAP_NAV_AN = 1352;
-const TAP_MES_ANT = 1386;
-const TAP_NAV_DASH = 1572;
-const TAPS = [TAP_SCORE, TAP_TOGGLE, TAP_GUARDAR_CFG, TAP_NAV_WF, TAP_GUARDAR_WF, TAP_NAV_MAT, TAP_GENERAR, ...CAMBIOS.map((c) => c.f), TAP_ACTUALIZAR, TAP_NAV_PR, TAP_MONTO, TAP_GUARDAR_PR, TAP_NAV_INF, TAP_DNI, TAP_BUSCAR_INF, TAP_NAV_AN, TAP_MES_ANT, TAP_NAV_DASH];
+const TAP_ACTUALIZAR = 618;
+const TAP_NAV_PR = 686;
+const TAP_MONTO = 734;
+const TIPEO_MONTO = [740, 762];
+const TAP_GUARDAR_PR = 802;
+const TAP_NAV_INF = 868;
+const TAP_DNI = 892;
+const TIPEO_DNI = [896, 912];
+const TAP_BUSCAR_INF = 920;
+const INFORME = 928;
+const TAP_NAV_AN = 1120;
+const TAP_MES_ANT = 1154;
+const TAP_NAV_DASH = 1340;
+const TAPS = [TAP_SCORE, TAP_TOGGLE, TAP_GUARDAR_CFG, TAP_NAV_WF, TAP_GUARDAR_WF, TAP_NAV_MAT, ...CAMBIOS.map((c) => c.f), TAP_ACTUALIZAR, TAP_NAV_PR, TAP_MONTO, TAP_GUARDAR_PR, TAP_NAV_INF, TAP_DNI, TAP_BUSCAR_INF, TAP_NAV_AN, TAP_MES_ANT, TAP_NAV_DASH];
 
 const pulsado = (frame: number, f: number) => interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
 const aparece = (frame: number, desde: number, dur = 10) => interpolate(frame, [desde, desde + dur], [0, 1], clamp);
@@ -237,8 +237,8 @@ const VariablesTab: React.FC<{ frame: number }> = ({ frame }) => (
               <div style={{ width: 16, height: 16, borderRadius: 3, background: "#3b82f6", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icono d={I.editar} s={11} w={2.4} />
               </div>
-              <div style={{ width: 16, height: 16, borderRadius: 3, border: "1.6px solid #dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icono d={I.cruz} s={10} c="#dc2626" w={3} />
+              <div style={{ width: 16, height: 16, borderRadius: 3, background: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icono d={I.cruz} s={10} c="white" w={3.2} />
               </div>
             </div>
           </div>
@@ -463,7 +463,8 @@ const valorCelda = (r: number, c: number, frame: number) => {
   const n = CAMBIOS.filter((m) => m.r === r && m.c === c && frame >= m.f + 2).length;
   return NIVELES[Math.min(3, NIVELES.indexOf(MATRIZ[r][c]) + n)];
 };
-const llenado = (frame: number, r: number, c: number) => aparece(frame, TAP_GENERAR + 6 + (9 - r) * 3 + c * 2, 8);
+// The matrix is already generated when the scene opens.
+const llenado = (frame: number, r: number, c: number) => (frame >= 0 && r >= 0 && c >= 0 ? 1 : 0);
 
 const Grilla: React.FC<{ frame: number; cw: number; ch: number; lw: number; gap: number; fs: number }> = ({ frame, cw, ch, lw, gap, fs }) => (
   <div style={{ position: "relative" }}>
@@ -532,7 +533,7 @@ const MatrizTab: React.FC<{ frame: number }> = ({ frame }) => {
           <ParametroFila k="Máximo:" v="1000" />
           <ParametroFila k="# segmentos:" v="10" />
         </div>
-        <div style={{ marginTop: 16, height: 34, borderRadius: 6, background: NAVY, color: "white", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${1 - pulsado(frame, TAP_GENERAR) * 0.06})` }}>Generar Matriz</div>
+        <div style={{ marginTop: 16, height: 34, borderRadius: 6, background: NAVY, color: "white", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>Generar Matriz</div>
         <div style={{ marginTop: 10, height: 34, borderRadius: 6, background: "#e8f3fc", border: "1px solid #bfdbfe", color: NAVY, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>Configuraciones</div>
       </div>
       <div style={{ position: "absolute", left: MATRIZ_BOX.x, top: MATRIZ_BOX.y, width: MATRIZ_BOX.w, height: MATRIZ_BOX.h, background: PANEL, borderRadius: 12 }}>
@@ -681,9 +682,8 @@ const DEDO_TAB: [number, number, number][] = [
   [TAP_TOGGLE - 2, xToggleTab(pCons.c), HEADER + SETUP.y + pCons.y + SETUP.fila / 2],
   [TAP_GUARDAR_CFG - 2, SIDE + SETUP.x + SETUP.w - 18 - 34, HEADER + SETUP.y + 26],
   [TAP_NAV_WF - 2, SIDE / 2, sideY(5)],
-  [TAP_GUARDAR_WF - 2, SIDE + 20 + 114, HEADER + 20 + 26 + 10 + 4 * 46 + 15 + 4 + 42 + 16],
+  [TAP_GUARDAR_WF - 2, SIDE + 20 + 114, HEADER + 20 + 18 + 10 + 5 * 38 + 4 * 8 + 14 + 1 + 4 + 10 + 32 + 10 + 16],
   [TAP_NAV_MAT - 2, SIDE / 2, sideY(7)],
-  [TAP_GENERAR - 2, SIDE + 40 + 135, HEADER + 40 + 520],
   ...CAMBIOS.map((m): [number, number, number] => [m.f - 2, celdaTab(m.r, m.c).x, celdaTab(m.r, m.c).y]),
   [TAP_ACTUALIZAR - 2, SIDE + MATRIZ_BOX.x + MATRIZ_BOX.w / 2 + 52, HEADER + MATRIZ_BOX.y + 643],
   [TAP_NAV_PR - 2, SIDE / 2, sideY(8)],
@@ -741,9 +741,9 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
         ))}
       </div>
       <Toast frame={frame} desde={TAP_GUARDAR_CFG + 6} hasta={248} titulo="Configuración guardada" sub="Bureau A - Básica · Score mínimo 420" />
-      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={642} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" />
-      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={922} titulo="Matriz actualizada" sub="Riesgo Medio · Score Bureau A × NSE" />
-      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={1100} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · Monto máximo $ 230.000" />
+      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={466} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" />
+      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={690} titulo="Matriz actualizada" sub="Riesgo Medio · Score Bureau A × NSE" />
+      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={872} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · Monto máximo $ 230.000" />
       <Dedo frame={frame} camino={DEDO_TAB} />
     </div>
   );
@@ -858,7 +858,7 @@ const MatrizMovil: React.FC<{ frame: number }> = ({ frame }) => (
           </div>
         ))}
       </div>
-      <div style={{ position: "absolute", left: 14, right: 14, bottom: 10, height: 26, borderRadius: 6, background: NAVY, color: "white", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${1 - pulsado(frame, TAP_GENERAR) * 0.06})` }}>Generar Matriz</div>
+      <div style={{ position: "absolute", left: 14, right: 14, bottom: 10, height: 26, borderRadius: 6, background: NAVY, color: "white", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>Generar Matriz</div>
     </div>
     <div style={{ position: "absolute", left: M_GRILLA.x, top: M_GRILLA.y }}>
       <Grilla frame={frame} {...GRILLA_MOVIL} fs={10} />
@@ -899,6 +899,7 @@ const DATOS_LEAD: [string, string][] = [
   ["CÓDIGO ONBOARDING", "HUB-7K2Q9"],
   ["CÓDIGO LEAD", "AXN000036130"],
 ];
+const CHIPS_BUREAU = ["score: 612", "nse: C2", "peorSit12M: 1", "peorSitVigente: 1", "consultas3M: 2", "chequesRechazados: 0", "juicios12M: 0"];
 const CHIPS_BASES = ["moraTemprana: NO", "moraExtrajudicial: NO", "fraude: NO", "legales: NO", "préstamosVigentes: NO", "refinanciado: NO", "consolidado: NO", "empleado: NO", "listaNegra: NO", "préstamosVigentesMax: 3"];
 const VALORIZACION: [string, string][] = [
   ["FUENTE", "Tabla NSE (Bureau A)"],
@@ -1025,7 +1026,7 @@ const InformeTab: React.FC<{ frame: number }> = ({ frame }) => {
           <div style={s(3)}>
             <Seccion t="PIPELINE DE EVALUACIÓN">
               <PasoPipeline n={1} t="Bases Negativas" chips={CHIPS_BASES} frame={frame} desde={INFORME + 30} />
-              <PasoPipeline n={2} t="Bureau A" frame={frame} desde={INFORME + 44} />
+              <PasoPipeline n={2} t="Bureau A" chips={CHIPS_BUREAU} frame={frame} desde={INFORME + 44} />
             </Seccion>
           </div>
         </div>
@@ -1335,7 +1336,7 @@ const InformeMovil: React.FC<{ frame: number }> = ({ frame }) => {
           <div style={s(2)}>
             <Seccion t="PIPELINE DE EVALUACIÓN" fs={10}>
               <PasoPipeline n={1} t="Bases Negativas" chips={CHIPS_BASES} maxChips={6} frame={frame} desde={INFORME + 30} fs={11} />
-              <PasoPipeline n={2} t="Bureau A" frame={frame} desde={INFORME + 44} fs={11} />
+              <PasoPipeline n={2} t="Bureau A" chips={CHIPS_BUREAU} maxChips={5} frame={frame} desde={INFORME + 44} fs={11} />
             </Seccion>
           </div>
           <div style={s(3)}>
@@ -1471,7 +1472,6 @@ const DEDO_MOVIL: [number, number, number][] = [
   [TAP_NAV_WF - 2, tabX(1), MH - M_TABS / 2 - 4],
   [TAP_GUARDAR_WF - 2, 195, M_HEADER + 650],
   [TAP_NAV_MAT - 2, tabX(2), MH - M_TABS / 2 - 4],
-  [TAP_GENERAR - 2, 195, M_HEADER + 42 + 120 - 23],
   ...CAMBIOS.map((m): [number, number, number] => [m.f - 2, M_GRILLA.x + GRILLA_MOVIL.lw + GRILLA_MOVIL.gap + m.c * (GRILLA_MOVIL.cw + GRILLA_MOVIL.gap) + GRILLA_MOVIL.cw / 2, M_HEADER + M_GRILLA.y + (m.r + 1) * (GRILLA_MOVIL.ch + GRILLA_MOVIL.gap) + GRILLA_MOVIL.ch / 2]),
   [TAP_ACTUALIZAR - 2, 290, M_HEADER + 569],
   [TAP_NAV_PR - 2, tabX(3), MH - M_TABS / 2 - 4],
@@ -1532,9 +1532,9 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
         })}
       </div>
       <Toast frame={frame} desde={TAP_GUARDAR_CFG + 6} hasta={248} titulo="Configuración guardada" sub="Bureau A - Básica · Score mínimo 420" chico />
-      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={642} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" chico />
-      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={922} titulo="Matriz actualizada" sub="Riesgo Medio · Score × NSE" chico />
-      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={1100} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · $ 230.000" chico />
+      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={466} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" chico />
+      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={690} titulo="Matriz actualizada" sub="Riesgo Medio · Score × NSE" chico />
+      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={872} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · $ 230.000" chico />
       <Dedo frame={frame} camino={DEDO_MOVIL} />
     </div>
   );
@@ -1583,25 +1583,26 @@ const tomasDe = (tab: boolean): Toma[] => {
     { f: 204, z: 1, ...c, ...der, cy: 0.62 },
     { f: 236, z: 1, ...c, ...der, cy: 0.62 },
     { f: 272, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 300, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 336, z: zwf, ...wfIni, ...izq, cy: 0.57 },
-    { f: 520, z: zwf, ...wfFin, ...izq, cy: 0.57 },
-    { f: 556, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 900, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 936, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 952, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 986, z: zz, ...precio, ...der, cy: 0.57 },
-    { f: 1040, z: zz, ...precio, ...der, cy: 0.57 },
-    { f: 1076, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1100, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1136, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1400, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1436, z: zz, ...kpis, ...izq, cy: 0.57 },
-    { f: 1520, z: zz, ...kpis, ...izq, cy: 0.57 },
-    { f: 1556, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1590, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1626, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1740, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 284, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 316, z: zwf, ...wfIni, ...izq, cy: 0.57 },
+    { f: 384, z: zwf, ...wfFin, ...izq, cy: 0.57 },
+    { f: 396, z: zwf, ...wfFin, ...izq, cy: 0.57 },
+    { f: 430, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 672, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 708, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 724, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 758, z: zz, ...precio, ...der, cy: 0.57 },
+    { f: 812, z: zz, ...precio, ...der, cy: 0.57 },
+    { f: 848, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 872, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 908, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1168, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1204, z: zz, ...kpis, ...izq, cy: 0.57 },
+    { f: 1288, z: zz, ...kpis, ...izq, cy: 0.57 },
+    { f: 1324, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1358, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1394, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1510, z: 1, ...c, ...der, cy: 0.62 },
     { f: MOTOR_FRAMES, z: 1.05, ...c, ...der, cy: 0.62 },
   ];
 };
@@ -1612,9 +1613,9 @@ const TOMAS_CEL = tomasDe(false);
 type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number; hueco?: string };
 const oT = grillaOrigenTab();
 const SALTOS_TAB: Salto[] = [
-  { x: SIDE + oT.x - 8, y: HEADER + oT.y - 8, w: oT.ancho + 16, h: oT.alto + 12, f: [872, 884, 902, 916], z: 90 },
-  { x: SIDE + INF.x + INF.colDer - 8, y: HEADER + INF.y + 56 + DICT_Y + 4, w: INF.colW + 16, h: 222, f: [1250, 1264, 1284, 1300], z: 100 },
-  { x: SIDE + (PW - SIDE) / 2 - 436 - 6, y: HEADER + DASH.wf - 6, w: 884, h: 158, f: [1690, 1704, 1724, 1740], z: 100, hueco: "#060a12" },
+  { x: SIDE + oT.x - 8, y: HEADER + oT.y - 8, w: oT.ancho + 16, h: oT.alto + 12, f: [628, 640, 658, 672], z: 90 },
+  { x: SIDE + INF.x + INF.colDer - 8, y: HEADER + INF.y + 56 + DICT_Y + 4, w: INF.colW + 16, h: 222, f: [1018, 1032, 1052, 1068], z: 100 },
+  { x: SIDE + (PW - SIDE) / 2 - 436 - 6, y: HEADER + DASH.wf - 6, w: 884, h: 158, f: [1458, 1472, 1492, 1508], z: 100, hueco: "#060a12" },
 ];
 const SALTOS_CEL: Salto[] = [
   {
@@ -1622,10 +1623,10 @@ const SALTOS_CEL: Salto[] = [
     y: M_HEADER + M_GRILLA.y - 6,
     w: GRILLA_MOVIL.lw + GRILLA_MOVIL.gap + 7 * (GRILLA_MOVIL.cw + GRILLA_MOVIL.gap) + 9,
     h: 11 * (GRILLA_MOVIL.ch + GRILLA_MOVIL.gap) + 9,
-    f: [872, 884, 902, 916],
+    f: [628, 640, 658, 672],
     z: 90,
   },
-  { x: 6, y: M_HEADER + M_DASH.wf - 6, w: 378, h: 144, f: [1690, 1704, 1724, 1740], z: 100, hueco: "#060a12" },
+  { x: 6, y: M_HEADER + M_DASH.wf - 6, w: 378, h: 144, f: [1458, 1472, 1492, 1508], z: 100, hueco: "#060a12" },
 ];
 
 const Pantalla: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <PaginaTab frame={frame} /> : <PaginaMovil frame={frame} />);
