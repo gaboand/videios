@@ -553,22 +553,22 @@ const MatrizTab: React.FC<{ frame: number }> = ({ frame }) => {
 // ---------- Risk pricing ----------
 type FilaPrecio = [string, number, number, number, number];
 const TABLAS: { t: string; filas: FilaPrecio[] }[] = [
-  { t: "Estrategia de Riesgos - Primarios", filas: [["A", 15, 7, 291, 215000], ["B", 15, 7, 291, 172000], ["C", 10, 7, 291, 143000], ["D", 10, 7, 291, 115000]] },
-  { t: "Estrategia de Riesgos - Renovados", filas: [["A", 25, 7, 234, 215000], ["B", 20, 7, 252, 215000], ["C", 15, 7, 257, 215000], ["D", 10, 7, 291, 215000]] },
-  { t: "Estrategia de Riesgos - Renovados 1", filas: [["A", 35, 7, 234, 350000], ["B", 30, 7, 252, 300000], ["C", 25, 7, 257, 250000], ["D", 15, 7, 291, 215000]] },
-  { t: "Estrategia de Riesgos - Renovados 2", filas: [["A", 35, 7, 234, 350000], ["B", 30, 7, 252, 300000], ["C", 25, 7, 257, 250000], ["D", 15, 7, 291, 215000]] },
+  { t: "Estrategia de Riesgos - Primarios", filas: [["A", 15, 7, 135, 1200000], ["B", 15, 7, 148, 950000], ["C", 10, 7, 162, 720000], ["D", 10, 7, 178, 500000]] },
+  { t: "Estrategia de Riesgos - Renovados", filas: [["A", 25, 7, 98, 2100000], ["B", 20, 7, 112, 1800000], ["C", 15, 7, 126, 1500000], ["D", 10, 7, 145, 1100000]] },
+  { t: "Estrategia de Riesgos - Renovados 1", filas: [["A", 35, 7, 92, 2800000], ["B", 30, 7, 105, 2400000], ["C", 25, 7, 118, 2000000], ["D", 15, 7, 140, 1600000]] },
+  { t: "Estrategia de Riesgos - Renovados 2", filas: [["A", 35, 7, 95, 2600000], ["B", 30, 7, 110, 2250000], ["C", 25, 7, 124, 1900000], ["D", 15, 7, 150, 1400000]] },
 ];
 const COLOR_NIVEL: Record<string, string> = { A: "#16a34a", B: "#eab308", C: "#f97316", D: "#dc2626" };
 const montoTxt = (n: number) => `$ ${n.toLocaleString("es-AR")}`;
 const montoEditado = (frame: number) => {
   if (frame < TIPEO_MONTO[0]) {
-    return montoTxt(215000);
+    return montoTxt(1200000);
   }
-  return `$ ${tipeo(frame, "230.000", TIPEO_MONTO)}`;
+  return `$ ${tipeo(frame, "1.350.000", TIPEO_MONTO)}`;
 };
 const TablaPrecio: React.FC<{ frame: number; k: number; w: number; fila: number; fs: number; chico?: boolean }> = ({ frame, k, w, fila, fs, chico }) => {
   const tabla = TABLAS[k];
-  const cols = chico ? [44, 52, 50, 52, w - 198] : [56, 126, 126, 126, w - 434];
+  const cols = chico ? [44, 52, 50, 52, w - 198] : [56, 110, 100, 110, w - 376];
   const cab = ["NIVEL", "RCI (%)", "PLAZO", "TNA (%)", "MONTO MÁX."];
   const t0 = ESC.pricing[0] + 6 + k * 5;
   return (
@@ -681,7 +681,7 @@ const DEDO_TAB: [number, number, number][] = [
   ...CAMBIOS.map((m): [number, number, number] => [m.f - 2, celdaTab(m.r, m.c).x, celdaTab(m.r, m.c).y]),
   [TAP_ACTUALIZAR - 2, SIDE + MATRIZ_BOX.x + MATRIZ_BOX.w / 2 + 52, HEADER + MATRIZ_BOX.y + 643],
   [TAP_NAV_PR - 2, SIDE / 2, sideY(8)],
-  [TAP_MONTO - 2, SIDE + PRECIO_TAB.x[0] + 434 + (PRECIO_TAB.w - 434) / 2, HEADER + PRECIO_TAB.y[0] + 68 + PRECIO_TAB.fila / 2],
+  [TAP_MONTO - 2, SIDE + PRECIO_TAB.x[0] + 376 + (PRECIO_TAB.w - 376) / 2, HEADER + PRECIO_TAB.y[0] + 68 + PRECIO_TAB.fila / 2],
   [TAP_GUARDAR_PR - 2, PW - 30 - 56, HEADER + 91],
   [TAP_NAV_INF - 2, SIDE / 2, sideY(9)],
   [TAP_DNI - 2, SIDE + INF.x + 420, HEADER + 33],
@@ -737,7 +737,7 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
       <Toast frame={frame} desde={TAP_GUARDAR_CFG + 6} hasta={248} titulo="Configuración guardada" sub="Bureau A - Básica · Score mínimo 420" />
       <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={434} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" />
       <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={604} titulo="Matriz actualizada" sub="Riesgo Medio · Score Bureau A × NSE" />
-      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={786} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · Monto máximo $ 230.000" />
+      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={786} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · Monto máximo $ 1.350.000" />
       <Dedo frame={frame} camino={DEDO_TAB} />
     </div>
   );
@@ -900,19 +900,19 @@ const VALORIZACION: [string, string][] = [
   ["NSE (NIVEL)", "C2"],
   ["SCORE BUREAU A", "612"],
   ["SEGMENTO DE RIESGO", "B"],
-  ["INGRESO NSE", "$642.180"],
-  ["INGRESO INFERIDO FINAL", "$642.180"],
+  ["INGRESO NSE", "$1.284.360"],
+  ["INGRESO INFERIDO FINAL", "$1.284.360"],
 ];
 const DICTAMEN: [string, string][] = [
   ["RESULTADO", "APROBADO"],
-  ["MONTO", "$215.000"],
-  ["MONTO MÁX.", "$215.000"],
+  ["MONTO", "$1.250.000"],
+  ["MONTO MÁX.", "$1.800.000"],
   ["PLAZO", "7 meses"],
-  ["TNA", "252%"],
+  ["TNA", "112%"],
   ["RCI", "20%"],
-  ["INGRESO INFERIDO", "$642.180"],
-  ["INGRESO NETO", "$642.180"],
-  ["CUOTA MÁX.", "$128.436"],
+  ["INGRESO INFERIDO", "$1.284.360"],
+  ["INGRESO NETO", "$1.284.360"],
+  ["CUOTA MÁX.", "$256.872"],
 ];
 const cuentaTxt = (frame: number, desde: number, txt: string) => {
   const m = txt.match(/[\d.,]+/);
@@ -1528,7 +1528,7 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
       <Toast frame={frame} desde={TAP_GUARDAR_CFG + 6} hasta={248} titulo="Configuración guardada" sub="Bureau A - Básica · Score mínimo 420" chico />
       <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={434} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" chico />
       <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={604} titulo="Matriz actualizada" sub="Riesgo Medio · Score × NSE" chico />
-      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={786} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · $ 230.000" chico />
+      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={786} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · $ 1.350.000" chico />
       <Dedo frame={frame} camino={DEDO_MOVIL} />
     </div>
   );
