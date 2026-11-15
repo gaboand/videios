@@ -114,6 +114,7 @@ const I = {
   persona: "M12 4 A4 4 0 1 1 12 12 A4 4 0 1 1 12 4 M4 21 C5 15 19 15 20 21",
   cruz: "M6 6 L18 18 M18 6 L6 18",
   flecha: "M15 5 L8 12 L15 19",
+  correo: "M3 6 H21 V18 H3 Z M3 6 L12 13 L21 6",
 };
 
 type Modulo = { t: string; d: string; i: string; estrella?: boolean };
@@ -171,6 +172,7 @@ const PRESTAMOS: Prestamo[] = [
   { cod: "2026081300003", capital: 1999639.67, plazo: 18, saldo: null, alta: "13/8/2026" },
 ];
 const NUEVA_OP = "2026111500001";
+const RECIBO = "Recibo enviado por email a jperez@correo.com";
 const TOTAL = PRESTAMOS.slice(0, 5).reduce((s, p) => s + (p.saldo ?? 0), 0);
 const marcados = (frame: number) => TAP_CHECK.filter((f) => frame >= f + 2).length;
 const totalMarcado = (frame: number) => {
@@ -211,7 +213,7 @@ const EstadoPrestamo: React.FC<{ cancelada: number; nueva?: boolean; fs?: number
   ) : (
     <span style={{ fontSize: fs + 1.5, color: TINTA }}>vigente</span>
   );
-const Toast: React.FC<{ frame: number; desde: number; hasta?: number; titulo: string; sub: string; chico?: boolean }> = ({ frame, desde, hasta = 1e9, titulo, sub, chico }) => {
+const Toast: React.FC<{ frame: number; desde: number; hasta?: number; titulo: string; sub: string; extra?: string; chico?: boolean }> = ({ frame, desde, hasta = 1e9, titulo, sub, extra, chico }) => {
   const t = spring({ frame: frame - desde, fps: 30, config: { damping: 16 } }) * interpolate(frame, [hasta - 10, hasta], [1, 0], clamp);
   if (frame < desde || frame >= hasta) {
     return null;
@@ -220,6 +222,11 @@ const Toast: React.FC<{ frame: number; desde: number; hasta?: number; titulo: st
     <div style={{ position: "absolute", right: chico ? 12 : 24, left: chico ? 12 : undefined, top: chico ? M_HEADER + 10 : HEADER + 16, zIndex: 7, background: "white", borderLeft: `4px solid ${VERDE}`, borderRadius: 10, boxShadow: "0 10px 26px rgba(20,30,50,0.22)", padding: chico ? "10px 14px" : "12px 18px", opacity: Math.min(1, t * 1.5), transform: `translateY(${(1 - t) * -16}px)` }}>
       <div style={{ fontSize: chico ? 12 : 13, fontWeight: 800, color: VERDE }}>✓ {titulo}</div>
       <div style={{ fontSize: chico ? 10.5 : 11, color: TINTA_2, marginTop: 3 }}>{sub}</div>
+      {extra ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: chico ? 10.5 : 11, color: AZUL, marginTop: 6, paddingTop: 6, borderTop: `1px solid ${BORDE}`, opacity: aparece(frame, desde + 14, 10) }}>
+          <Icono d={I.correo} s={13} c={AZUL} w={2.2} /> {extra}
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -698,7 +705,7 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         ))}
       </div>
-      <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} />
+      <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} extra={RECIBO} />
       <Toast frame={frame} desde={PROCESADA + 10} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · ${pesos(TOTAL)} · 18 cuotas`} />
       <Dedo frame={frame} camino={DEDO_TAB} />
     </div>
@@ -948,7 +955,7 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
         <HojaCobranza frame={frame} chico />
         <ModalConsolidacion frame={frame} chico />
       </div>
-      <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} chico />
+      <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} extra={RECIBO} chico />
       <Toast frame={frame} desde={PROCESADA + 10} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · 18 cuotas`} chico />
       <Dedo frame={frame} camino={DEDO_MOVIL} />
     </div>
