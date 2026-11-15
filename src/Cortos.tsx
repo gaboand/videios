@@ -58,8 +58,8 @@ export const CORTOS: Record<string, { C: React.ComponentType<Props>; tramos: Tra
   BackOfficeCorto: { C: BackOfficeDinamico, tramos: [[0, 100], [170, 300], [456, 540]] },
   // Home with brand change, product, loan payment, confirmation.
   TiendaCorto: { C: TiendaDinamico, tramos: [[0, 100], [296, 356], [420, 488], [530, 600]] },
-  // Containers, client with payment promise, segment cube, reports.
-  CollectionsCorto: { C: CollectionsDinamico, tramos: [[0, 85], [266, 346], [500, 570], [930, 1000]] },
+  // Client cards of cluster S4, client with payment promise, segment cube, reports.
+  CollectionsCorto: { C: CollectionsDinamico, tramos: [[118, 212], [266, 346], [500, 570], [930, 1000]] },
   // Data with brand change, offers, end of the identity check, signed contract.
   OnboardingCorto: { C: OnboardingDinamico, tramos: [[0, 95], [232, 300], [544, 597, 24], [1240, 1316]] },
 };
