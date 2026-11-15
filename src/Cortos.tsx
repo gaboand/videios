@@ -3,6 +3,7 @@ import { BackOfficeDinamico } from "./BackOffice";
 import { CollectionsDinamico } from "./CollectionsAxonia";
 import { CoreLendingDinamico } from "./CoreLending";
 import { MotorDinamico } from "./MotorDecision";
+import { SucursalDinamico } from "./SucursalVirtual";
 import { ContactFlowDinamico } from "./ContactFlow";
 import { OnboardingDinamico } from "./OnboardingApp";
 import { TiendaDinamico } from "./TiendaAxonia";
@@ -70,6 +71,9 @@ export const CORTOS: Record<string, { C: React.ComponentType<Props>; tramos: Tra
   // Bureau variables, workflow building, risk matrix changes, evaluation
   // report verdict, engine dashboard.
   MotorCorto: { C: MotorDinamico, tramos: [[40, 110], [284, 350], [462, 524], [930, 984], [1370, 1426]] },
+  // Home with credit line and insurance banner, loan card, payoff total,
+  // pre-approved offer slider, claim sent.
+  SucursalCorto: { C: SucursalDinamico, tramos: [[0, 100], [350, 410], [560, 620], [804, 862], [1090, 1150]] },
 };
 
 export const componenteCorto = (id: string): React.FC<Props> => {

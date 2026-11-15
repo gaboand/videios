@@ -39,7 +39,7 @@ import { MOTOR_FRAMES, MotorDinamico, motorSchema } from "./MotorDecision";
 import { SUCURSAL_FRAMES, SucursalDinamico, sucursalSchema } from "./SucursalVirtual";
 
 // Short versions (10 s max): ContactFlowCorto, BackOfficeCorto, TiendaCorto,
-// CollectionsCorto, OnboardingCorto, CoreLendingCorto, MotorCorto, each with a ...Movil 9:16 twin.
+// CollectionsCorto, OnboardingCorto, CoreLendingCorto, MotorCorto, SucursalCorto, each with a ...Movil 9:16 twin.
 const CORTOS_COMP = Object.keys(CORTOS).map((id) => ({ id, C: componenteCorto(id), dur: duracionCorto(CORTOS[id].tramos) }));
 
 export const RemotionRoot: React.FC = () => {
