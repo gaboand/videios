@@ -25,7 +25,7 @@ export const coreLendingSchema = z.object({
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const CORELENDING_FRAMES = 1640;
+export const CORELENDING_FRAMES = 1260;
 
 const FUENTE = "Montserrat, sans-serif";
 const HEADER_BG = "#4b4d52";
@@ -50,38 +50,39 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 // ---------- Timeline ----------
 const ESC = {
-  home: [0, 140],
-  detalle: [136, 416],
-  consolidacion: [412, 870],
-  conta: [866, 1010],
-  estados: [1006, 1190],
-  resumen: [1186, 1400],
-  diario: [1396, CORELENDING_FRAMES + 10],
+  home: [0, 100],
+  detalle: [96, 312],
+  consolidacion: [308, 636],
+  conta: [632, 760],
+  estados: [756, 900],
+  resumen: [896, 1060],
+  diario: [1056, CORELENDING_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
-const TAP_CONSULTAR = 120;
-const TAP_COBRANZA = 250;
-const HOJA_COBRANZA = [256, 296];
-const TAP_CONFIRMAR_COB = 284;
-const COBRADA = 300;
-const TAP_MENU = 404;
-const TAP_INPUT = 428;
-const TIPEO = [434, 462];
-const TAP_BUSCAR = 472;
-const RESULTADOS = 482;
-const TAP_CHECK = [522, 538, 554, 570, 586];
-const TAP_CONTINUAR = 632;
-const MODAL = 638;
-const TAP_PROCESAR = 760;
-const PROCESADA = 792;
-const TAP_INICIO = 856;
-const TAP_MOD_CONTA = 900;
-const MODAL_CONTA = 906;
-const TAP_ESTADOS = 990;
-const TAP_GENERAR = 1030;
-const TAP_RESULTADOS = 1110; // phone only: statements tab
-const TAP_REPORTES = 1176;
-const TAP_DIARIO = 1386;
+const TAP_CONSULTAR = 84;
+const TAP_COBRANZA = 160;
+const HOJA_COBRANZA = [166, 200];
+const TAP_CONFIRMAR_COB = 188;
+const COBRADA = 202;
+const RECIBO_F = [206, 242];
+const TAP_MENU = 300;
+const TAP_INPUT = 322;
+const TIPEO = [326, 346];
+const TAP_BUSCAR = 354;
+const RESULTADOS = 362;
+const TAP_CHECK = [384, 396, 408, 420, 432];
+const TAP_CONTINUAR = 452;
+const MODAL = 458;
+const TAP_PROCESAR = 540;
+const PROCESADA = 566;
+const TAP_INICIO = 622;
+const TAP_MOD_CONTA = 656;
+const MODAL_CONTA = 662;
+const TAP_ESTADOS = 720;
+const TAP_GENERAR = 772;
+const TAP_RESULTADOS = 836; // phone only: statements tab
+const TAP_REPORTES = 886;
+const TAP_DIARIO = 1052;
 const TAPS_BASE = [TAP_CONSULTAR, TAP_COBRANZA, TAP_CONFIRMAR_COB, TAP_MENU, TAP_INPUT, TAP_BUSCAR, ...TAP_CHECK, TAP_CONTINUAR, TAP_PROCESAR, TAP_INICIO, TAP_MOD_CONTA, TAP_ESTADOS, TAP_GENERAR, TAP_REPORTES, TAP_DIARIO];
 const TAPS_TAB = TAPS_BASE;
 const TAPS_CEL = [...TAPS_BASE, TAP_RESULTADOS];
@@ -186,7 +187,6 @@ const PRESTAMOS: Prestamo[] = [
   { cod: "2026081300003", capital: 1999639.67, plazo: 18, saldo: null, alta: "13/8/2026" },
 ];
 const NUEVA_OP = "2026111500001";
-const RECIBO = "Recibo enviado por email a jperez@correo.com";
 const TOTAL = PRESTAMOS.slice(0, 5).reduce((s, p) => s + (p.saldo ?? 0), 0);
 const marcados = (frame: number) => TAP_CHECK.filter((f) => frame >= f + 2).length;
 const totalMarcado = (frame: number) => {
@@ -241,6 +241,28 @@ const Toast: React.FC<{ frame: number; desde: number; hasta?: number; titulo: st
           <Icono d={I.correo} s={13} c={AZUL} w={2.2} /> {extra}
         </div>
       ) : null}
+    </div>
+  );
+};
+
+// Minimal "receipt sent" check in the middle of the screen.
+const ReciboEnviado: React.FC<{ frame: number; chico?: boolean }> = ({ frame, chico }) => {
+  const [a, b] = RECIBO_F;
+  if (frame < a || frame >= b) {
+    return null;
+  }
+  const t = spring({ frame: frame - a, fps: 30, config: { damping: 14 } }) * interpolate(frame, [b - 8, b], [1, 0], clamp);
+  const check = interpolate(frame, [a + 4, a + 14], [0, 1], clamp);
+  return (
+    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 7 }}>
+      <div style={{ width: chico ? 132 : 150, padding: chico ? "16px 0 14px" : "18px 0 16px", borderRadius: 16, background: "rgba(255,255,255,0.97)", boxShadow: "0 12px 36px rgba(10,20,40,0.28)", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, opacity: Math.min(1, t * 1.4), transform: `scale(${0.8 + 0.2 * t})` }}>
+        <div style={{ width: chico ? 40 : 44, height: chico ? 40 : 44, borderRadius: "50%", background: VERDE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width={22} height={22} viewBox="0 0 24 24">
+            <path d="M5 12.5 L10 17.5 L19 7.5" fill="none" stroke="white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - check} />
+          </svg>
+        </div>
+        <div style={{ fontSize: chico ? 11.5 : 12.5, fontWeight: 700, color: TINTA }}>Recibo enviado</div>
+      </div>
     </div>
   );
 };
@@ -732,7 +754,7 @@ const EstadosTab: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ position: "absolute", right: 110, top: 30, display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: TINTA_2 }}>
         Mes:
         <div style={{ height: 34, padding: "0 12px", border: `1px solid ${BORDE}`, borderRadius: 6, display: "flex", alignItems: "center", gap: 18, color: TINTA }}>
-          Noviembre <span style={{ fontSize: 9 }}>▾</span>
+          Octubre <span style={{ fontSize: 9 }}>▾</span>
         </div>
         Año:
         <div style={{ height: 34, width: 70, padding: "0 12px", border: `1px solid ${BORDE}`, borderRadius: 6, display: "flex", alignItems: "center", color: TINTA, boxSizing: "border-box" }}>2026</div>
@@ -740,7 +762,7 @@ const EstadosTab: React.FC<{ frame: number }> = ({ frame }) => {
         <div style={{ height: 34, padding: "0 14px", borderRadius: 6, background: "#e5e7eb", color: TINTA, fontWeight: 600, display: "flex", alignItems: "center" }}>Imprimir</div>
       </div>
       <div style={{ position: "absolute", left: EF_IZQ.x, top: 92, fontSize: 11, fontStyle: "italic", color: TINTA_2 }}>
-        Acumulado al Noviembre 2026 — {Math.round(1284 * t).toLocaleString("es-AR")} asiento(s) confirmado(s) considerado(s)
+        Acumulado a Octubre 2026 — {Math.round(1284 * t).toLocaleString("es-AR")} asiento(s) confirmado(s) considerado(s)
       </div>
       {tarjeta("Estado Patrimonial", PATRIMONIAL, EF_IZQ)}
       {tarjeta("Estado de Resultados", RESULTADOS_EF, EF_DER)}
@@ -750,19 +772,19 @@ const EstadosTab: React.FC<{ frame: number }> = ({ frame }) => {
 
 // ---------- Dark reports ----------
 const OSC = { fondo: "#0b111d", panel: "#111a2b", linea: "#22304a", texto: "#e5e9f0", texto2: "#9aa6b8", azul: "#4f7cac", verde: "#5f9e86" };
-const MESES = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11"];
-const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov"];
-const ALTAS_OPS = [380, 570, 960, 1100, 1290, 930, 1230, 1270, 1300, 1540, 300];
-const ALTAS_CAP = [68, 82, 128, 138, 152, 90, 124, 132, 140, 164, 30];
+const MESES = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"];
+const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct"];
+const ALTAS_OPS = [520, 680, 790, 940, 1010, 1120, 1080, 1260, 1340, 1430];
+const ALTAS_CAP = [54, 70, 84, 98, 108, 121, 116, 134, 146, 158];
 const kpisCartera = (frame: number) => {
   const t = sube(frame, ESC.resumen[0] + 10, 36);
   return [
-    { k: "OPERACIONES", v: Math.round(10934 * t).toLocaleString("es-AR"), c: "#5b84b8" },
-    { k: "CAPITAL OTORGADO", v: `$${(1263.7 * t).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`, c: "#5b84b8" },
-    { k: "CAPITAL EN MORA", v: `$${(282.8 * t).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`, c: "#b85b5b" },
-    { k: "TNA PROMEDIO", v: `${Math.round(213 * t)}%`, c: "#c9a45b" },
-    { k: "% EN MORA", v: `${(22.4 * t).toFixed(1).replace(".", ",")}%`, c: "#c98a4b" },
-    { k: "% MORA >30", v: `${(17.8 * t).toFixed(1).replace(".", ",")}%`, c: "#8b7bc9" },
+    { k: "OPERACIONES", v: Math.round(11482 * t).toLocaleString("es-AR"), c: "#5b84b8" },
+    { k: "CAPITAL OTORGADO", v: `$${(1318.4 * t).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`, c: "#5b84b8" },
+    { k: "CAPITAL EN MORA", v: `$${(259.6 * t).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`, c: "#b85b5b" },
+    { k: "TNA PROMEDIO", v: `${Math.round(198 * t)}%`, c: "#c9a45b" },
+    { k: "% EN MORA", v: `${(19.7 * t).toFixed(1).replace(".", ",")}%`, c: "#c98a4b" },
+    { k: "% MORA >30", v: `${(14.9 * t).toFixed(1).replace(".", ",")}%`, c: "#8b7bc9" },
   ];
 };
 const GraficoAltas: React.FC<{ frame: number; w: number; h: number; fs?: number }> = ({ frame, w, h, fs = 10 }) => {
@@ -860,7 +882,7 @@ const ResumenTab: React.FC<{ frame: number }> = ({ frame }) => {
           <span style={{ marginLeft: 10, color: OSC.texto2 }}>Desde</span>
           <div style={{ height: 30, padding: "0 12px", borderRadius: 6, background: "#1a2438", display: "flex", alignItems: "center" }}>01/01/2026</div>
           <span style={{ color: OSC.texto2 }}>Hasta</span>
-          <div style={{ height: 30, padding: "0 12px", borderRadius: 6, background: "#1a2438", display: "flex", alignItems: "center" }}>15/11/2026</div>
+          <div style={{ height: 30, padding: "0 12px", borderRadius: 6, background: "#1a2438", display: "flex", alignItems: "center" }}>31/10/2026</div>
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
           {FILTROS.map((f) => (
@@ -901,13 +923,13 @@ const ResumenTab: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ ...panel, left: 16, top: 622, width: 545, height: 160, padding: "12px 18px", boxSizing: "border-box" }}>
         <div style={{ textAlign: "center", fontSize: 12, fontWeight: 700 }}>ESTADO DE MORA</div>
         <div style={{ marginTop: 10 }}>
-          <Barras frame={frame} desde={f0 + 40} datos={[9000, 4100, 2300, 1500, 900, 2600]} max={10000} w={510} h={100} color="#5b84b8" />
+          <Barras frame={frame} desde={f0 + 40} datos={[8200, 3300, 2700, 1200, 1100, 1900]} max={10000} w={510} h={100} color="#5b84b8" />
         </div>
       </div>
       <div style={{ ...panel, left: 573, top: 622, width: 545, height: 160, padding: "12px 18px", boxSizing: "border-box" }}>
         <div style={{ textAlign: "center", fontSize: 12, fontWeight: 700 }}>DISTRIBUCIÓN POR CUOTAS</div>
         <div style={{ marginTop: 10 }}>
-          <Barras frame={frame} desde={f0 + 44} datos={[600, 1400, 5400, 2500, 3600, 1200, 800, 300]} max={6000} w={510} h={100} color="#8b7bc9" />
+          <Barras frame={frame} desde={f0 + 44} datos={[900, 2100, 4600, 3100, 2900, 1500, 700, 400]} max={6000} w={510} h={100} color="#8b7bc9" />
         </div>
       </div>
     </div>
@@ -915,24 +937,24 @@ const ResumenTab: React.FC<{ frame: number }> = ({ frame }) => {
 };
 
 const KPIS_DIARIO: [string, string, string, string][] = [
-  ["48", "ALTAS", "$6,0 M", "#5b84b8"],
-  ["455", "PAGOS", "$14,71 M", "#4f9c7a"],
-  ["1", "CANC. ANTICIPADA", "$13.509", "#4f9c7a"],
-  ["6", "CANC. P/ REFI-CONSOL.", "$1,95 M", "#4f9c7a"],
+  ["52", "ALTAS", "$6,4 M", "#5b84b8"],
+  ["431", "PAGOS", "$13,86 M", "#4f9c7a"],
+  ["2", "CANC. ANTICIPADA", "$27.140", "#4f9c7a"],
+  ["4", "CANC. P/ REFI-CONSOL.", "$1,62 M", "#4f9c7a"],
   ["0", "ANULACIONES", "$0", "#c98a4b"],
-  ["42", "CONDONACIONES", "$1,18 M", "#c98a4b"],
-  ["0", "REVERSAS", "$0", "#b85b5b"],
-  ["51", "BONIFICACIONES", "$460.549", "#8b7bc9"],
+  ["37", "CONDONACIONES", "$0,94 M", "#c98a4b"],
+  ["1", "REVERSAS", "$48.300", "#b85b5b"],
+  ["46", "BONIFICACIONES", "$412.870", "#8b7bc9"],
 ];
 const CANALES: [string, number, number][] = [
-  ["Sucursal Centro", 97, 21.0],
-  ["Transferencia", 71, 15.4],
-  ["Sucursal Norte", 66, 14.3],
-  ["Sucursal Sur", 66, 14.3],
-  ["Débito automático", 52, 11.3],
-  ["Billetera virtual", 45, 9.7],
-  ["Sucursal Oeste", 39, 8.4],
-  ["Pago fácil", 20, 4.3],
+  ["Sucursal Centro", 88, 20.1],
+  ["Transferencia", 79, 18.0],
+  ["Sucursal Norte", 61, 13.9],
+  ["Débito automático", 58, 13.2],
+  ["Sucursal Sur", 54, 12.3],
+  ["Billetera virtual", 49, 11.2],
+  ["Sucursal Oeste", 31, 7.1],
+  ["Corresponsal", 18, 4.1],
 ];
 const KPI_DIARIO = { x: 20, y: 112, w: 1094, h: 118 };
 const cuenta = (frame: number, desde: number, txt: string) => {
@@ -962,10 +984,10 @@ const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ ...panel, left: 20, top: 16, width: 1094, height: 80, borderLeft: "4px solid #3b82f6", display: "flex", alignItems: "center", padding: "0 20px", boxSizing: "border-box" }}>
         <div>
           <div style={{ fontSize: 18, fontWeight: 700 }}>Reporte Diario</div>
-          <div style={{ fontSize: 11, color: OSC.texto2, marginTop: 4 }}>Reporte del 15/11/2026</div>
+          <div style={{ fontSize: 11, color: OSC.texto2, marginTop: 4 }}>Reporte del 31/10/2026</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, fontSize: 10.5, color: OSC.texto2 }}>
-          {[["Fecha", "15/11/2026"], ["Cartera", "Todas"], ["Sucursal", "Todas"], ["Titular Cartera", "Todos"]].map(([k, v]) => (
+          {[["Fecha", "31/10/2026"], ["Cartera", "Todas"], ["Sucursal", "Todas"], ["Titular Cartera", "Todos"]].map(([k, v]) => (
             <span key={k} style={{ display: "flex", alignItems: "center", gap: 6 }}>
               {k}
               <span style={{ height: 30, padding: "0 12px", borderRadius: 6, background: "#1a2438", border: `1px solid ${OSC.linea}`, color: OSC.texto, display: "flex", alignItems: "center", gap: 10 }}>
@@ -988,19 +1010,19 @@ const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ ...panel, left: 20, top: 246, width: 540, height: 500, padding: "16px 18px", boxSizing: "border-box" }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 0.5 }}>ALTAS DEL DÍA</div>
         <div style={{ display: "flex", gap: 26, marginTop: 14, paddingBottom: 12, borderBottom: `1px solid ${OSC.linea}` }}>
-          {stat("48", "OPERACIONES", 0)}
-          {stat("$6,0 M", "CAPITAL TOTAL", 1)}
-          {stat("254,6%", "TNA PROMEDIO", 2)}
-          {stat("4,5 ctas", "PLAZO PROM.", 3)}
-          {stat("$125.052", "TICKET PROM.", 4)}
+          {stat("52", "OPERACIONES", 0)}
+          {stat("$6,4 M", "CAPITAL TOTAL", 1)}
+          {stat("241,8%", "TNA PROMEDIO", 2)}
+          {stat("4,8 ctas", "PLAZO PROM.", 3)}
+          {stat("$123.077", "TICKET PROM.", 4)}
         </div>
         <div style={{ display: "flex", marginTop: 14 }}>
           <div style={{ width: 240 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR LÍNEA DE CRÉDITO</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14 }}>
-              <Dona frame={frame} desde={f0 + 40} partes={[[0.79, "#5f9e86"], [0.08, "#4f7cac"], [0.13, "#8b7bc9"]]} s={110} grosor={26} />
+              <Dona frame={frame} desde={f0 + 40} partes={[[0.72, "#5f9e86"], [0.11, "#4f7cac"], [0.17, "#8b7bc9"]]} s={110} grosor={26} />
               <div style={{ fontSize: 9, color: OSC.texto2, display: "flex", flexDirection: "column", gap: 6 }}>
-                {[["Cuota fija", "#5f9e86", "79%"], ["Pago adelantado", "#4f7cac", "8%"], ["Refinanciación", "#8b7bc9", "13%"]].map(([n, c, p]) => (
+                {[["Cuota fija", "#5f9e86", "72%"], ["Pago adelantado", "#4f7cac", "11%"], ["Refinanciación", "#8b7bc9", "17%"]].map(([n, c, p]) => (
                   <span key={n} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                     <span style={{ width: 9, height: 9, background: c }} />
                     {n} {p}
@@ -1011,7 +1033,7 @@ const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
           <div style={{ flex: 1, marginLeft: 16 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR SEGMENTO DE CLIENTE</div>
-            {([["primario", 3, 6.3], ["renovación", 39, 81.3], ["refinanciación", 6, 12.5]] as [string, number, number][]).map(([n, v, p], i) => (
+            {([["primario", 5, 9.6], ["renovación", 40, 76.9], ["refinanciación", 7, 13.5]] as [string, number, number][]).map(([n, v, p], i) => (
               <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, fontSize: 10.5 }}>
                 <span style={{ width: 86 }}>{n}</span>
                 <div style={{ flex: 1, height: 12, borderRadius: 3, background: "#1d2a40" }}>
@@ -1027,7 +1049,7 @@ const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
         <div style={{ display: "flex", marginTop: 34 }}>
           <div style={{ width: 240 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR CARTERA</div>
-            {([["propia", 43, 89.6], ["administrada", 5, 10.4]] as [string, number, number][]).map(([n, v, p], i) => (
+            {([["propia", 46, 88.5], ["administrada", 6, 11.5]] as [string, number, number][]).map(([n, v, p], i) => (
               <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, fontSize: 10.5 }}>
                 <span style={{ width: 76 }}>{n}</span>
                 <div style={{ flex: 1, height: 12, borderRadius: 3, background: "#1d2a40" }}>
@@ -1042,7 +1064,7 @@ const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
           <div style={{ flex: 1, marginLeft: 16 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR PROVINCIA</div>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 18, height: 90, marginTop: 12, paddingLeft: 10 }}>
-              {([["Norte", 21], ["Centro", 14], ["Sur", 12], ["Sin datos", 4]] as [string, number][]).map(([n, v], i) => (
+              {([["Norte", 19], ["Centro", 17], ["Sur", 11], ["Sin datos", 5]] as [string, number][]).map(([n, v], i) => (
                 <div key={n} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                   <div style={{ width: 34, height: (v / 22) * 70 * sube(frame, f0 + 54 + i * 4), background: "#4f7cac", borderRadius: "2px 2px 0 0" }} />
                   <span style={{ fontSize: 9, color: OSC.texto2 }}>{n}</span>
@@ -1057,10 +1079,10 @@ const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
           COBRANZA <span style={{ fontSize: 9, color: OSC.texto2, fontWeight: 500 }}>(Pagos y Canc. Anticipadas)</span>
         </div>
         <div style={{ display: "flex", gap: 26, marginTop: 14, paddingBottom: 12, borderBottom: `1px solid ${OSC.linea}` }}>
-          {stat("462", "COBROS", 5)}
-          {stat("$16,68 M", "TOTAL COBRADO", 6)}
-          {stat("456", "SIN REFI/CONSOL.", 7)}
-          {stat("$14,73 M", "COBRADO NETO", 8)}
+          {stat("438", "COBROS", 5)}
+          {stat("$15,92 M", "TOTAL COBRADO", 6)}
+          {stat("433", "SIN REFI/CONSOL.", 7)}
+          {stat("$14,06 M", "COBRADO NETO", 8)}
         </div>
         <div style={{ display: "flex", marginTop: 14 }}>
           <div style={{ flex: 1 }}>
@@ -1080,10 +1102,10 @@ const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
           <div style={{ width: 170, marginLeft: 16 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>DESGLOSE</div>
             <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
-              <Dona frame={frame} desde={f0 + 46} partes={[[0.47, "#4f7cac"], [0.41, "#5f9e86"], [0.09, "#8b7bc9"], [0.02, "#c9a45b"], [0.01, "#b85b5b"]]} s={120} grosor={28} />
+              <Dona frame={frame} desde={f0 + 46} partes={[[0.45, "#4f7cac"], [0.43, "#5f9e86"], [0.08, "#8b7bc9"], [0.03, "#c9a45b"], [0.01, "#b85b5b"]]} s={120} grosor={28} />
             </div>
             <div style={{ fontSize: 9, color: OSC.texto2, display: "flex", flexDirection: "column", gap: 6, marginTop: 14, paddingLeft: 20 }}>
-              {[["Capital 47%", "#4f7cac"], ["Interés 41%", "#5f9e86"], ["IVA Int. 9%", "#8b7bc9"], ["Comp. 2%", "#c9a45b"], ["Punit. 1%", "#b85b5b"]].map(([n, c]) => (
+              {[["Capital 45%", "#4f7cac"], ["Interés 43%", "#5f9e86"], ["IVA Int. 8%", "#8b7bc9"], ["Comp. 3%", "#c9a45b"], ["Punit. 1%", "#b85b5b"]].map(([n, c]) => (
                 <span key={n} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                   <span style={{ width: 9, height: 9, background: c }} />
                   {n}
@@ -1143,7 +1165,7 @@ const Dedo: React.FC<{ frame: number; camino: [number, number, number][]; taps: 
   const onda = tap === undefined ? 0 : (frame - tap) / 16;
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
   const vis =
-    interpolate(frame, [90, 104], [0, 1], clamp) *
+    interpolate(frame, [50, 64], [0, 1], clamp) *
     (1 - interpolate(frame, [TAP_PROCESAR + 26, TAP_PROCESAR + 40, TAP_INICIO - 30, TAP_INICIO - 16], [0, 1, 1, 0], clamp)) *
     interpolate(frame, [TAP_DIARIO + 30, TAP_DIARIO + 44], [1, 0], clamp);
   return (
@@ -1210,8 +1232,9 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
           </div>
         ))}
       </div>
-      <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} extra={RECIBO} />
-      <Toast frame={frame} desde={PROCESADA + 10} hasta={866} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · ${pesos(TOTAL)} · 18 cuotas`} />
+      <Toast frame={frame} desde={COBRADA + 2} hasta={296} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} />
+      <ReciboEnviado frame={frame} />
+      <Toast frame={frame} desde={PROCESADA + 10} hasta={630} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · ${pesos(TOTAL)} · 18 cuotas`} />
       <Dedo frame={frame} camino={DEDO_TAB} taps={TAPS_TAB} />
     </div>
   );
@@ -1446,7 +1469,7 @@ const EstadosMovil: React.FC<{ frame: number }> = ({ frame }) => {
       </div>
       <div style={{ position: "absolute", left: 12, right: 12, top: 56, display: "flex", gap: 8 }}>
         <div style={{ flex: 1, height: 34, borderRadius: 7, background: "white", border: `1px solid ${BORDE}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", fontSize: 12, color: TINTA }}>
-          Noviembre 2026 <span style={{ fontSize: 9 }}>▾</span>
+          Octubre 2026 <span style={{ fontSize: 9 }}>▾</span>
         </div>
         <div style={{ height: 34, padding: "0 16px", borderRadius: 7, background: "#2563eb", color: "white", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", transform: `scale(${1 - pulsado(frame, TAP_GENERAR) * 0.07})` }}>Generar</div>
       </div>
@@ -1491,7 +1514,7 @@ const ResumenMovil: React.FC<{ frame: number }> = ({ frame }) => {
               {b}
             </div>
           ))}
-          <span style={{ marginLeft: "auto", fontSize: 9.5, color: OSC.texto2 }}>01/01 – 15/11/2026</span>
+          <span style={{ marginLeft: "auto", fontSize: 9.5, color: OSC.texto2 }}>01/01 – 31/10/2026</span>
         </div>
         <div style={{ position: "absolute", left: 12, right: 12, top: 96, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {kpisCartera(frame).map((k, i) => (
@@ -1510,7 +1533,7 @@ const ResumenMovil: React.FC<{ frame: number }> = ({ frame }) => {
         <div style={{ position: "absolute", left: 12, right: 12, top: 572, height: 108, background: OSC.panel, borderRadius: 12, padding: "10px 14px", boxSizing: "border-box" }}>
           <div style={{ textAlign: "center", fontSize: 11, fontWeight: 700 }}>ESTADO DE MORA</div>
           <div style={{ marginTop: 8 }}>
-            <Barras frame={frame} desde={f0 + 40} datos={[9000, 4100, 2300, 1500, 900, 2600]} max={10000} w={338} h={62} color="#5b84b8" />
+            <Barras frame={frame} desde={f0 + 40} datos={[8200, 3300, 2700, 1200, 1100, 1900]} max={10000} w={338} h={62} color="#5b84b8" />
           </div>
         </div>
       </div>
@@ -1525,7 +1548,7 @@ const DiarioMovil: React.FC<{ frame: number }> = ({ frame }) => {
     <Contenido fondo={OSC.fondo}>
       <div style={{ color: OSC.texto }}>
         <SegmentoReportes diario frame={frame} />
-        <div style={{ position: "absolute", left: 14, top: 56, fontSize: 11, color: OSC.texto2 }}>Reporte del 15/11/2026 · Todas las carteras</div>
+        <div style={{ position: "absolute", left: 14, top: 56, fontSize: 11, color: OSC.texto2 }}>Reporte del 31/10/2026 · Todas las carteras</div>
         <div style={{ position: "absolute", left: 12, top: M_KPI_D.y, display: "grid", gridTemplateColumns: `repeat(4, ${M_KPI_D.w}px)`, gap: M_KPI_D.gap }}>
           {KPIS_DIARIO.map(([n, k, m, c], i) => (
             <div key={k} style={{ height: M_KPI_D.h, background: OSC.panel, borderRadius: 9, borderTop: `2px solid ${c}`, padding: "8px 8px", boxSizing: "border-box", opacity: aparece(frame, f0 + 6 + i * 3) }}>
@@ -1538,7 +1561,7 @@ const DiarioMovil: React.FC<{ frame: number }> = ({ frame }) => {
         <div style={{ position: "absolute", left: 12, right: 12, top: 258, height: 112, background: OSC.panel, borderRadius: 12, padding: "12px 14px", boxSizing: "border-box" }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.5 }}>ALTAS DEL DÍA</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", rowGap: 10, marginTop: 10 }}>
-            {[["48", "OPERACIONES"], ["$6,0 M", "CAPITAL TOTAL"], ["254,6%", "TNA PROM."], ["4,5 ctas", "PLAZO PROM."], ["$125.052", "TICKET PROM."]].map(([v, k], i) => (
+            {[["52", "OPERACIONES"], ["$6,4 M", "CAPITAL TOTAL"], ["241,8%", "TNA PROM."], ["4,8 ctas", "PLAZO PROM."], ["$123.077", "TICKET PROM."]].map(([v, k], i) => (
               <div key={k}>
                 <div style={{ fontSize: 13.5, fontWeight: 700 }}>{cuenta(frame, f0 + 30 + i * 3, v)}</div>
                 <div style={{ fontSize: 8, color: OSC.texto2, marginTop: 1 }}>{k}</div>
@@ -1549,7 +1572,7 @@ const DiarioMovil: React.FC<{ frame: number }> = ({ frame }) => {
         <div style={{ position: "absolute", left: 12, right: 12, top: 382, height: 298, background: OSC.panel, borderRadius: 12, padding: "12px 14px", boxSizing: "border-box" }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.5 }}>COBRANZA</div>
           <div style={{ display: "flex", gap: 22, marginTop: 8 }}>
-            {[["462", "COBROS"], ["$16,68 M", "TOTAL COBRADO"], ["$14,73 M", "NETO"]].map(([v, k], i) => (
+            {[["438", "COBROS"], ["$15,92 M", "TOTAL COBRADO"], ["$14,06 M", "NETO"]].map(([v, k], i) => (
               <div key={k}>
                 <div style={{ fontSize: 13.5, fontWeight: 700 }}>{cuenta(frame, f0 + 36 + i * 3, v)}</div>
                 <div style={{ fontSize: 8, color: OSC.texto2, marginTop: 1 }}>{k}</div>
@@ -1656,8 +1679,9 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
         <ModalConsolidacion frame={frame} chico />
         <HojaConta frame={frame} />
       </div>
-      <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} extra={RECIBO} chico />
-      <Toast frame={frame} desde={PROCESADA + 10} hasta={866} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · 18 cuotas`} chico />
+      <Toast frame={frame} desde={COBRADA + 2} hasta={296} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} chico />
+      <ReciboEnviado frame={frame} chico />
+      <Toast frame={frame} desde={PROCESADA + 10} hasta={630} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · 18 cuotas`} chico />
       <Dedo frame={frame} camino={DEDO_MOVIL} taps={TAPS_CEL} />
     </div>
   );
@@ -1699,26 +1723,26 @@ const tomasDe = (tab: boolean): Toma[] => {
   const grafico = tab ? { px: 600, py: 500 } : { px: 195, py: 530 };
   return [
     { f: 0, z: 0.92, ...c, ry: 20, rx: 9, rz: 2.5, cy: 0.62 },
-    { f: 40, z: zz, ...indicadores, ...izq, cy: 0.57 },
-    { f: 104, z: zz, ...indicadores, ...izq, cy: 0.57 },
-    { f: 140, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 400, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 436, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 500, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 536, z: zz, ...lista, ...der, cy: 0.57 },
-    { f: 604, z: zz, ...lista, ...der, cy: 0.57 },
-    { f: 636, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 916, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 952, z: zz, ...modalConta, ...der, cy: 0.57 },
-    { f: 984, z: zz, ...modalConta, ...der, cy: 0.57 },
-    { f: 1020, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1250, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1286, z: zz, ...grafico, ...der, cy: 0.57 },
-    { f: 1366, z: zz, ...grafico, ...der, cy: 0.57 },
-    { f: 1402, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1440, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1476, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1580, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 34, z: zz, ...indicadores, ...izq, cy: 0.57 },
+    { f: 62, z: zz, ...indicadores, ...izq, cy: 0.57 },
+    { f: 96, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 304, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 338, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 366, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 400, z: zz, ...lista, ...der, cy: 0.57 },
+    { f: 440, z: zz, ...lista, ...der, cy: 0.57 },
+    { f: 470, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 668, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 698, z: zz, ...modalConta, ...der, cy: 0.57 },
+    { f: 716, z: zz, ...modalConta, ...der, cy: 0.57 },
+    { f: 752, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 932, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 966, z: zz, ...grafico, ...der, cy: 0.57 },
+    { f: 1026, z: zz, ...grafico, ...der, cy: 0.57 },
+    { f: 1060, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1086, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1120, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1200, z: 1, ...c, ...izq, cy: 0.62 },
     { f: CORELENDING_FRAMES, z: 1.05, ...c, ...izq, cy: 0.62 },
   ];
 };
@@ -1729,16 +1753,16 @@ const TOMAS_CEL = tomasDe(false);
 // installment and the new capital of the consolidation.
 type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number; hueco?: string };
 const SALTOS_TAB: Salto[] = [
-  { x: SIDE + MODAL_D.x + TABLA_D.x - 4, y: HEADER + MODAL_D.y + TABLA_D.y + TABLA_D.cab + TABLA_D.fila - 4, w: 914, h: TABLA_D.fila + 8, f: [316, 330, 350, 366], z: 110 },
-  { x: SIDE + MODAL_C.x + 24 + 2 * (188 + 12) - 2, y: HEADER + MODAL_C.y + MODAL_C.cards - 2, w: 192, h: 74, f: [700, 714, 736, 752], z: 110 },
-  { x: SIDE + EF_DER.x + 14, y: HEADER + EF_DER.y + 56 + 11 * FILA_EF - 4, w: EF_DER.w - 28, h: FILA_EF + 8, f: [1136, 1150, 1166, 1180], z: 110 },
-  { x: SIDE + KPI_DIARIO.x + (KPI_DIARIO.w - 70) / 8 + 10 - 4, y: HEADER + KPI_DIARIO.y - 4, w: (KPI_DIARIO.w - 70) / 8 + 8, h: KPI_DIARIO.h + 8, f: [1516, 1530, 1550, 1566], z: 110, hueco: "#060a12" },
+  { x: SIDE + MODAL_D.x + TABLA_D.x - 4, y: HEADER + MODAL_D.y + TABLA_D.y + TABLA_D.cab + TABLA_D.fila - 4, w: 914, h: TABLA_D.fila + 8, f: [244, 256, 272, 286], z: 110 },
+  { x: SIDE + MODAL_C.x + 24 + 2 * (188 + 12) - 2, y: HEADER + MODAL_C.y + MODAL_C.cards - 2, w: 192, h: 74, f: [490, 502, 520, 534], z: 110 },
+  { x: SIDE + EF_DER.x + 14, y: HEADER + EF_DER.y + 56 + 11 * FILA_EF - 4, w: EF_DER.w - 28, h: FILA_EF + 8, f: [852, 864, 880, 894], z: 110 },
+  { x: SIDE + KPI_DIARIO.x + (KPI_DIARIO.w - 70) / 8 + 10 - 4, y: HEADER + KPI_DIARIO.y - 4, w: (KPI_DIARIO.w - 70) / 8 + 8, h: KPI_DIARIO.h + 8, f: [1146, 1160, 1180, 1196], z: 110, hueco: "#060a12" },
 ];
 const SALTOS_CEL: Salto[] = [
-  { x: 8, y: M_HEADER + M_PLAN_Y + 44 - 4, w: 374, h: 52, f: [316, 330, 350, 366], z: 110 },
-  { x: 14, y: 300 + 263 - 2, w: 179, h: 66, f: [700, 714, 736, 752], z: 110 },
-  { x: 8, y: M_HEADER + M_EF.y + 10 + 11 * M_EF.fila - 4, w: 374, h: M_EF.fila + 8, f: [1136, 1150, 1166, 1180], z: 110 },
-  { x: 12 + M_KPI_D.w + M_KPI_D.gap - 3, y: M_HEADER + M_KPI_D.y - 3, w: M_KPI_D.w + 6, h: M_KPI_D.h + 6, f: [1516, 1530, 1550, 1566], z: 110, hueco: "#060a12" },
+  { x: 8, y: M_HEADER + M_PLAN_Y + 44 - 4, w: 374, h: 52, f: [244, 256, 272, 286], z: 110 },
+  { x: 14, y: 300 + 263 - 2, w: 179, h: 66, f: [490, 502, 520, 534], z: 110 },
+  { x: 8, y: M_HEADER + M_EF.y + 10 + 11 * M_EF.fila - 4, w: 374, h: M_EF.fila + 8, f: [852, 864, 880, 894], z: 110 },
+  { x: 12 + M_KPI_D.w + M_KPI_D.gap - 3, y: M_HEADER + M_KPI_D.y - 3, w: M_KPI_D.w + 6, h: M_KPI_D.h + 6, f: [1146, 1160, 1180, 1196], z: 110, hueco: "#060a12" },
 ];
 
 const Pantalla: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <PaginaTab frame={frame} /> : <PaginaMovil frame={frame} />);
