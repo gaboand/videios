@@ -69,22 +69,24 @@ const NODO_PASO = 13;
 const TAP_GUARDAR_WF = 590;
 const TAP_NAV_MAT = 636;
 const TAP_GENERAR = 676;
-// Each tap pushes one cell a level worse, always next to (not diagonal from)
-// the zone of that color and to the previous cell of its group: four orange
-// to red, four yellow to orange, four green to yellow.
+// Each tap pushes one cell a level worse: four orange to red, four yellow to
+// orange, four green to yellow. The matrix stays monotonic after every tap
+// (risk never gets worse as the score rises or better as the NSE drops), so a
+// cell only changes when the cell above and the one to its right are already
+// at least that level.
 const CAMBIOS = [
-  { r: 1, c: 3, f: 748 },
-  { r: 1, c: 2, f: 757 },
-  { r: 1, c: 1, f: 766 },
-  { r: 1, c: 0, f: 775 },
-  { r: 3, c: 4, f: 784 },
-  { r: 3, c: 3, f: 793 },
-  { r: 3, c: 2, f: 802 },
-  { r: 2, c: 3, f: 811 },
+  { r: 2, c: 4, f: 748 },
+  { r: 1, c: 3, f: 757 },
+  { r: 1, c: 2, f: 766 },
+  { r: 1, c: 1, f: 775 },
+  { r: 2, c: 3, f: 784 },
+  { r: 2, c: 2, f: 793 },
+  { r: 3, c: 4, f: 802 },
+  { r: 3, c: 3, f: 811 },
   { r: 5, c: 3, f: 820 },
   { r: 6, c: 3, f: 829 },
-  { r: 7, c: 3, f: 838 },
-  { r: 7, c: 4, f: 847 },
+  { r: 7, c: 4, f: 838 },
+  { r: 7, c: 3, f: 847 },
 ];
 const TAP_ACTUALIZAR = 866;
 const TAP_NAV_PR = 918;
