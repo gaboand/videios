@@ -1380,7 +1380,7 @@ export const duracionSuiteCorto = (tr: Transicion) => {
   const pl = PLANOS[tr];
   return Math.round(iniciosDe(pl)[pl.length - 1] + largoDe(pl[pl.length - 1].tramos));
 };
-export const SUITE_CORTO_FRAMES = duracionSuiteCorto("acordeon");
+export const SUITE_CORTO_FRAMES = duracionSuiteCorto("paneo");
 
 const PlanoSuite: React.FC<{ plano: Plano; tr: Transicion; props: z.infer<typeof suite360Schema>; entra: boolean }> = ({ plano, tr, props, entra }) => {
   const f = useCurrentFrame();
@@ -1415,7 +1415,4 @@ export const suiteCorto = (tr: Transicion): React.FC<z.infer<typeof suite360Sche
   };
   return Componente;
 };
-export const Suite360Corto = suiteCorto("acordeon");
-export const Suite360CortoFundido = suiteCorto("fundido");
-export const Suite360CortoPaneo = suiteCorto("paneo");
-export const Suite360CortoEmpuje = suiteCorto("empuje");
+export const Suite360Corto = suiteCorto("paneo");
