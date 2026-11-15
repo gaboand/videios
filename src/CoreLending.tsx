@@ -25,7 +25,7 @@ export const coreLendingSchema = z.object({
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const CORELENDING_FRAMES = 930;
+export const CORELENDING_FRAMES = 1640;
 
 const FUENTE = "Montserrat, sans-serif";
 const HEADER_BG = "#4b4d52";
@@ -52,7 +52,11 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const ESC = {
   home: [0, 140],
   detalle: [136, 416],
-  consolidacion: [412, CORELENDING_FRAMES + 10],
+  consolidacion: [412, 870],
+  conta: [866, 1010],
+  estados: [1006, 1190],
+  resumen: [1186, 1400],
+  diario: [1396, CORELENDING_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
 const TAP_CONSULTAR = 120;
@@ -70,7 +74,17 @@ const TAP_CONTINUAR = 632;
 const MODAL = 638;
 const TAP_PROCESAR = 760;
 const PROCESADA = 792;
-const TAPS = [TAP_CONSULTAR, TAP_COBRANZA, TAP_CONFIRMAR_COB, TAP_MENU, TAP_INPUT, TAP_BUSCAR, ...TAP_CHECK, TAP_CONTINUAR, TAP_PROCESAR];
+const TAP_INICIO = 856;
+const TAP_MOD_CONTA = 900;
+const MODAL_CONTA = 906;
+const TAP_ESTADOS = 990;
+const TAP_GENERAR = 1030;
+const TAP_RESULTADOS = 1110; // phone only: statements tab
+const TAP_REPORTES = 1176;
+const TAP_DIARIO = 1386;
+const TAPS_BASE = [TAP_CONSULTAR, TAP_COBRANZA, TAP_CONFIRMAR_COB, TAP_MENU, TAP_INPUT, TAP_BUSCAR, ...TAP_CHECK, TAP_CONTINUAR, TAP_PROCESAR, TAP_INICIO, TAP_MOD_CONTA, TAP_ESTADOS, TAP_GENERAR, TAP_REPORTES, TAP_DIARIO];
+const TAPS_TAB = TAPS_BASE;
+const TAPS_CEL = [...TAPS_BASE, TAP_RESULTADOS];
 
 const pesos = (n: number) => `$ ${n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const pulsado = (frame: number, f: number) => interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
@@ -134,7 +148,7 @@ const MODULOS: Modulo[] = [
   { t: "Admin Sistemas", d: "Procesos, reconciliaciones, permisos, usuarios y control de cartera", i: I.sistemas },
 ];
 const SIDE_ICONOS = [I.casa, I.lupa, I.ficha, I.mas, I.chancho, I.operaciones, I.especiales, I.gestion, I.operativos, I.config, I.conta, I.cambios, I.cesion, I.sistemas, I.robot];
-const SIDE_ACTIVO: Record<Escena, number> = { home: 0, detalle: 1, consolidacion: 6 };
+const SIDE_ACTIVO: Record<Escena, number> = { home: 0, detalle: 1, consolidacion: 6, conta: 0, estados: 10, resumen: 7, diario: 7 };
 const SIDE_ESPECIALES = 6;
 
 // ---------- Data ----------
@@ -253,7 +267,7 @@ const HomeTab: React.FC<{ frame: number }> = ({ frame }) => (
       const c = k % 4;
       const r = Math.floor(k / 4);
       const t = aparece(frame, 6 + k * 3, 12);
-      const press = k === 0 ? pulsado(frame, TAP_CONSULTAR) : 0;
+      const press = k === 0 ? pulsado(frame, TAP_CONSULTAR) : k === 9 ? pulsado(frame, TAP_MOD_CONTA) : 0;
       return (
         <div key={m.t} style={{ position: "absolute", left: 64 + c * 262, top: 122 + r * 150, width: 236, opacity: t, transform: `translateY(${(1 - t) * 12}px) scale(${1 - press * 0.05})` }}>
           <div style={{ width: 42, height: 42, borderRadius: 8, background: AZUL, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -606,6 +620,483 @@ const ConsolidacionTab: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
+// ---------- Accounting: module modal over the home ----------
+type Sub = { t: string; d: string; i: string };
+const SUBMODULOS: Sub[] = [
+  { t: "Inventarios Contables", d: "Genera los stock de las operaciones realizadas", i: "M12 3 L21 8 L12 13 L3 8 Z M3 12 L12 17 L21 12 M3 16 L12 21 L21 16" },
+  { t: "Libro Diario", d: "Generación y consulta de asientos contables mensuales", i: "M6 3 H18 V21 H6 Z M9 7 H15 M9 11 H15" },
+  { t: "Plan de Cuentas", d: "Alias de código/nombre y descripción de las cuentas contables", i: "M4 6 H6 M4 12 H6 M4 18 H6 M9 6 H20 M9 12 H20 M9 18 H20" },
+  { t: "Sellados", d: "Impuesto de sellos: alícuotas por provincia, sucursal o general", i: "M9 4 H15 V10 H9 Z M12 10 V14 M5 14 H19 V18 H5 Z M5 21 H19" },
+  { t: "Ingresos Brutos", d: "IIBB sobre ingresos facturables: alícuotas por provincia, sucursal o general", i: "M6 18 L18 6 M7.5 6 A1.5 1.5 0 1 1 7.5 9 A1.5 1.5 0 1 1 7.5 6 M16.5 15 A1.5 1.5 0 1 1 16.5 18 A1.5 1.5 0 1 1 16.5 15" },
+  { t: "Estados Financieros", d: "Patrimonial y resultados acumulados del proceso de créditos", i: "M12 4 V20 M5 20 H19 M4 8 H20 M4 8 L2 14 H6 Z M20 8 L18 14 H22 Z" },
+];
+const MODAL_K = { x: 87, y: 140, w: 960, h: 442 };
+const modalConta = (frame: number) => interpolate(frame, [MODAL_CONTA, MODAL_CONTA + 10, ESC.conta[1] - 6, ESC.conta[1]], [0, 1, 1, 0], clamp);
+
+const ContaTab: React.FC<{ frame: number }> = ({ frame }) => {
+  const v = modalConta(frame);
+  return (
+    <>
+      <HomeTab frame={frame} />
+      <div style={{ position: "absolute", left: SIDE, top: HEADER, right: 0, bottom: 0, backdropFilter: `blur(${3 * v}px)`, background: `rgba(30,36,48,${0.4 * v})` }}>
+        <div style={{ position: "absolute", left: MODAL_K.x, top: MODAL_K.y, width: MODAL_K.w, height: MODAL_K.h, background: "white", borderRadius: 14, boxShadow: "0 24px 60px rgba(10,20,40,0.3)", opacity: v, transform: `scale(${0.95 + 0.05 * v})` }}>
+          <div style={{ position: "absolute", left: 28, top: 24, fontSize: 20, fontWeight: 500, color: TINTA }}>Contabilidad</div>
+          <div style={{ position: "absolute", right: 28, top: 26 }}>
+            <Icono d={I.cruz} s={18} c={TINTA_2} w={2.2} />
+          </div>
+          {SUBMODULOS.map((m, k) => {
+            const c = k % 3;
+            const r = Math.floor(k / 3);
+            const t = aparece(frame, MODAL_CONTA + 6 + k * 3, 10);
+            return (
+              <div key={m.t} style={{ position: "absolute", left: 56 + c * 300, top: 98 + r * 170, width: 256, opacity: t, transform: `translateY(${(1 - t) * 10}px) scale(${k === 5 ? 1 - pulsado(frame, TAP_ESTADOS) * 0.05 : 1})` }}>
+                <div style={{ width: 40, height: 40, borderRadius: 8, background: AZUL, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icono d={m.i} s={20} />
+                </div>
+                <div style={{ position: "absolute", right: 0, top: -6, fontSize: 13, color: "#9aa3b2" }}>☆</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: TINTA, marginTop: 14 }}>{m.t}</div>
+                <div style={{ fontSize: 11.5, color: TINTA_2, marginTop: 6, lineHeight: 1.5 }}>{m.d}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+};
+
+// ---------- Financial statements ----------
+type Linea = { t: string; v?: number; tipo?: "cab" | "sub" | "total" | "final" };
+const PATRIMONIAL: Linea[] = [
+  { t: "ACTIVO", tipo: "cab" },
+  { t: "Cartera bruta (Préstamos a terceros)", v: 1263712450 },
+  { t: "(-) Intereses a devengar", v: -312480120, tipo: "sub" },
+  { t: "(-) Previsión incobrables", v: -48906300, tipo: "sub" },
+  { t: "Cartera neta", v: 902326030 },
+  { t: "Intereses a cobrar", v: 64218900 },
+  { t: "IVA int. devengados a cobrar", v: 13485969 },
+  { t: "Banco", v: 186540210 },
+  { t: "Puente refinanciación (transitorio)", v: 4120000 },
+  { t: "TOTAL ACTIVO", v: 1170691109, tipo: "total" },
+  { t: "PASIVO", tipo: "cab" },
+  { t: "IVA débito fiscal", v: 21904330 },
+  { t: "Ley de sellos a pagar", v: 6318560 },
+  { t: "IIBB a pagar", v: 9477840 },
+  { t: "TOTAL PASIVO", v: 37700730, tipo: "total" },
+  { t: "PATRIMONIO NETO", v: 1132990379, tipo: "final" },
+];
+const RESULTADOS_EF: Linea[] = [
+  { t: "INGRESOS", tipo: "cab" },
+  { t: "Intereses ganados", v: 412860540 },
+  { t: "Gestión administrativa", v: 38214000 },
+  { t: "Recupero de previsión", v: 5630200 },
+  { t: "TOTAL INGRESOS", v: 456704740, tipo: "total" },
+  { t: "EGRESOS", tipo: "cab" },
+  { t: "Cargo previsión", v: 48906300 },
+  { t: "Pérdida por condonación", v: 3540900 },
+  { t: "Pérdida por incobrabilidad", v: 12284610 },
+  { t: "Ingresos brutos (IIBB)", v: 19760400 },
+  { t: "TOTAL EGRESOS", v: 84492210, tipo: "total" },
+  { t: "RESULTADO NETO", v: 372212530, tipo: "final" },
+];
+const generado = (frame: number) => sube(frame, TAP_GENERAR + 6, 40);
+const FILA_EF = 30;
+const LineaEF: React.FC<{ l: Linea; t: number; fs?: number; h?: number }> = ({ l, t, fs = 11.5, h = FILA_EF }) => {
+  const cab = l.tipo === "cab";
+  const final = l.tipo === "final";
+  const verde = final && l.t === "RESULTADO NETO";
+  return (
+    <div style={{ height: h, display: "flex", alignItems: "center", padding: `0 ${final ? 10 : 10}px 0 ${l.tipo === "sub" ? 24 : 10}px`, fontSize: cab ? fs - 2 : fs, fontWeight: cab ? 600 : final ? 600 : 500, letterSpacing: cab ? 0.6 : 0, color: verde ? "#16a34a" : TINTA, background: cab || l.tipo === "total" ? "#f1f3f6" : "white", borderBottom: final ? "none" : "1px solid #f0f2f5", borderTop: final ? `1.5px solid ${TINTA}` : undefined }}>
+      {l.t}
+      {l.v !== undefined ? <span style={{ marginLeft: "auto", fontWeight: final || l.tipo === "total" ? 700 : 500, color: final ? "#16a34a" : TINTA }}>{pesos(l.v * t)}</span> : null}
+    </div>
+  );
+};
+const EF_IZQ = { x: 120, y: 152, w: 440 };
+const EF_DER = { x: 584, y: 152, w: 440 };
+const EstadosTab: React.FC<{ frame: number }> = ({ frame }) => {
+  const t = generado(frame);
+  const tarjeta = (titulo: string, lineas: Linea[], pos: { x: number; y: number; w: number }) => (
+    <div style={{ position: "absolute", left: pos.x, top: pos.y, width: pos.w, border: `1px solid ${BORDE}`, borderRadius: 10, padding: "16px 20px 14px", boxSizing: "border-box", background: "white" }}>
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: TINTA, paddingBottom: 10, borderBottom: `1.5px solid ${AZUL}`, marginBottom: 12 }}>{titulo}</div>
+      {lineas.map((l, k) => (
+        <div key={l.t} style={{ opacity: aparece(frame, ESC.estados[0] + 8 + k * 2, 8) }}>
+          <LineaEF l={l} t={t} />
+        </div>
+      ))}
+    </div>
+  );
+  return (
+    <div style={{ position: "absolute", left: SIDE, top: HEADER, right: 0, bottom: 0, background: "white" }}>
+      <div style={{ position: "absolute", left: EF_IZQ.x, top: 38, fontSize: 19, fontWeight: 600, color: TINTA }}>Estados Financieros — Créditos</div>
+      <div style={{ position: "absolute", right: 110, top: 30, display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: TINTA_2 }}>
+        Mes:
+        <div style={{ height: 34, padding: "0 12px", border: `1px solid ${BORDE}`, borderRadius: 6, display: "flex", alignItems: "center", gap: 18, color: TINTA }}>
+          Noviembre <span style={{ fontSize: 9 }}>▾</span>
+        </div>
+        Año:
+        <div style={{ height: 34, width: 70, padding: "0 12px", border: `1px solid ${BORDE}`, borderRadius: 6, display: "flex", alignItems: "center", color: TINTA, boxSizing: "border-box" }}>2026</div>
+        <div style={{ height: 34, padding: "0 16px", borderRadius: 6, background: "#2563eb", color: "white", fontWeight: 600, display: "flex", alignItems: "center", transform: `scale(${1 - pulsado(frame, TAP_GENERAR) * 0.07})` }}>Generar</div>
+        <div style={{ height: 34, padding: "0 14px", borderRadius: 6, background: "#e5e7eb", color: TINTA, fontWeight: 600, display: "flex", alignItems: "center" }}>Imprimir</div>
+      </div>
+      <div style={{ position: "absolute", left: EF_IZQ.x, top: 92, fontSize: 11, fontStyle: "italic", color: TINTA_2 }}>
+        Acumulado al Noviembre 2026 — {Math.round(1284 * t).toLocaleString("es-AR")} asiento(s) confirmado(s) considerado(s)
+      </div>
+      {tarjeta("Estado Patrimonial", PATRIMONIAL, EF_IZQ)}
+      {tarjeta("Estado de Resultados", RESULTADOS_EF, EF_DER)}
+    </div>
+  );
+};
+
+// ---------- Dark reports ----------
+const OSC = { fondo: "#0b111d", panel: "#111a2b", linea: "#22304a", texto: "#e5e9f0", texto2: "#9aa6b8", azul: "#4f7cac", verde: "#5f9e86" };
+const MESES = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11"];
+const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov"];
+const ALTAS_OPS = [380, 570, 960, 1100, 1290, 930, 1230, 1270, 1300, 1540, 300];
+const ALTAS_CAP = [68, 82, 128, 138, 152, 90, 124, 132, 140, 164, 30];
+const kpisCartera = (frame: number) => {
+  const t = sube(frame, ESC.resumen[0] + 10, 36);
+  return [
+    { k: "OPERACIONES", v: Math.round(10934 * t).toLocaleString("es-AR"), c: "#5b84b8" },
+    { k: "CAPITAL OTORGADO", v: `$${(1263.7 * t).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`, c: "#5b84b8" },
+    { k: "CAPITAL EN MORA", v: `$${(282.8 * t).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MM`, c: "#b85b5b" },
+    { k: "TNA PROMEDIO", v: `${Math.round(213 * t)}%`, c: "#c9a45b" },
+    { k: "% EN MORA", v: `${(22.4 * t).toFixed(1).replace(".", ",")}%`, c: "#c98a4b" },
+    { k: "% MORA >30", v: `${(17.8 * t).toFixed(1).replace(".", ",")}%`, c: "#8b7bc9" },
+  ];
+};
+const GraficoAltas: React.FC<{ frame: number; w: number; h: number; fs?: number }> = ({ frame, w, h, fs = 10 }) => {
+  const izq = fs * 3.2;
+  const der = fs * 4.6;
+  const abajo = fs * 2;
+  const W = w - izq - der;
+  const H = h - abajo - 6;
+  const paso = W / MESES.length;
+  const f0 = ESC.resumen[0] + 18;
+  const pts = ALTAS_CAP.map((c, i) => [izq + paso * (i + 0.5), 6 + H - (c / 180) * H]);
+  const d = pts.reduce((acc, [x, y], i) => {
+    if (i === 0) {
+      return `M ${x} ${y}`;
+    }
+    const [px, py] = pts[i - 1];
+    const mx = (px + x) / 2;
+    return `${acc} C ${mx} ${py} ${mx} ${y} ${x} ${y}`;
+  }, "");
+  const linea = interpolate(frame, [f0 + 20, f0 + 70], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  return (
+    <svg width={w} height={h}>
+      {[0, 0.25, 0.5, 0.75, 1].map((g) => (
+        <g key={g}>
+          <line x1={izq} x2={izq + W} y1={6 + H - g * H} y2={6 + H - g * H} stroke={OSC.linea} strokeWidth={1} />
+          <text x={izq - 6} y={6 + H - g * H + fs * 0.35} fill={OSC.texto2} fontSize={fs * 0.85} textAnchor="end">
+            {Math.round(1600 * g)}
+          </text>
+          <text x={izq + W + 6} y={6 + H - g * H + fs * 0.35} fill={OSC.texto2} fontSize={fs * 0.85}>
+            ${Math.round(180 * g)} MM
+          </text>
+        </g>
+      ))}
+      {ALTAS_OPS.map((o, i) => {
+        const t = sube(frame, f0 + i * 4, 24);
+        const bh = (o / 1600) * H * t;
+        return <rect key={i} x={izq + paso * i + paso * 0.15} y={6 + H - bh} width={paso * 0.7} height={bh} rx={2} fill="#3c5272" stroke="#5b7aa3" strokeWidth={1} />;
+      })}
+      <path d={d} fill="none" stroke={OSC.verde} strokeWidth={2.4} pathLength={1} strokeDasharray={1} strokeDashoffset={1 - linea} />
+      {pts.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r={3.5} fill={OSC.verde} opacity={linea >= (i + 0.5) / pts.length ? 1 : 0} />
+      ))}
+      {MESES.map((m, i) => (
+        <text key={m} x={izq + paso * (i + 0.5)} y={h - fs * 0.5} fill={OSC.texto} fontSize={fs * 0.85} textAnchor="middle">
+          {fs < 9 ? MESES_CORTOS[i] : m}
+        </text>
+      ))}
+    </svg>
+  );
+};
+const Barras: React.FC<{ frame: number; desde: number; datos: number[]; max: number; w: number; h: number; color: string }> = ({ frame, desde, datos, max, w, h, color }) => (
+  <svg width={w} height={h}>
+    {datos.map((v, i) => {
+      const t = sube(frame, desde + i * 3, 22);
+      const paso = w / datos.length;
+      const bh = (v / max) * h * t;
+      return <rect key={i} x={paso * i + paso * 0.2} y={h - bh} width={paso * 0.6} height={bh} rx={2} fill={color} />;
+    })}
+  </svg>
+);
+const Dona: React.FC<{ frame: number; desde: number; partes: [number, string][]; s: number; grosor: number }> = ({ frame, desde, partes, s, grosor }) => {
+  const r = (s - grosor) / 2;
+  const L = 2 * Math.PI * r;
+  const t = sube(frame, desde, 40);
+  let acc = 0;
+  return (
+    <svg width={s} height={s} style={{ transform: "rotate(-90deg)" }}>
+      {partes.map(([p, c], i) => {
+        const seg = (
+          <circle key={i} cx={s / 2} cy={s / 2} r={r} fill="none" stroke={c} strokeWidth={grosor} strokeDasharray={`${L * p * t} ${L}`} strokeDashoffset={-L * acc * t} />
+        );
+        acc += p;
+        return seg;
+      })}
+    </svg>
+  );
+};
+
+const FILTROS = ["Todas las carteras", "Todos los segmentos", "Todas las Lín. Cdto.", "Todos los titulares", "Todas las sucursales", "Todos los subsegmentos", "Todos los riesgos"];
+const ESTADOS_CARTERA = ["Vigente", "Non Accrual", "Castigado", "Cancelado", "Pagado", "Refinanciado", "Renovado", "Consolidado", "Anulado"];
+const KPI_CARTERA = { x: 16, y: 210, w: 1102, h: 82 };
+const ResumenTab: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.resumen[0];
+  const panel = { background: OSC.panel, borderRadius: 12, position: "absolute" as const };
+  const boton = (t: string, sel = false) => (
+    <div key={t} style={{ height: 30, padding: "0 14px", borderRadius: 6, border: `1px solid ${sel ? "#2563eb" : "#3a4a66"}`, background: sel ? "#2563eb" : "transparent", color: OSC.texto, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center" }}>{t}</div>
+  );
+  return (
+    <div style={{ position: "absolute", left: SIDE, top: HEADER, right: 0, bottom: 0, background: OSC.fondo, color: OSC.texto }}>
+      <div style={{ ...panel, left: 16, top: 14, width: 1102, height: 180, padding: "14px 18px", boxSizing: "border-box", opacity: aparece(frame, f0 + 2) }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
+          {boton("Mes actual")}
+          {boton("Este año", true)}
+          {boton("Todo")}
+          <span style={{ marginLeft: 10, color: OSC.texto2 }}>Desde</span>
+          <div style={{ height: 30, padding: "0 12px", borderRadius: 6, background: "#1a2438", display: "flex", alignItems: "center" }}>01/01/2026</div>
+          <span style={{ color: OSC.texto2 }}>Hasta</span>
+          <div style={{ height: 30, padding: "0 12px", borderRadius: 6, background: "#1a2438", display: "flex", alignItems: "center" }}>15/11/2026</div>
+        </div>
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          {FILTROS.map((f) => (
+            <div key={f} style={{ height: 30, padding: "0 10px", borderRadius: 6, background: "#1a2438", border: `1px solid ${OSC.linea}`, fontSize: 10, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}>
+              {f} <span style={{ fontSize: 8 }}>▾</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ position: "absolute", right: 18, top: 92, display: "flex", gap: 8 }}>
+          <div style={{ height: 30, padding: "0 16px", borderRadius: 6, background: "#16a34a", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center" }}>Aplicar</div>
+          <div style={{ height: 30, padding: "0 14px", borderRadius: 6, border: "1px solid #3a4a66", fontSize: 11, display: "flex", alignItems: "center" }}>Resetear</div>
+        </div>
+        <div style={{ position: "absolute", left: 18, right: 18, bottom: 14, paddingTop: 10, borderTop: `1px solid ${OSC.linea}`, display: "flex", alignItems: "center", gap: 6, fontSize: 10 }}>
+          <span style={{ color: OSC.texto2, marginRight: 4 }}>ESTADO:</span>
+          {ESTADOS_CARTERA.map((e) => (
+            <span key={e} style={{ padding: "4px 11px", borderRadius: 12, background: "#1d3557", border: "1px solid #2f4f7a", fontWeight: 600 }}>{e}</span>
+          ))}
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: KPI_CARTERA.x, top: KPI_CARTERA.y, width: KPI_CARTERA.w, display: "flex", gap: 12 }}>
+        {kpisCartera(frame).map((k, i) => (
+          <div key={k.k} style={{ flex: 1, height: KPI_CARTERA.h, background: OSC.panel, borderRadius: 10, borderTop: `2px solid ${k.c}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, opacity: aparece(frame, f0 + 6 + i * 3) }}>
+            <div style={{ fontSize: 10, letterSpacing: 0.6, color: "#c9d0da" }}>{k.k}</div>
+            <div style={{ fontSize: 22, fontWeight: 800 }}>{k.v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ ...panel, left: 16, top: 306, width: 1102, height: 300, padding: "14px 18px", boxSizing: "border-box" }}>
+        <div style={{ textAlign: "center", fontSize: 12, fontWeight: 700 }}>ALTAS POR MES</div>
+        <div style={{ display: "flex", justifyContent: "center", gap: 16, fontSize: 10, color: OSC.texto2, marginTop: 6 }}>
+          <span><span style={{ display: "inline-block", width: 12, height: 9, background: "#3c5272", border: "1px solid #5b7aa3", marginRight: 5 }} />Operaciones</span>
+          <span><span style={{ display: "inline-block", width: 12, height: 9, border: `2px solid ${OSC.verde}`, marginRight: 5 }} />Capital</span>
+        </div>
+        <div style={{ marginTop: 6 }}>
+          <GraficoAltas frame={frame} w={1066} h={232} />
+        </div>
+      </div>
+      <div style={{ ...panel, left: 16, top: 622, width: 545, height: 160, padding: "12px 18px", boxSizing: "border-box" }}>
+        <div style={{ textAlign: "center", fontSize: 12, fontWeight: 700 }}>ESTADO DE MORA</div>
+        <div style={{ marginTop: 10 }}>
+          <Barras frame={frame} desde={f0 + 40} datos={[9000, 4100, 2300, 1500, 900, 2600]} max={10000} w={510} h={100} color="#5b84b8" />
+        </div>
+      </div>
+      <div style={{ ...panel, left: 573, top: 622, width: 545, height: 160, padding: "12px 18px", boxSizing: "border-box" }}>
+        <div style={{ textAlign: "center", fontSize: 12, fontWeight: 700 }}>DISTRIBUCIÓN POR CUOTAS</div>
+        <div style={{ marginTop: 10 }}>
+          <Barras frame={frame} desde={f0 + 44} datos={[600, 1400, 5400, 2500, 3600, 1200, 800, 300]} max={6000} w={510} h={100} color="#8b7bc9" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const KPIS_DIARIO: [string, string, string, string][] = [
+  ["48", "ALTAS", "$6,0 M", "#5b84b8"],
+  ["455", "PAGOS", "$14,71 M", "#4f9c7a"],
+  ["1", "CANC. ANTICIPADA", "$13.509", "#4f9c7a"],
+  ["6", "CANC. P/ REFI-CONSOL.", "$1,95 M", "#4f9c7a"],
+  ["0", "ANULACIONES", "$0", "#c98a4b"],
+  ["42", "CONDONACIONES", "$1,18 M", "#c98a4b"],
+  ["0", "REVERSAS", "$0", "#b85b5b"],
+  ["51", "BONIFICACIONES", "$460.549", "#8b7bc9"],
+];
+const CANALES: [string, number, number][] = [
+  ["Sucursal Centro", 97, 21.0],
+  ["Transferencia", 71, 15.4],
+  ["Sucursal Norte", 66, 14.3],
+  ["Sucursal Sur", 66, 14.3],
+  ["Débito automático", 52, 11.3],
+  ["Billetera virtual", 45, 9.7],
+  ["Sucursal Oeste", 39, 8.4],
+  ["Pago fácil", 20, 4.3],
+];
+const KPI_DIARIO = { x: 20, y: 112, w: 1094, h: 118 };
+const cuenta = (frame: number, desde: number, txt: string) => {
+  // Counts the first number in the text up from zero.
+  const m = txt.match(/[\d.,]+/);
+  if (!m) {
+    return txt;
+  }
+  const crudo = m[0];
+  const decimales = crudo.includes(",") ? crudo.split(",")[1].length : 0;
+  const n = parseFloat(crudo.replace(/\./g, "").replace(",", "."));
+  const t = sube(frame, desde, 34);
+  const v = (n * t).toLocaleString("es-AR", { minimumFractionDigits: decimales, maximumFractionDigits: decimales });
+  return txt.replace(crudo, v);
+};
+const DiarioTab: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.diario[0];
+  const panel = { background: OSC.panel, borderRadius: 12, position: "absolute" as const, border: `1px solid ${OSC.linea}` };
+  const stat = (v: string, k: string, i: number) => (
+    <div key={k}>
+      <div style={{ fontSize: 16, fontWeight: 700 }}>{cuenta(frame, f0 + 30 + i * 3, v)}</div>
+      <div style={{ fontSize: 9.5, color: OSC.texto2, letterSpacing: 0.4, marginTop: 2 }}>{k}</div>
+    </div>
+  );
+  return (
+    <div style={{ position: "absolute", left: SIDE, top: HEADER, right: 0, bottom: 0, background: OSC.fondo, color: OSC.texto }}>
+      <div style={{ ...panel, left: 20, top: 16, width: 1094, height: 80, borderLeft: "4px solid #3b82f6", display: "flex", alignItems: "center", padding: "0 20px", boxSizing: "border-box" }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>Reporte Diario</div>
+          <div style={{ fontSize: 11, color: OSC.texto2, marginTop: 4 }}>Reporte del 15/11/2026</div>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, fontSize: 10.5, color: OSC.texto2 }}>
+          {[["Fecha", "15/11/2026"], ["Cartera", "Todas"], ["Sucursal", "Todas"], ["Titular Cartera", "Todos"]].map(([k, v]) => (
+            <span key={k} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {k}
+              <span style={{ height: 30, padding: "0 12px", borderRadius: 6, background: "#1a2438", border: `1px solid ${OSC.linea}`, color: OSC.texto, display: "flex", alignItems: "center", gap: 10 }}>
+                {v} <span style={{ fontSize: 8 }}>▾</span>
+              </span>
+            </span>
+          ))}
+          <span style={{ height: 30, padding: "0 16px", borderRadius: 6, background: "#2563eb", color: "white", fontWeight: 700, display: "flex", alignItems: "center" }}>Generar</span>
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: KPI_DIARIO.x, top: KPI_DIARIO.y, width: KPI_DIARIO.w, display: "flex", gap: 10 }}>
+        {KPIS_DIARIO.map(([n, k, m, c], i) => (
+          <div key={k} style={{ flex: 1, height: KPI_DIARIO.h, background: OSC.panel, borderRadius: 10, borderTop: `2px solid ${c}`, padding: "12px 12px", boxSizing: "border-box", opacity: aparece(frame, f0 + 6 + i * 3) }}>
+            <div style={{ fontSize: 24, fontWeight: 800 }}>{cuenta(frame, f0 + 10 + i * 3, n)}</div>
+            <div style={{ fontSize: 8.5, color: "#c9d0da", letterSpacing: 0.6, marginTop: 6, lineHeight: 1.3, minHeight: 22 }}>{k}</div>
+            <div style={{ fontSize: 13, color: "#c9d0da", marginTop: 6 }}>{cuenta(frame, f0 + 14 + i * 3, m)}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ ...panel, left: 20, top: 246, width: 540, height: 500, padding: "16px 18px", boxSizing: "border-box" }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 0.5 }}>ALTAS DEL DÍA</div>
+        <div style={{ display: "flex", gap: 26, marginTop: 14, paddingBottom: 12, borderBottom: `1px solid ${OSC.linea}` }}>
+          {stat("48", "OPERACIONES", 0)}
+          {stat("$6,0 M", "CAPITAL TOTAL", 1)}
+          {stat("254,6%", "TNA PROMEDIO", 2)}
+          {stat("4,5 ctas", "PLAZO PROM.", 3)}
+          {stat("$125.052", "TICKET PROM.", 4)}
+        </div>
+        <div style={{ display: "flex", marginTop: 14 }}>
+          <div style={{ width: 240 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR LÍNEA DE CRÉDITO</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14 }}>
+              <Dona frame={frame} desde={f0 + 40} partes={[[0.79, "#5f9e86"], [0.08, "#4f7cac"], [0.13, "#8b7bc9"]]} s={110} grosor={26} />
+              <div style={{ fontSize: 9, color: OSC.texto2, display: "flex", flexDirection: "column", gap: 6 }}>
+                {[["Cuota fija", "#5f9e86", "79%"], ["Pago adelantado", "#4f7cac", "8%"], ["Refinanciación", "#8b7bc9", "13%"]].map(([n, c, p]) => (
+                  <span key={n} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <span style={{ width: 9, height: 9, background: c }} />
+                    {n} {p}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ flex: 1, marginLeft: 16 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR SEGMENTO DE CLIENTE</div>
+            {([["primario", 3, 6.3], ["renovación", 39, 81.3], ["refinanciación", 6, 12.5]] as [string, number, number][]).map(([n, v, p], i) => (
+              <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, fontSize: 10.5 }}>
+                <span style={{ width: 86 }}>{n}</span>
+                <div style={{ flex: 1, height: 12, borderRadius: 3, background: "#1d2a40" }}>
+                  <div style={{ width: `${p * sube(frame, f0 + 44 + i * 4)}%`, height: "100%", borderRadius: 3, background: "#4f7cac" }} />
+                </div>
+                <span style={{ width: 62, textAlign: "right", color: OSC.texto2 }}>
+                  {v} {p.toFixed(1).replace(".", ",")}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", marginTop: 34 }}>
+          <div style={{ width: 240 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR CARTERA</div>
+            {([["propia", 43, 89.6], ["administrada", 5, 10.4]] as [string, number, number][]).map(([n, v, p], i) => (
+              <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, fontSize: 10.5 }}>
+                <span style={{ width: 76 }}>{n}</span>
+                <div style={{ flex: 1, height: 12, borderRadius: 3, background: "#1d2a40" }}>
+                  <div style={{ width: `${p * sube(frame, f0 + 50 + i * 4)}%`, height: "100%", borderRadius: 3, background: "#4f7cac" }} />
+                </div>
+                <span style={{ width: 62, textAlign: "right", color: OSC.texto2 }}>
+                  {v} {p.toFixed(1).replace(".", ",")}%
+                </span>
+              </div>
+            ))}
+          </div>
+          <div style={{ flex: 1, marginLeft: 16 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR PROVINCIA</div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 18, height: 90, marginTop: 12, paddingLeft: 10 }}>
+              {([["Norte", 21], ["Centro", 14], ["Sur", 12], ["Sin datos", 4]] as [string, number][]).map(([n, v], i) => (
+                <div key={n} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 34, height: (v / 22) * 70 * sube(frame, f0 + 54 + i * 4), background: "#4f7cac", borderRadius: "2px 2px 0 0" }} />
+                  <span style={{ fontSize: 9, color: OSC.texto2 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style={{ ...panel, left: 574, top: 246, width: 540, height: 500, padding: "16px 18px", boxSizing: "border-box" }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 0.5 }}>
+          COBRANZA <span style={{ fontSize: 9, color: OSC.texto2, fontWeight: 500 }}>(Pagos y Canc. Anticipadas)</span>
+        </div>
+        <div style={{ display: "flex", gap: 26, marginTop: 14, paddingBottom: 12, borderBottom: `1px solid ${OSC.linea}` }}>
+          {stat("462", "COBROS", 5)}
+          {stat("$16,68 M", "TOTAL COBRADO", 6)}
+          {stat("456", "SIN REFI/CONSOL.", 7)}
+          {stat("$14,73 M", "COBRADO NETO", 8)}
+        </div>
+        <div style={{ display: "flex", marginTop: 14 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>POR CANAL</div>
+            {CANALES.map(([n, v, p], i) => (
+              <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 13, fontSize: 10 }}>
+                <span style={{ width: 104 }}>{n}</span>
+                <div style={{ flex: 1, height: 11, borderRadius: 3, background: "#1d2a40" }}>
+                  <div style={{ width: `${(p / 22) * 100 * sube(frame, f0 + 40 + i * 3)}%`, height: "100%", borderRadius: 3, background: "#4f7cac" }} />
+                </div>
+                <span style={{ width: 60, textAlign: "right", color: OSC.texto2 }}>
+                  {v} {p.toFixed(1).replace(".", ",")}%
+                </span>
+              </div>
+            ))}
+          </div>
+          <div style={{ width: 170, marginLeft: 16 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4 }}>DESGLOSE</div>
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
+              <Dona frame={frame} desde={f0 + 46} partes={[[0.47, "#4f7cac"], [0.41, "#5f9e86"], [0.09, "#8b7bc9"], [0.02, "#c9a45b"], [0.01, "#b85b5b"]]} s={120} grosor={28} />
+            </div>
+            <div style={{ fontSize: 9, color: OSC.texto2, display: "flex", flexDirection: "column", gap: 6, marginTop: 14, paddingLeft: 20 }}>
+              {[["Capital 47%", "#4f7cac"], ["Interés 41%", "#5f9e86"], ["IVA Int. 9%", "#8b7bc9"], ["Comp. 2%", "#c9a45b"], ["Punit. 1%", "#b85b5b"]].map(([n, c]) => (
+                <span key={n} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 9, height: 9, background: c }} />
+                  {n}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ---------- Tablet page ----------
 const DEDO_TAB: [number, number, number][] = [
   [0, 700, 700],
@@ -619,6 +1110,13 @@ const DEDO_TAB: [number, number, number][] = [
   [TAP_CONTINUAR - 2, SIDE + TABLA_C.x + TABLA_C.w - 24 - 52, HEADER + TABLA_C.y + TABLA_C.cab + TABLA_C.fila * 8 + 27],
   [TAP_PROCESAR - 2, SIDE + MODAL_C.x + MODAL_C.w - 24 - 82, HEADER + MODAL_C.y + MODAL_C.h - 43],
   [TAP_PROCESAR + 40, 760, 760],
+  [TAP_INICIO - 2, SIDE / 2, HEADER + 24 + 9],
+  [TAP_MOD_CONTA - 2, SIDE + 64 + 262 + 21, HEADER + 122 + 300 + 21],
+  [TAP_ESTADOS - 2, SIDE + MODAL_K.x + 56 + 600 + 20, HEADER + MODAL_K.y + 98 + 170 + 20],
+  [TAP_GENERAR - 2, SIDE + 895, HEADER + 30 + 17],
+  [TAP_REPORTES - 2, 139, 25],
+  [TAP_DIARIO - 2, 179, 25],
+  [TAP_DIARIO + 40, 700, 600],
 ];
 
 const posDedo = (frame: number, camino: [number, number, number][]) => {
@@ -639,12 +1137,15 @@ const posDedo = (frame: number, camino: [number, number, number][]) => {
   return p;
 };
 
-const Dedo: React.FC<{ frame: number; camino: [number, number, number][] }> = ({ frame, camino }) => {
+const Dedo: React.FC<{ frame: number; camino: [number, number, number][]; taps: number[] }> = ({ frame, camino, taps }) => {
   const dedo = posDedo(frame, camino);
-  const tap = TAPS.find((f) => frame >= f && frame < f + 16);
+  const tap = taps.find((f) => frame >= f && frame < f + 16);
   const onda = tap === undefined ? 0 : (frame - tap) / 16;
   const presion = tap === undefined ? 0 : interpolate(frame - tap, [0, 3, 8], [0, 1, 0], clamp);
-  const vis = interpolate(frame, [90, 104], [0, 1], clamp) * interpolate(frame, [TAP_PROCESAR + 26, TAP_PROCESAR + 40], [1, 0], clamp);
+  const vis =
+    interpolate(frame, [90, 104], [0, 1], clamp) *
+    (1 - interpolate(frame, [TAP_PROCESAR + 26, TAP_PROCESAR + 40, TAP_INICIO - 30, TAP_INICIO - 16], [0, 1, 1, 0], clamp)) *
+    interpolate(frame, [TAP_DIARIO + 30, TAP_DIARIO + 44], [1, 0], clamp);
   return (
     <>
       {tap !== undefined ? (
@@ -666,6 +1167,10 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
     ["home", HomeTab],
     ["detalle", DetalleTab],
     ["consolidacion", ConsolidacionTab],
+    ["conta", ContaTab],
+    ["estados", EstadosTab],
+    ["resumen", ResumenTab],
+    ["diario", DiarioTab],
   ];
   const actual = actualDe(frame);
   return (
@@ -685,8 +1190,8 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
         <div style={{ marginLeft: 20 }}>
           <Logo w={92} />
         </div>
-        {[I.grafico, I.calendario].map((d) => (
-          <div key={d} style={{ marginLeft: 14, width: 26, height: 26, borderRadius: "50%", background: "#5d6068", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {[I.grafico, I.calendario].map((d, i) => (
+          <div key={d} style={{ marginLeft: 14, width: 26, height: 26, borderRadius: "50%", background: (i === 0 ? actual === "resumen" : actual === "diario") ? "#2f5d8f" : "#5d6068", display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${1 - pulsado(frame, i === 0 ? TAP_REPORTES : TAP_DIARIO) * 0.2})` }}>
             <Icono d={d} s={14} c="#a9c7ec" w={2.2} />
           </div>
         ))}
@@ -700,14 +1205,14 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
       </div>
       <div style={{ position: "absolute", left: 0, top: HEADER, width: SIDE, bottom: 0, background: SIDE_BG, display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 22, zIndex: 5 }}>
         {SIDE_ICONOS.map((d, i) => (
-          <div key={i} style={{ transform: `scale(${i === SIDE_ESPECIALES ? 1 - pulsado(frame, TAP_MENU) * 0.2 : 1})` }}>
+          <div key={i} style={{ transform: `scale(${i === SIDE_ESPECIALES ? 1 - pulsado(frame, TAP_MENU) * 0.2 : i === 0 ? 1 - pulsado(frame, TAP_INICIO) * 0.2 : 1})` }}>
             <Icono d={d} s={18} c={i === SIDE_ACTIVO[actual] ? "#FF8C42" : "#e5e7eb"} />
           </div>
         ))}
       </div>
       <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} extra={RECIBO} />
-      <Toast frame={frame} desde={PROCESADA + 10} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · ${pesos(TOTAL)} · 18 cuotas`} />
-      <Dedo frame={frame} camino={DEDO_TAB} />
+      <Toast frame={frame} desde={PROCESADA + 10} hasta={866} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · ${pesos(TOTAL)} · 18 cuotas`} />
+      <Dedo frame={frame} camino={DEDO_TAB} taps={TAPS_TAB} />
     </div>
   );
 };
@@ -738,7 +1243,7 @@ const HomeMovil: React.FC<{ frame: number }> = ({ frame }) => (
       const c = k % 2;
       const r = Math.floor(k / 2);
       const t = aparece(frame, 6 + k * 3, 12);
-      const press = k === 0 ? pulsado(frame, TAP_CONSULTAR) : 0;
+      const press = k === 0 ? pulsado(frame, TAP_CONSULTAR) : k === 9 ? pulsado(frame, TAP_MOD_CONTA) : 0;
       return (
         <div key={m.t} style={{ position: "absolute", left: 12 + c * 185, top: 166 + r * 84, width: 177, height: 76, border: `1px solid ${BORDE}`, borderRadius: 10, background: "white", padding: "10px 10px", boxSizing: "border-box", display: "flex", gap: 9, opacity: t, transform: `translateY(${(1 - t) * 10}px) scale(${1 - press * 0.05})` }}>
           <div style={{ width: 30, height: 30, borderRadius: 7, background: AZUL, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -888,13 +1393,195 @@ const ConsolidacionMovil: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
-const TABS_MOVIL: [string, string, Escena | null][] = [
-  ["Inicio", I.casa, "home"],
-  ["Préstamos", I.lupa, "detalle"],
-  ["Operaciones", I.especiales, "consolidacion"],
-  ["Reportes", I.gestion, null],
-  ["Más", I.config, null],
+// ---------- Phone: accounting, statements and reports ----------
+const M_HOJA_CONTA = 360;
+const HojaConta: React.FC<{ frame: number }> = ({ frame }) => {
+  const v = modalConta(frame);
+  if (v <= 0.001) {
+    return null;
+  }
+  return (
+    <div style={{ position: "absolute", inset: 0 }}>
+      <div style={{ position: "absolute", inset: 0, background: `rgba(10,14,22,${0.45 * v})` }} />
+      <div style={{ position: "absolute", left: 0, right: 0, top: M_HOJA_CONTA, bottom: 0, background: "white", borderRadius: "18px 18px 0 0", transform: `translateY(${(1 - v) * (MH - M_HOJA_CONTA)}px)` }}>
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: "#d6dae1", margin: "12px auto 0" }} />
+        <div style={{ position: "absolute", left: 18, top: 28, fontSize: 17, fontWeight: 600, color: TINTA }}>Contabilidad</div>
+        <div style={{ position: "absolute", right: 18, top: 30 }}>
+          <Icono d={I.cruz} s={16} c={TINTA_2} w={2.2} />
+        </div>
+        {SUBMODULOS.map((m, k) => (
+          <div key={m.t} style={{ position: "absolute", left: 12, right: 12, top: 70 + k * 66, height: 60, display: "flex", alignItems: "center", gap: 12, padding: "0 8px", borderRadius: 10, background: k === 5 ? `rgba(47,93,143,${pulsado(frame, TAP_ESTADOS) * 0.1})` : "white", opacity: aparece(frame, MODAL_CONTA + 6 + k * 3, 10) }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: AZUL, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icono d={m.i} s={18} />
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TINTA }}>{m.t}</div>
+              <div style={{ fontSize: 9.5, color: TINTA_2, marginTop: 3, lineHeight: 1.35 }}>{m.d}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const M_EF = { y: 146, fila: 30 };
+const EstadosMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const t = generado(frame);
+  const res = interpolate(frame, [TAP_RESULTADOS + 2, TAP_RESULTADOS + 10], [0, 1], clamp);
+  const lista = (lineas: Linea[], o: number) => (
+    <div style={{ position: "absolute", left: 12, right: 12, top: M_EF.y, background: "white", borderRadius: 12, padding: "10px 4px", opacity: o }}>
+      {lineas.map((l, k) => (
+        <div key={l.t} style={{ opacity: aparece(frame, ESC.estados[0] + 8 + k * 2, 8) }}>
+          <LineaEF l={l} t={t} fs={10.5} h={M_EF.fila} />
+        </div>
+      ))}
+    </div>
+  );
+  return (
+    <Contenido>
+      <div style={{ position: "absolute", left: 14, top: 12, fontSize: 16, fontWeight: 700, color: TINTA }}>Estados Financieros</div>
+      <div style={{ position: "absolute", left: 14, top: 34, fontSize: 10, fontStyle: "italic", color: TINTA_2 }}>
+        Créditos · {Math.round(1284 * t).toLocaleString("es-AR")} asientos confirmados
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 56, display: "flex", gap: 8 }}>
+        <div style={{ flex: 1, height: 34, borderRadius: 7, background: "white", border: `1px solid ${BORDE}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", fontSize: 12, color: TINTA }}>
+          Noviembre 2026 <span style={{ fontSize: 9 }}>▾</span>
+        </div>
+        <div style={{ height: 34, padding: "0 16px", borderRadius: 7, background: "#2563eb", color: "white", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", transform: `scale(${1 - pulsado(frame, TAP_GENERAR) * 0.07})` }}>Generar</div>
+      </div>
+      <div style={{ position: "absolute", left: 12, right: 12, top: 102, height: 34, borderRadius: 8, background: "#e4e7ec", display: "flex", padding: 3, boxSizing: "border-box" }}>
+        {["Patrimonial", "Resultados"].map((s, i) => {
+          const sel = i === 0 ? 1 - res : res;
+          return (
+            <div key={s} style={{ flex: 1, borderRadius: 6, background: `rgba(255,255,255,${sel})`, boxShadow: sel > 0.5 ? "0 1px 3px rgba(0,0,0,0.12)" : "none", fontSize: 11.5, fontWeight: 700, color: sel > 0.5 ? TINTA : TINTA_2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {s}
+            </div>
+          );
+        })}
+      </div>
+      {res < 1 ? lista(PATRIMONIAL, 1 - res) : null}
+      {res > 0 ? lista(RESULTADOS_EF, res) : null}
+    </Contenido>
+  );
+};
+
+const SegmentoReportes: React.FC<{ diario: boolean; frame: number }> = ({ diario, frame }) => (
+  <div style={{ position: "absolute", left: 12, right: 12, top: 12, height: 34, borderRadius: 8, background: "#1a2438", display: "flex", padding: 3, boxSizing: "border-box" }}>
+    {["Resumen de cartera", "Reporte diario"].map((s, i) => {
+      const sel = (i === 1) === diario;
+      return (
+        <div key={s} style={{ flex: 1, borderRadius: 6, background: sel ? "#2563eb" : "transparent", fontSize: 11, fontWeight: 700, color: sel ? "white" : OSC.texto2, display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${i === 1 && !diario ? 1 - pulsado(frame, TAP_DIARIO) * 0.06 : 1})` }}>
+          {s}
+        </div>
+      );
+    })}
+  </div>
+);
+
+const ResumenMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.resumen[0];
+  return (
+    <Contenido fondo={OSC.fondo}>
+      <div style={{ color: OSC.texto }}>
+        <SegmentoReportes diario={false} frame={frame} />
+        <div style={{ position: "absolute", left: 12, right: 12, top: 56, display: "flex", gap: 6, alignItems: "center" }}>
+          {["Mes actual", "Este año", "Todo"].map((b) => (
+            <div key={b} style={{ fontSize: 10, fontWeight: 700, padding: "6px 10px", borderRadius: 6, border: `1px solid ${b === "Este año" ? "#2563eb" : "#3a4a66"}`, background: b === "Este año" ? "#2563eb" : "transparent" }}>
+              {b}
+            </div>
+          ))}
+          <span style={{ marginLeft: "auto", fontSize: 9.5, color: OSC.texto2 }}>01/01 – 15/11/2026</span>
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 96, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          {kpisCartera(frame).map((k, i) => (
+            <div key={k.k} style={{ height: 64, background: OSC.panel, borderRadius: 10, borderTop: `2px solid ${k.c}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, opacity: aparece(frame, f0 + 6 + i * 3) }}>
+              <div style={{ fontSize: 8.5, letterSpacing: 0.5, color: "#c9d0da" }}>{k.k}</div>
+              <div style={{ fontSize: 17, fontWeight: 800 }}>{k.v}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 324, height: 236, background: OSC.panel, borderRadius: 12, padding: "12px 10px", boxSizing: "border-box" }}>
+          <div style={{ textAlign: "center", fontSize: 11, fontWeight: 700 }}>ALTAS POR MES</div>
+          <div style={{ marginTop: 8 }}>
+            <GraficoAltas frame={frame} w={346} h={194} fs={8} />
+          </div>
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 572, height: 108, background: OSC.panel, borderRadius: 12, padding: "10px 14px", boxSizing: "border-box" }}>
+          <div style={{ textAlign: "center", fontSize: 11, fontWeight: 700 }}>ESTADO DE MORA</div>
+          <div style={{ marginTop: 8 }}>
+            <Barras frame={frame} desde={f0 + 40} datos={[9000, 4100, 2300, 1500, 900, 2600]} max={10000} w={338} h={62} color="#5b84b8" />
+          </div>
+        </div>
+      </div>
+    </Contenido>
+  );
+};
+
+const M_KPI_D = { y: 80, w: 87, h: 80, gap: 6 };
+const DiarioMovil: React.FC<{ frame: number }> = ({ frame }) => {
+  const f0 = ESC.diario[0];
+  return (
+    <Contenido fondo={OSC.fondo}>
+      <div style={{ color: OSC.texto }}>
+        <SegmentoReportes diario frame={frame} />
+        <div style={{ position: "absolute", left: 14, top: 56, fontSize: 11, color: OSC.texto2 }}>Reporte del 15/11/2026 · Todas las carteras</div>
+        <div style={{ position: "absolute", left: 12, top: M_KPI_D.y, display: "grid", gridTemplateColumns: `repeat(4, ${M_KPI_D.w}px)`, gap: M_KPI_D.gap }}>
+          {KPIS_DIARIO.map(([n, k, m, c], i) => (
+            <div key={k} style={{ height: M_KPI_D.h, background: OSC.panel, borderRadius: 9, borderTop: `2px solid ${c}`, padding: "8px 8px", boxSizing: "border-box", opacity: aparece(frame, f0 + 6 + i * 3) }}>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{cuenta(frame, f0 + 10 + i * 3, n)}</div>
+              <div style={{ fontSize: 6.8, color: "#c9d0da", letterSpacing: 0.3, marginTop: 3, lineHeight: 1.25, minHeight: 17 }}>{k}</div>
+              <div style={{ fontSize: 10, color: "#c9d0da", marginTop: 3 }}>{cuenta(frame, f0 + 14 + i * 3, m)}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 258, height: 112, background: OSC.panel, borderRadius: 12, padding: "12px 14px", boxSizing: "border-box" }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.5 }}>ALTAS DEL DÍA</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", rowGap: 10, marginTop: 10 }}>
+            {[["48", "OPERACIONES"], ["$6,0 M", "CAPITAL TOTAL"], ["254,6%", "TNA PROM."], ["4,5 ctas", "PLAZO PROM."], ["$125.052", "TICKET PROM."]].map(([v, k], i) => (
+              <div key={k}>
+                <div style={{ fontSize: 13.5, fontWeight: 700 }}>{cuenta(frame, f0 + 30 + i * 3, v)}</div>
+                <div style={{ fontSize: 8, color: OSC.texto2, marginTop: 1 }}>{k}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ position: "absolute", left: 12, right: 12, top: 382, height: 298, background: OSC.panel, borderRadius: 12, padding: "12px 14px", boxSizing: "border-box" }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.5 }}>COBRANZA</div>
+          <div style={{ display: "flex", gap: 22, marginTop: 8 }}>
+            {[["462", "COBROS"], ["$16,68 M", "TOTAL COBRADO"], ["$14,73 M", "NETO"]].map(([v, k], i) => (
+              <div key={k}>
+                <div style={{ fontSize: 13.5, fontWeight: 700 }}>{cuenta(frame, f0 + 36 + i * 3, v)}</div>
+                <div style={{ fontSize: 8, color: OSC.texto2, marginTop: 1 }}>{k}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 0.4, marginTop: 12 }}>POR CANAL</div>
+          {CANALES.slice(0, 7).map(([n, v, p], i) => (
+            <div key={n} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 9, fontSize: 9.5 }}>
+              <span style={{ width: 98 }}>{n}</span>
+              <div style={{ flex: 1, height: 9, borderRadius: 3, background: "#1d2a40" }}>
+                <div style={{ width: `${(p / 22) * 100 * sube(frame, f0 + 40 + i * 3)}%`, height: "100%", borderRadius: 3, background: "#4f7cac" }} />
+              </div>
+              <span style={{ width: 56, textAlign: "right", color: OSC.texto2 }}>
+                {v} {p.toFixed(1).replace(".", ",")}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Contenido>
+  );
+};
+
+const TABS_MOVIL: [string, string, Escena[]][] = [
+  ["Inicio", I.casa, ["home", "conta", "estados"]],
+  ["Préstamos", I.lupa, ["detalle"]],
+  ["Operaciones", I.especiales, ["consolidacion"]],
+  ["Reportes", I.gestion, ["resumen", "diario"]],
+  ["Más", I.config, []],
 ];
+const TAP_TAB: Record<number, number> = { 0: TAP_INICIO, 2: TAP_MENU, 3: TAP_REPORTES };
 const tabX = (i: number) => (MW / 5) * i + MW / 10;
 const DEDO_MOVIL: [number, number, number][] = [
   [0, 300, 700],
@@ -908,6 +1595,14 @@ const DEDO_MOVIL: [number, number, number][] = [
   [TAP_CONTINUAR - 2, MW - 12 - 14 - 50, M_HEADER + 610 + 35],
   [TAP_PROCESAR - 2, 250, MH - 28 - 22],
   [TAP_PROCESAR + 40, 300, 640],
+  [TAP_INICIO - 2, tabX(0), MH - M_TABS / 2 - 4],
+  [TAP_MOD_CONTA - 2, 12 + 185 + 88, M_HEADER + 166 + 4 * 84 + 38],
+  [TAP_ESTADOS - 2, 195, M_HOJA_CONTA + 70 + 5 * 66 + 30],
+  [TAP_GENERAR - 2, MW - 12 - 42, M_HEADER + 56 + 17],
+  [TAP_RESULTADOS - 2, 285, M_HEADER + 102 + 17],
+  [TAP_REPORTES - 2, tabX(3), MH - M_TABS / 2 - 4],
+  [TAP_DIARIO - 2, 285, M_HEADER + 12 + 17],
+  [TAP_DIARIO + 40, 300, 640],
 ];
 
 const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
@@ -915,8 +1610,13 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
     ["home", HomeMovil],
     ["detalle", DetalleMovil],
     ["consolidacion", ConsolidacionMovil],
+    ["conta", HomeMovil],
+    ["estados", EstadosMovil],
+    ["resumen", ResumenMovil],
+    ["diario", DiarioMovil],
   ];
   const actual = actualDe(frame);
+  const oscuro = actual === "resumen" || actual === "diario";
   return (
     <div style={{ position: "relative", width: MW, height: MH, background: HEADER_BG, fontFamily: FUENTE, overflow: "hidden" }}>
       {escenas.map(([e, C]) => {
@@ -939,12 +1639,12 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
           <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#d6d9de" }} />
         </div>
       </div>
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: M_TABS, background: "white", borderTop: `1px solid ${BORDE}`, display: "flex", zIndex: 5 }}>
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: M_TABS, background: oscuro ? "#111827" : "white", borderTop: `1px solid ${oscuro ? "#26314a" : BORDE}`, display: "flex", zIndex: 5 }}>
         {TABS_MOVIL.map(([n, d, e], i) => {
-          const sel = e === actual;
-          const col = sel ? "#FF8C42" : "#6b7280";
+          const sel = e.includes(actual);
+          const col = sel ? "#FF8C42" : oscuro ? "#9aa3b2" : "#6b7280";
           return (
-            <div key={n} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, paddingBottom: 6, transform: `scale(${i === 2 ? 1 - pulsado(frame, TAP_MENU) * 0.12 : 1})` }}>
+            <div key={n} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, paddingBottom: 6, transform: `scale(${i in TAP_TAB ? 1 - pulsado(frame, TAP_TAB[i]) * 0.12 : 1})` }}>
               <Icono d={d} s={19} c={col} />
               <div style={{ fontSize: 9, fontWeight: 700, color: col }}>{n}</div>
             </div>
@@ -954,10 +1654,11 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
       <div style={{ position: "absolute", inset: 0, zIndex: 6, pointerEvents: "none" }}>
         <HojaCobranza frame={frame} chico />
         <ModalConsolidacion frame={frame} chico />
+        <HojaConta frame={frame} />
       </div>
       <Toast frame={frame} desde={COBRADA + 2} hasta={396} titulo="Cobranza registrada" sub={`Cuota 2 · ${pesos(CUOTA)} · Efectivo`} extra={RECIBO} chico />
-      <Toast frame={frame} desde={PROCESADA + 10} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · 18 cuotas`} chico />
-      <Dedo frame={frame} camino={DEDO_MOVIL} />
+      <Toast frame={frame} desde={PROCESADA + 10} hasta={866} titulo="Consolidación procesada" sub={`Nueva operación ${NUEVA_OP} · 18 cuotas`} chico />
+      <Dedo frame={frame} camino={DEDO_MOVIL} taps={TAPS_CEL} />
     </div>
   );
 };
@@ -993,6 +1694,9 @@ const tomasDe = (tab: boolean): Toma[] => {
   // Day's indicators of the home and the consolidation list.
   const indicadores = tab ? { px: 760, py: 240 } : { px: 195, py: 280 };
   const lista = tab ? { px: 590, py: 470 } : { px: 195, py: 430 };
+  // Accounting modal and the monthly chart of the portfolio summary.
+  const modalConta = tab ? { px: 620, py: 420 } : { px: 195, py: 600 };
+  const grafico = tab ? { px: 600, py: 500 } : { px: 195, py: 530 };
   return [
     { f: 0, z: 0.92, ...c, ry: 20, rx: 9, rz: 2.5, cy: 0.62 },
     { f: 40, z: zz, ...indicadores, ...izq, cy: 0.57 },
@@ -1004,8 +1708,18 @@ const tomasDe = (tab: boolean): Toma[] => {
     { f: 536, z: zz, ...lista, ...der, cy: 0.57 },
     { f: 604, z: zz, ...lista, ...der, cy: 0.57 },
     { f: 636, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 850, z: 1, ...c, ...der, cy: 0.62 },
-    { f: CORELENDING_FRAMES, z: 1.06, ...c, ...der, cy: 0.62 },
+    { f: 916, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 952, z: zz, ...modalConta, ...der, cy: 0.57 },
+    { f: 984, z: zz, ...modalConta, ...der, cy: 0.57 },
+    { f: 1020, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1250, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1286, z: zz, ...grafico, ...der, cy: 0.57 },
+    { f: 1366, z: zz, ...grafico, ...der, cy: 0.57 },
+    { f: 1402, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1440, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1476, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1580, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: CORELENDING_FRAMES, z: 1.05, ...c, ...izq, cy: 0.62 },
   ];
 };
 const TOMAS_TAB = tomasDe(true);
@@ -1013,14 +1727,18 @@ const TOMAS_CEL = tomasDe(false);
 
 // Pieces that lift out of the screen and settle back: the collected
 // installment and the new capital of the consolidation.
-type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number };
+type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number; hueco?: string };
 const SALTOS_TAB: Salto[] = [
   { x: SIDE + MODAL_D.x + TABLA_D.x - 4, y: HEADER + MODAL_D.y + TABLA_D.y + TABLA_D.cab + TABLA_D.fila - 4, w: 914, h: TABLA_D.fila + 8, f: [316, 330, 350, 366], z: 110 },
   { x: SIDE + MODAL_C.x + 24 + 2 * (188 + 12) - 2, y: HEADER + MODAL_C.y + MODAL_C.cards - 2, w: 192, h: 74, f: [700, 714, 736, 752], z: 110 },
+  { x: SIDE + EF_DER.x + 14, y: HEADER + EF_DER.y + 56 + 11 * FILA_EF - 4, w: EF_DER.w - 28, h: FILA_EF + 8, f: [1136, 1150, 1166, 1180], z: 110 },
+  { x: SIDE + KPI_DIARIO.x + (KPI_DIARIO.w - 70) / 8 + 10 - 4, y: HEADER + KPI_DIARIO.y - 4, w: (KPI_DIARIO.w - 70) / 8 + 8, h: KPI_DIARIO.h + 8, f: [1516, 1530, 1550, 1566], z: 110, hueco: "#060a12" },
 ];
 const SALTOS_CEL: Salto[] = [
   { x: 8, y: M_HEADER + M_PLAN_Y + 44 - 4, w: 374, h: 52, f: [316, 330, 350, 366], z: 110 },
   { x: 14, y: 300 + 263 - 2, w: 179, h: 66, f: [700, 714, 736, 752], z: 110 },
+  { x: 8, y: M_HEADER + M_EF.y + 10 + 11 * M_EF.fila - 4, w: 374, h: M_EF.fila + 8, f: [1136, 1150, 1166, 1180], z: 110 },
+  { x: 12 + M_KPI_D.w + M_KPI_D.gap - 3, y: M_HEADER + M_KPI_D.y - 3, w: M_KPI_D.w + 6, h: M_KPI_D.h + 6, f: [1516, 1530, 1550, 1566], z: 110, hueco: "#060a12" },
 ];
 
 const Pantalla: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <PaginaTab frame={frame} /> : <PaginaMovil frame={frame} />);
@@ -1067,7 +1785,7 @@ export const CoreLendingDinamico: React.FC<z.infer<typeof coreLendingSchema>> = 
               const k = interpolate(frame, s.f, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
               return (
                 <div key={i}>
-                  <div style={{ position: "absolute", left: s.x, top: s.y, width: s.w, height: s.h, borderRadius: 10, background: "#e6eaf0", opacity: Math.min(1, k * 3) }} />
+                  <div style={{ position: "absolute", left: s.x, top: s.y, width: s.w, height: s.h, borderRadius: 10, background: s.hueco ?? "#e6eaf0", opacity: Math.min(1, k * 3) }} />
                   <div style={{ position: "absolute", left: s.x, top: s.y, width: s.w, height: s.h, borderRadius: 10, overflow: "hidden", transform: `translate3d(0, ${10 * k}px, ${s.z * k}px)`, boxShadow: `0 ${30 * k}px ${60 * k}px rgba(0,0,0,${0.35 * k})` }}>
                     <div style={{ position: "absolute", left: -s.x, top: -s.y, width: w, height: h }}>
                       <Pantalla frame={frame} tab={tab} />
