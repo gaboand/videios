@@ -30,7 +30,7 @@ import {
 } from "./OnboardingApp";
 import { OfertasOpciones } from "./OfertasOpciones";
 import { CONTACTFLOW_FRAMES, ContactFlow, ContactFlowDinamico, ContactFlowMovil, contactFlowSchema } from "./ContactFlow";
-import { BACKOFFICE_FRAMES, BackOffice, BackOfficeMovil, backOfficeSchema } from "./BackOffice";
+import { BACKOFFICE_FRAMES, BackOffice, BackOfficeDinamico, BackOfficeMovil, backOfficeSchema } from "./BackOffice";
 import { Reloj, TIENDA_FRAMES, TiendaAxonia, TiendaDinamico, TiendaMovil, tiendaSchema } from "./TiendaAxonia";
 
 export const RemotionRoot: React.FC = () => {
@@ -426,6 +426,28 @@ export const RemotionRoot: React.FC = () => {
         // npx remotion render BackOfficeMovil
         id="BackOfficeMovil"
         component={BackOfficeMovil}
+        schema={backOfficeSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={BACKOFFICE_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render BackOfficeDinamico
+        id="BackOfficeDinamico"
+        component={BackOfficeDinamico}
+        schema={backOfficeSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={BACKOFFICE_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render BackOfficeDinamicoMovil
+        id="BackOfficeDinamicoMovil"
+        component={BackOfficeDinamico}
         schema={backOfficeSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={BACKOFFICE_FRAMES}

@@ -647,7 +647,7 @@ const Pagina: React.FC<{ frame: number }> = ({ frame }) => {
           return null;
         }
         return (
-          <div key={e} style={{ position: "absolute", inset: 0, opacity: v }}>
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v, clipPath: `inset(${HEADER}px 0 0 0)` }}>
             <C frame={frame} />
           </div>
         );
@@ -1119,7 +1119,7 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
           return null;
         }
         return (
-          <div key={e} style={{ position: "absolute", inset: 0, opacity: v }}>
+          <div key={e} style={{ position: "absolute", inset: 0, opacity: v, clipPath: `inset(${M_HEADER}px 0 0 0)` }}>
             <C frame={frame} />
           </div>
         );
@@ -1186,6 +1186,121 @@ export const BackOfficeMovil: React.FC<z.infer<typeof backOfficeSchema>> = ({ fo
           <PaginaMovil frame={frame} />
         </Dispositivo>
       </div>
+    </AbsoluteFill>
+  );
+};
+
+// ---------- Dynamic version (16:9 tablet or 9:16 phone) ----------
+// Calm camera: a few zooms with long holds and soft tilt changes between
+// scenes, one move per moment. Focus point in screen px (tablet 1180 x 820,
+// phone 390 x 844).
+type Toma = { f: number; z: number; px: number; py: number; ry: number; rx: number; rz: number; cy: number };
+const toma = (frame: number, tomas: Toma[]): Toma => {
+  for (let k = 1; k < tomas.length; k++) {
+    const a = tomas[k - 1];
+    const b = tomas[k];
+    if (frame <= b.f) {
+      const t = interpolate(frame, [a.f, b.f], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+      const mezcla = (u: number, v: number) => u + (v - u) * t;
+      return {
+        f: frame,
+        z: Math.exp(mezcla(Math.log(a.z), Math.log(b.z))),
+        px: mezcla(a.px, b.px),
+        py: mezcla(a.py, b.py),
+        ry: mezcla(a.ry, b.ry),
+        rx: mezcla(a.rx, b.rx),
+        rz: mezcla(a.rz, b.rz),
+        cy: mezcla(a.cy, b.cy),
+      };
+    }
+  }
+  return tomas[tomas.length - 1];
+};
+const tomasDe = (tab: boolean): Toma[] => {
+  const c = { px: (tab ? PW : MW) / 2, py: (tab ? PH : MH) / 2 };
+  const zz = tab ? 1.3 : 1.25;
+  const izq = { ry: 14, rx: 6, rz: 1.5 };
+  const der = { ry: -14, rx: 6, rz: -1.5 };
+  // Flow diagram of the configuration and the dashboard summary.
+  const flujo = tab ? { px: 590, py: 420 } : { px: 195, py: 480 };
+  const resumen = tab ? { px: 610, py: 300 } : { px: 195, py: 340 };
+  return [
+    { f: 0, z: 0.92, ...c, ry: -20, rx: 9, rz: -2.5, cy: 0.62 },
+    { f: 40, z: zz, ...flujo, ...der, cy: 0.57 },
+    { f: 118, z: zz, ...flujo, ...der, cy: 0.57 },
+    { f: 156, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 312, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 350, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 454, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 492, z: zz, ...resumen, ...izq, cy: 0.57 },
+    { f: BACKOFFICE_FRAMES, z: zz, ...resumen, ...izq, cy: 0.57 },
+  ];
+};
+const TOMAS_TAB = tomasDe(true);
+const TOMAS_CEL = tomasDe(false);
+
+// Piece that lifts out of the screen and settles back: the "Pasado a
+// Tesorería" folder once it gets its check.
+type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number };
+const SALTOS_TAB: Salto[] = [{ x: 812, y: 232, w: 330, h: 116, f: [248, 262, 280, 296], z: 110 }];
+const SALTOS_CEL: Salto[] = [{ x: 8, y: 436, w: 334, h: 84, f: [248, 262, 280, 296], z: 110 }];
+
+const PantallaBO: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <Pagina frame={frame} /> : <PaginaMovil frame={frame} />);
+
+export const BackOfficeDinamico: React.FC<z.infer<typeof backOfficeSchema>> = ({ fondo, paleta }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  const tab = width > height;
+  const tipo = tab ? "tablet" : "celular";
+  const { w, h } = pantallaDe(tipo, !tab);
+  const { H: EH } = exteriorDe(tipo, w, h);
+  const c = toma(frame, tab ? TOMAS_TAB : TOMAS_CEL);
+  const esc = ((height * 0.64) / EH) * c.z;
+  const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
+  // Device chrome offset (padding + border) so the overlay lines up with the screen.
+  const MARCO = tab ? 27 : 17;
+  const dx = -(c.px - w / 2) * esc;
+  // Keep the top 20% of the video free (for titles), with a margin for the tilt.
+  const dy0 = -(c.py - h / 2) * esc;
+  const arriba = height * c.cy + dy0 - (EH * esc) / 2;
+  const dy = dy0 + Math.max(0, height * 0.23 - arriba);
+  return (
+    <AbsoluteFill style={{ fontFamily: FUENTE }}>
+      <FondoAbstracto paleta={paleta} estilo={fondo} />
+      <AbsoluteFill style={{ perspective: 2600 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: width / 2,
+            top: height * c.cy,
+            opacity: t,
+            transformStyle: "preserve-3d",
+            transform: `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${esc}) rotateY(${c.ry}deg) rotateX(${c.rx}deg) rotateZ(${c.rz}deg)`,
+          }}
+        >
+          <Dispositivo tipo={tipo} w={w} h={h}>
+            <PantallaBO frame={frame} tab={tab} />
+          </Dispositivo>
+          <div style={{ position: "absolute", left: MARCO, top: MARCO, width: w, height: h, transformStyle: "preserve-3d" }}>
+            {(tab ? SALTOS_TAB : SALTOS_CEL).map((s, i) => {
+              if (frame <= s.f[0] || frame >= s.f[3]) {
+                return null;
+              }
+              const k = interpolate(frame, s.f, [0, 1, 1, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+              return (
+                <div key={i}>
+                  <div style={{ position: "absolute", left: s.x, top: s.y, width: s.w, height: s.h, borderRadius: 12, background: "#e6eaf0", opacity: Math.min(1, k * 3) }} />
+                  <div style={{ position: "absolute", left: s.x, top: s.y, width: s.w, height: s.h, borderRadius: 12, overflow: "hidden", transform: `translate3d(0, ${10 * k}px, ${s.z * k}px)`, boxShadow: `0 ${30 * k}px ${60 * k}px rgba(0,0,0,${0.35 * k})` }}>
+                    <div style={{ position: "absolute", left: -s.x, top: -s.y, width: w, height: h }}>
+                      <PantallaBO frame={frame} tab={tab} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
