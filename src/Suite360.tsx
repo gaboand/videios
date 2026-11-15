@@ -29,9 +29,9 @@ const NAVY = "#1f2d4d";
 const GRIS = "#dfe3ea";
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-export const SUITE_FRAMES = 592;
+export const SUITE_FRAMES = 648;
 
-type Id = "tienda" | "canales" | "funnel" | "riesgo" | "marketplace" | "core" | "sucursal" | "crm" | "contact";
+type Id = "tienda" | "canales" | "funnel" | "riesgo" | "marketplace" | "core" | "sucursal" | "backoffice" | "crm" | "contact";
 type Modulo = { id: Id; nombre: string; x: number; y: number; w: number; h: number };
 type Escena = {
   W: number;
@@ -52,6 +52,7 @@ const NOMBRES: Record<Id, string> = {
   marketplace: "Marketplace de Préstamos",
   core: "Core de Préstamos",
   sucursal: "Sucursal Virtual",
+  backoffice: "Back Office",
   crm: "CRM de Cobranzas",
   contact: "Contact Flow",
 };
@@ -63,10 +64,11 @@ const TAM: Record<Id, [number, number]> = {
   marketplace: [440, 210],
   core: [440, 250],
   sucursal: [400, 210],
+  backoffice: [400, 220],
   crm: [380, 240],
   contact: [380, 260],
 };
-const ORDEN_MODULOS: Id[] = ["tienda", "canales", "funnel", "riesgo", "marketplace", "core", "sucursal", "crm", "contact"];
+const ORDEN_MODULOS: Id[] = ["tienda", "canales", "funnel", "riesgo", "marketplace", "backoffice", "core", "sucursal", "crm", "contact"];
 const ubicar = (pos: Record<Id, [number, number]>): Modulo[] =>
   ORDEN_MODULOS.map((id) => ({
     id,
@@ -77,30 +79,33 @@ const ubicar = (pos: Record<Id, [number, number]>): Modulo[] =>
     h: TAM[id][1],
   }));
 
-// 16:9: the flow left to right, as in the reference slide.
+// 16:9: the flow in a 5 x 2 rectangle (top row left to right, bottom row
+// hanging from it).
 const HORIZONTAL: Escena = {
   W: 1920,
   H: 1080,
   mods: ubicar({
-    tienda: [500, 30],
-    canales: [70, 250],
-    funnel: [90, 660],
-    riesgo: [500, 470],
-    marketplace: [960, 120],
-    core: [960, 640],
-    sucursal: [500, 850],
-    crm: [1480, 250],
-    contact: [1480, 650],
+    tienda: [50, 315],
+    canales: [585, 300],
+    funnel: [105, 675],
+    riesgo: [1050, 325],
+    marketplace: [530, 685],
+    backoffice: [1550, 310],
+    core: [2030, 295],
+    sucursal: [2050, 685],
+    crm: [1560, 670],
+    contact: [1060, 660],
   }),
   flechas: [
-    { d: "M 490 150 C 430 150 418 190 410 236" },
-    { d: "M 235 530 L 235 615", doble: true },
-    { d: "M 415 300 Q 700 250 760 455" },
-    { d: "M 860 458 C 870 400 885 345 935 305" },
-    { d: "M 720 690 Q 760 790 940 760" },
-    { d: "M 1010 905 C 1000 958 962 962 914 958", doble: true },
-    { d: "M 1408 740 C 1452 700 1428 470 1466 405" },
-    { d: "M 1670 525 L 1670 610", doble: true },
+    { d: "M 458 420 L 577 420" },
+    { d: "M 640 548 C 600 610 450 610 410 660", doble: true },
+    { d: "M 923 420 L 1042 420" },
+    { d: "M 1100 523 C 1060 600 1010 610 975 668" },
+    { d: "M 1458 420 L 1542 420" },
+    { d: "M 1958 420 L 2022 420" },
+    { d: "M 2370 553 L 2370 670", doble: true },
+    { d: "M 2080 553 C 2040 610 1980 620 1950 655" },
+    { d: "M 1448 790 L 1552 790", doble: true },
   ],
   general: { x: 960, y: 344, z: 0.62 },
   // Screen box the overview fits in (same margins as the 7-module version).
@@ -117,20 +122,22 @@ const VERTICAL: Escena = {
     funnel: [90, 690],
     riesgo: [590, 690],
     marketplace: [50, 1020],
-    core: [590, 1020],
+    backoffice: [590, 1020],
+    core: [590, 1410],
     sucursal: [50, 1410],
-    crm: [640, 1410],
-    contact: [640, 1800],
+    crm: [50, 1790],
+    contact: [640, 1780],
   }),
   flechas: [
     { d: "M 460 405 L 674 405" },
     { d: "M 700 556 C 640 640 460 620 392 684", doble: true },
     { d: "M 855 556 L 855 650" },
     { d: "M 610 890 C 560 940 470 930 444 998" },
-    { d: "M 940 890 C 962 925 962 950 962 978" },
-    { d: "M 600 1284 C 560 1340 480 1330 455 1372", doble: true },
-    { d: "M 860 1284 L 860 1370" },
-    { d: "M 830 1662 L 830 1760", doble: true },
+    { d: "M 790 890 L 790 975" },
+    { d: "M 790 1250 L 790 1365" },
+    { d: "M 580 1515 L 460 1515", doble: true },
+    { d: "M 650 1670 C 610 1730 330 1700 260 1748" },
+    { d: "M 440 1910 L 630 1910", doble: true },
   ],
   general: { x: 540, y: 730, z: 0.56 },
   caja: [266, 700, 809, 1486],
@@ -1108,9 +1115,66 @@ const Sucursal: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
+// Back office: the Tesorería folder with the operations checked one by one.
+const OPERACIONES: [string, number][] = [
+  ["Javier Perez", 1400000],
+  ["Lucía Fernández", 850000],
+  ["Martín Gómez", 2100000],
+  ["Sofía Ríos", 620000],
+  ["Tomás Acosta", 1250000],
+];
+const BackOffice: React.FC<{ t: number }> = ({ t }) => (
+  <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: 22, background: NAVY, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 8px" }}>
+      <T s={7.5} b c="white">Back Office</T>
+      <T s={5.8} c="rgba(255,255,255,0.85)">DMARTINEZ</T>
+    </div>
+    <div style={{ flex: 1, display: "flex" }}>
+      <div style={{ width: 88, background: "#f4f5f7", borderRight: `1px solid ${GRIS}`, padding: "6px 5px", display: "flex", flexDirection: "column", gap: 3 }}>
+        {(
+          [
+            ["Entrada", 12 - Math.round(3 * progreso(t, 14, 0, 1, 20))],
+            ["Análisis", 5],
+            ["Tesorería", 8 + Math.round(3 * progreso(t, 14, 0, 1, 20))],
+            ["Archivo", 146],
+          ] as [string, number][]
+        ).map(([k, v]) => {
+          const sel = k === "Tesorería";
+          return (
+            <div key={k} style={{ display: "flex", alignItems: "center", gap: 3, padding: "3px 4px", borderRadius: 3, background: sel ? "rgba(255,140,66,0.15)" : "transparent" }}>
+              <div style={{ width: 8, height: 6, borderRadius: 1, background: sel ? ACENTO : "#c4cad4" }} />
+              <T s={6} b={sel} c={sel ? TINTA : TINTA_2}>{k}</T>
+              <span style={{ marginLeft: "auto", fontSize: 5.5, fontWeight: 700, color: TINTA_2 }}>{v}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ flex: 1, padding: "6px 7px", display: "flex", flexDirection: "column", gap: 3 }}>
+        <T s={7} b>Tesorería · Desembolsos</T>
+        {OPERACIONES.map(([n, m], i) => {
+          const ok = progreso(t, 12, i, 4, 6);
+          return (
+            <div key={n} style={{ display: "flex", alignItems: "center", gap: 4, borderBottom: `1px solid ${GRIS}`, padding: "2px 0", opacity: progreso(t, 4, i, 2) }}>
+              <div style={{ width: 8, height: 8, borderRadius: 2, border: `1.2px solid ${ok > 0.5 ? VERDE : "#9aa3b2"}`, background: ok > 0.5 ? VERDE : "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {ok > 0.5 ? <span style={{ fontSize: 6, color: "white", fontWeight: 900, lineHeight: 1 }}>✓</span> : null}
+              </div>
+              <T s={6} b style={{ flex: 1 }}>{n}</T>
+              <T s={6}>{pesos(m)}</T>
+              <div style={{ width: 52, display: "flex", justifyContent: "flex-end" }}>
+                {ok > 0.5 ? <Pill fondo={VERDE} s={4.8}>DESEMBOLSADO</Pill> : <Pill fondo={AMARILLO} s={4.8}>PENDIENTE</Pill>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+);
+
 const CONTENIDO: Record<Id, React.FC<{ t: number }>> = {
   tienda: Tienda,
   sucursal: Sucursal,
+  backoffice: BackOffice,
   canales: Canales,
   funnel: Funnel,
   riesgo: Riesgo,
