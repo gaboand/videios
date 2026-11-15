@@ -35,6 +35,7 @@ import { Reloj, TIENDA_FRAMES, TiendaAxonia, TiendaDinamico, TiendaMovil, tienda
 
 import { CORTOS, componenteCorto, duracionCorto } from "./Cortos";
 import { CORELENDING_FRAMES, CoreLendingDinamico, coreLendingSchema } from "./CoreLending";
+import { MOTOR_FRAMES, MotorDinamico, motorSchema } from "./MotorDecision";
 
 // Short versions (10 s max): ContactFlowCorto, BackOfficeCorto, TiendaCorto,
 // CollectionsCorto, OnboardingCorto, CoreLendingCorto, each with a ...Movil 9:16 twin.
@@ -524,6 +525,28 @@ export const RemotionRoot: React.FC = () => {
         schema={coreLendingSchema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={CORELENDING_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // npx remotion render MotorDinamico
+        id="MotorDinamico"
+        component={MotorDinamico}
+        schema={motorSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={MOTOR_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // npx remotion render MotorDinamicoMovil
+        id="MotorDinamicoMovil"
+        component={MotorDinamico}
+        schema={motorSchema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={MOTOR_FRAMES}
         fps={30}
         width={1080}
         height={1920}
