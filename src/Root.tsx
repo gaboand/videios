@@ -21,7 +21,7 @@ import {
   ConsolidacionDeudas,
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
-import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
+import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, duracionSuiteCorto, suite360Schema, Suite360CortoFundido, Suite360CortoPaneo, Suite360CortoEmpuje } from "./Suite360";
 import {
   ONBOARDING_FRAMES,
   OnboardingApp,
@@ -287,6 +287,39 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      <Composition
+        // Preview of the short Suite 360 with "fundido" transitions (16:9 only).
+        id="Suite360CortoFundido"
+        component={Suite360CortoFundido}
+        schema={suite360Schema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={duracionSuiteCorto("fundido")}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Preview of the short Suite 360 with "paneo" transitions (16:9 only).
+        id="Suite360CortoPaneo"
+        component={Suite360CortoPaneo}
+        schema={suite360Schema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={duracionSuiteCorto("paneo")}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Preview of the short Suite 360 with "empuje" transitions (16:9 only).
+        id="Suite360CortoEmpuje"
+        component={Suite360CortoEmpuje}
+        schema={suite360Schema}
+        defaultProps={{ fondo: "ondas", paleta: "gris" }}
+        durationInFrames={duracionSuiteCorto("empuje")}
+        fps={30}
+        width={1920}
+        height={1080}
       />
       <Composition
         // npx remotion render OnboardingApp

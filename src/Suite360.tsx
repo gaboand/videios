@@ -184,7 +184,7 @@ const generalDe = (e: Escena): Cam => {
 HORIZONTAL.general = generalDe(HORIZONTAL);
 VERTICAL.general = generalDe(VERTICAL);
 
-const camara = (e: Escena, frame: number): Cam => {
+const camara = (e: Escena, frame: number, sinAlejar = false): Cam => {
   const c0 = camDe(e, 0);
   const claves: { f: number; c: Cam }[] = [
     { f: 0, c: { ...c0, z: c0.z * 0.8 } },
@@ -208,7 +208,7 @@ const camara = (e: Escena, frame: number): Cam => {
       let z = Math.exp(Math.log(a.c.z) + (Math.log(b.c.z) - Math.log(a.c.z)) * t);
       // Between two modules the camera pulls back mid-way, so the arrow and
       // both modules stay in view instead of empty background.
-      if (b.c !== e.general && (a.c.x !== b.c.x || a.c.y !== b.c.y)) {
+      if (!sinAlejar && b.c !== e.general && (a.c.x !== b.c.x || a.c.y !== b.c.y)) {
         z *= 1 - 0.42 * Math.sin(Math.PI * t);
       }
       return { x: a.c.x + (b.c.x - a.c.x) * t, y: a.c.y + (b.c.y - a.c.y) * t, z };
@@ -1186,11 +1186,16 @@ const CONTENIDO: Record<Id, React.FC<{ t: number }>> = {
   contact: Contact,
 };
 
-export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, paleta }) => {
+// Extra options used by the short versions: camera without the mid-way
+// pull-back, camera fixed on one module, extra zoom factor, no background.
+type Extra = { sinAlejar?: boolean; camFija?: number; camZ?: number; sinFondo?: boolean };
+
+export const Suite360: React.FC<z.infer<typeof suite360Schema> & Extra> = ({ fondo, paleta, sinAlejar, camFija, camZ = 1, sinFondo }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const e = height > width ? VERTICAL : HORIZONTAL;
-  const cam = camara(e, frame);
+  const base = camFija !== undefined && (camFija < N_MODULOS - 1 || frame < aparicion(camFija) + 30) ? camDe(e, camFija) : camara(e, frame, sinAlejar);
+  const cam = { ...base, z: base.z * camZ };
   const general = interpolate(frame, [ALEJA, ALEJA_FIN], [0, 1], clamp);
   const actual = Math.min(
     N_MODULOS - 1,
@@ -1199,7 +1204,7 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
 
   return (
     <AbsoluteFill style={{ fontFamily: FUENTE }}>
-      <FondoAbstracto paleta={paleta} estilo={fondo} />
+      {sinFondo ? null : <FondoAbstracto paleta={paleta} estilo={fondo} />}
       <div
         style={{
           position: "absolute",
@@ -1322,41 +1327,95 @@ export const Suite360: React.FC<z.infer<typeof suite360Schema>> = ({ fondo, pale
   );
 };
 
-// Short version: same time on each module in close-up, but the camera moves
-// between modules (and the final pull-back) run faster. The original timeline
-// is replayed through a piecewise-linear time map.
-const TRAMOS_CORTO: [number, number, number][] = (() => {
-  // [from, to, speed] in frames of the original video.
-  const t: [number, number, number][] = [[0, aparicion(0) + 40, 1]];
-  for (let i = 0; i < N_MODULOS - 1; i++) {
-    const sale = i === 0 ? aparicion(0) + 40 : aparicion(i) + 30;
-    if (i > 0) t.push([aparicion(i) + 4, sale, 1]);
-    t.push([sale, aparicion(i + 1) + 4, 2.5]);
-  }
-  t.push([aparicion(N_MODULOS - 1) + 4, aparicion(N_MODULOS - 1) + 30, 1]);
-  t.push([aparicion(N_MODULOS - 1) + 30, ALEJA, 5]);
-  t.push([ALEJA, ALEJA_FIN, 1.5]);
-  t.push([ALEJA_FIN, SUITE_FRAMES, 1]);
-  return t;
-})();
-export const SUITE_CORTO_FRAMES = Math.round(TRAMOS_CORTO.reduce((a, [d, h, v]) => a + (h - d) / v, 0));
-const original = (f: number) => {
+// Short versions: same time on each module in close-up, faster changes
+// between modules. Each one is a list of shots ("planos") of the original
+// timeline, replayed through a piecewise-linear time map; consecutive shots
+// cross-fade over FUNDIDO frames.
+type Tramo = [number, number, number]; // [from, to, speed] in original frames
+type Plano = { tramos: Tramo[]; cam?: number };
+type Transicion = "acordeon" | "paneo" | "fundido" | "empuje";
+const FUNDIDO = 10;
+const largoDe = (tr: Tramo[]) => tr.reduce((a, [d, h, v]) => a + (h - d) / v, 0);
+const original = (tr: Tramo[], f: number) => {
   let a = 0;
-  for (const [d, h, v] of TRAMOS_CORTO) {
+  for (const [d, h, v] of tr) {
     const largo = (h - d) / v;
     if (f <= a + largo) return d + (f - a) * v;
     a += largo;
   }
-  return SUITE_FRAMES - 1;
+  return tr[tr.length - 1][1];
 };
+// Final pull-back of every short version.
+const CIERRE: Tramo[] = [
+  [aparicion(N_MODULOS - 1) + 30, ALEJA, 5],
+  [ALEJA, ALEJA_FIN, 1.5],
+  [ALEJA_FIN, SUITE_FRAMES, 1],
+];
+// One continuous camera, transitions sped up.
+const continuo = (v: number): Plano[] => {
+  const t: Tramo[] = [[0, aparicion(0) + 40, 1]];
+  for (let i = 0; i < N_MODULOS - 1; i++) {
+    const sale = i === 0 ? aparicion(0) + 40 : aparicion(i) + 30;
+    if (i > 0) t.push([aparicion(i) + 4, sale, 1]);
+    t.push([sale, aparicion(i + 1) + 4, v]);
+  }
+  t.push([aparicion(N_MODULOS - 1) + 4, aparicion(N_MODULOS - 1) + 30, 1]);
+  return [{ tramos: [...t, ...CIERRE] }];
+};
+// One fixed shot per module, cross-faded.
+const cortes = (): Plano[] =>
+  ORDEN_MODULOS.map((_, i): Plano => {
+    if (i === 0) return { tramos: [[0, aparicion(0) + 40, 1]] };
+    if (i === N_MODULOS - 1) return { tramos: [[aparicion(i), aparicion(i) + 30, 1], ...CIERRE], cam: i };
+    return { tramos: [[aparicion(i), aparicion(i) + 40, 1]], cam: i };
+  });
+const PLANOS: Record<Transicion, Plano[]> = {
+  acordeon: continuo(2.5),
+  paneo: continuo(2),
+  fundido: cortes(),
+  empuje: cortes(),
+};
+const iniciosDe = (pl: Plano[]) => pl.map((_, k) => pl.slice(0, k).reduce((a, p) => a + largoDe(p.tramos) - FUNDIDO, 0));
+export const duracionSuiteCorto = (tr: Transicion) => {
+  const pl = PLANOS[tr];
+  return Math.round(iniciosDe(pl)[pl.length - 1] + largoDe(pl[pl.length - 1].tramos));
+};
+export const SUITE_CORTO_FRAMES = duracionSuiteCorto("acordeon");
 
-export const Suite360Corto: React.FC<z.infer<typeof suite360Schema>> = (props) => {
-  const frame = useCurrentFrame();
+const PlanoSuite: React.FC<{ plano: Plano; tr: Transicion; props: z.infer<typeof suite360Schema>; entra: boolean }> = ({ plano, tr, props, entra }) => {
+  const f = useCurrentFrame();
+  const orig = Math.min(SUITE_FRAMES - 1, Math.round(original(plano.tramos, f)));
+  const o = entra ? interpolate(f, [0, FUNDIDO], [0, 1], clamp) : 1;
+  const camZ = tr === "empuje" && entra ? interpolate(f, [0, 30], [0.95, 1], { ...clamp, easing: Easing.out(Easing.cubic) }) : 1;
   return (
-    <Freeze frame={0}>
-      <Sequence from={-Math.min(SUITE_FRAMES - 1, Math.round(original(frame)))}>
-        <Suite360 {...props} />
-      </Sequence>
-    </Freeze>
+    <AbsoluteFill style={{ opacity: o }}>
+      <Freeze frame={0}>
+        <Sequence from={-orig}>
+          <Suite360 {...props} sinFondo sinAlejar={tr === "paneo"} camFija={plano.cam} camZ={camZ} />
+        </Sequence>
+      </Freeze>
+    </AbsoluteFill>
   );
 };
+
+export const suiteCorto = (tr: Transicion): React.FC<z.infer<typeof suite360Schema>> => {
+  const Componente: React.FC<z.infer<typeof suite360Schema>> = (props) => {
+    const pl = PLANOS[tr];
+    const inicios = iniciosDe(pl);
+    return (
+      <AbsoluteFill>
+        <FondoAbstracto paleta={props.paleta} estilo={props.fondo} />
+        {pl.map((p, k) => (
+          <Sequence key={k} from={Math.round(inicios[k])} durationInFrames={Math.round(largoDe(p.tramos))}>
+            <PlanoSuite plano={p} tr={tr} props={props} entra={k > 0} />
+          </Sequence>
+        ))}
+      </AbsoluteFill>
+    );
+  };
+  return Componente;
+};
+export const Suite360Corto = suiteCorto("acordeon");
+export const Suite360CortoFundido = suiteCorto("fundido");
+export const Suite360CortoPaneo = suiteCorto("paneo");
+export const Suite360CortoEmpuje = suiteCorto("empuje");
