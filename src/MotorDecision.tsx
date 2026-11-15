@@ -25,7 +25,7 @@ export const motorSchema = z.object({
   paleta: z.enum(["azul", "gris"]),
 });
 
-export const MOTOR_FRAMES = 1570;
+export const MOTOR_FRAMES = 1484;
 
 const FUENTE = "Montserrat, sans-serif";
 const HEADER_BG = "#4b4d52";
@@ -50,12 +50,12 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 // ---------- Timeline ----------
 const ESC = {
   variables: [0, 256],
-  workflow: [252, 474],
-  matriz: [470, 698],
-  pricing: [694, 878],
-  informe: [874, 1128],
-  analisis: [1124, 1348],
-  dashboard: [1344, MOTOR_FRAMES + 10],
+  workflow: [252, 442],
+  matriz: [438, 612],
+  pricing: [608, 792],
+  informe: [788, 1042],
+  analisis: [1038, 1262],
+  dashboard: [1258, MOTOR_FRAMES + 10],
 } as const;
 type Escena = keyof typeof ESC;
 const TAP_SCORE = 70;
@@ -65,42 +65,36 @@ const TIPEO_CONS = [118, 128];
 const TAP_GUARDAR_CFG = 160;
 const TAP_NAV_WF = 244;
 const NODO_0 = 292;
-const NODO_PASO = 13 / 3;
-const TAP_GUARDAR_WF = 444;
-const TAP_NAV_MAT = 462;
+const NODO_PASO = 13 / 6;
+const TAP_GUARDAR_WF = 404;
+const TAP_NAV_MAT = 430;
 // The matrix scene opens with the matrix already generated. Each tap pushes
-// one cell a level worse: four orange to red, four yellow to orange, four
+// one cell a level worse: two orange to red, two yellow to orange, two
 // green to yellow. The matrix stays monotonic after every tap (risk never
 // gets worse as the score rises or better as the NSE drops), so a cell only
 // changes when the cell above and the one to its right are already at least
 // that level.
 const CAMBIOS = [
-  { r: 2, c: 4, f: 500 },
-  { r: 1, c: 3, f: 509 },
-  { r: 1, c: 2, f: 518 },
-  { r: 1, c: 1, f: 527 },
-  { r: 2, c: 3, f: 536 },
-  { r: 2, c: 2, f: 545 },
-  { r: 3, c: 4, f: 554 },
-  { r: 3, c: 3, f: 563 },
-  { r: 5, c: 3, f: 572 },
-  { r: 6, c: 3, f: 581 },
-  { r: 7, c: 4, f: 590 },
-  { r: 7, c: 3, f: 599 },
+  { r: 1, c: 3, f: 468 },
+  { r: 1, c: 2, f: 477 },
+  { r: 2, c: 3, f: 486 },
+  { r: 2, c: 2, f: 495 },
+  { r: 5, c: 3, f: 504 },
+  { r: 6, c: 3, f: 513 },
 ];
-const TAP_ACTUALIZAR = 618;
-const TAP_NAV_PR = 686;
-const TAP_MONTO = 734;
-const TIPEO_MONTO = [740, 762];
-const TAP_GUARDAR_PR = 802;
-const TAP_NAV_INF = 868;
-const TAP_DNI = 892;
-const TIPEO_DNI = [896, 912];
-const TAP_BUSCAR_INF = 920;
-const INFORME = 928;
-const TAP_NAV_AN = 1120;
-const TAP_MES_ANT = 1154;
-const TAP_NAV_DASH = 1340;
+const TAP_ACTUALIZAR = 532;
+const TAP_NAV_PR = 600;
+const TAP_MONTO = 648;
+const TIPEO_MONTO = [654, 676];
+const TAP_GUARDAR_PR = 716;
+const TAP_NAV_INF = 782;
+const TAP_DNI = 806;
+const TIPEO_DNI = [810, 826];
+const TAP_BUSCAR_INF = 834;
+const INFORME = 842;
+const TAP_NAV_AN = 1034;
+const TAP_MES_ANT = 1068;
+const TAP_NAV_DASH = 1254;
 const TAPS = [TAP_SCORE, TAP_TOGGLE, TAP_GUARDAR_CFG, TAP_NAV_WF, TAP_GUARDAR_WF, TAP_NAV_MAT, ...CAMBIOS.map((c) => c.f), TAP_ACTUALIZAR, TAP_NAV_PR, TAP_MONTO, TAP_GUARDAR_PR, TAP_NAV_INF, TAP_DNI, TAP_BUSCAR_INF, TAP_NAV_AN, TAP_MES_ANT, TAP_NAV_DASH];
 
 const pulsado = (frame: number, f: number) => interpolate(frame, [f, f + 4, f + 12], [0, 1, 0], clamp);
@@ -741,9 +735,9 @@ const PaginaTab: React.FC<{ frame: number }> = ({ frame }) => {
         ))}
       </div>
       <Toast frame={frame} desde={TAP_GUARDAR_CFG + 6} hasta={248} titulo="Configuración guardada" sub="Bureau A - Básica · Score mínimo 420" />
-      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={466} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" />
-      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={690} titulo="Matriz actualizada" sub="Riesgo Medio · Score Bureau A × NSE" />
-      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={872} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · Monto máximo $ 230.000" />
+      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={434} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" />
+      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={604} titulo="Matriz actualizada" sub="Riesgo Medio · Score Bureau A × NSE" />
+      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={786} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · Monto máximo $ 230.000" />
       <Dedo frame={frame} camino={DEDO_TAB} />
     </div>
   );
@@ -1532,9 +1526,9 @@ const PaginaMovil: React.FC<{ frame: number }> = ({ frame }) => {
         })}
       </div>
       <Toast frame={frame} desde={TAP_GUARDAR_CFG + 6} hasta={248} titulo="Configuración guardada" sub="Bureau A - Básica · Score mínimo 420" chico />
-      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={466} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" chico />
-      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={690} titulo="Matriz actualizada" sub="Riesgo Medio · Score × NSE" chico />
-      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={872} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · $ 230.000" chico />
+      <Toast frame={frame} desde={TAP_GUARDAR_WF + 6} hasta={434} titulo="Workflow guardado" sub="wf-Evaluacion · 17 nodos" chico />
+      <Toast frame={frame} desde={TAP_ACTUALIZAR + 6} hasta={604} titulo="Matriz actualizada" sub="Riesgo Medio · Score × NSE" chico />
+      <Toast frame={frame} desde={TAP_GUARDAR_PR + 6} hasta={786} titulo="Risk Pricing guardado" sub="Primarios · Nivel A · $ 230.000" chico />
       <Dedo frame={frame} camino={DEDO_MOVIL} />
     </div>
   );
@@ -1585,24 +1579,24 @@ const tomasDe = (tab: boolean): Toma[] => {
     { f: 272, z: 1, ...c, ...izq, cy: 0.62 },
     { f: 284, z: 1, ...c, ...izq, cy: 0.62 },
     { f: 316, z: zwf, ...wfIni, ...izq, cy: 0.57 },
-    { f: 384, z: zwf, ...wfFin, ...izq, cy: 0.57 },
-    { f: 396, z: zwf, ...wfFin, ...izq, cy: 0.57 },
-    { f: 430, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 672, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 708, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 724, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 758, z: zz, ...precio, ...der, cy: 0.57 },
-    { f: 812, z: zz, ...precio, ...der, cy: 0.57 },
-    { f: 848, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 872, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 908, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1168, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1204, z: zz, ...kpis, ...izq, cy: 0.57 },
-    { f: 1288, z: zz, ...kpis, ...izq, cy: 0.57 },
-    { f: 1324, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1358, z: 1, ...c, ...izq, cy: 0.62 },
-    { f: 1394, z: 1, ...c, ...der, cy: 0.62 },
-    { f: 1510, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 350, z: zwf, ...wfFin, ...izq, cy: 0.57 },
+    { f: 360, z: zwf, ...wfFin, ...izq, cy: 0.57 },
+    { f: 394, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 586, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 622, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 638, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 672, z: zz, ...precio, ...der, cy: 0.57 },
+    { f: 726, z: zz, ...precio, ...der, cy: 0.57 },
+    { f: 762, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 786, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 822, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1082, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1118, z: zz, ...kpis, ...izq, cy: 0.57 },
+    { f: 1202, z: zz, ...kpis, ...izq, cy: 0.57 },
+    { f: 1238, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1272, z: 1, ...c, ...izq, cy: 0.62 },
+    { f: 1308, z: 1, ...c, ...der, cy: 0.62 },
+    { f: 1424, z: 1, ...c, ...der, cy: 0.62 },
     { f: MOTOR_FRAMES, z: 1.05, ...c, ...der, cy: 0.62 },
   ];
 };
@@ -1613,9 +1607,9 @@ const TOMAS_CEL = tomasDe(false);
 type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number; hueco?: string };
 const oT = grillaOrigenTab();
 const SALTOS_TAB: Salto[] = [
-  { x: SIDE + oT.x - 8, y: HEADER + oT.y - 8, w: oT.ancho + 16, h: oT.alto + 12, f: [628, 640, 658, 672], z: 90 },
-  { x: SIDE + INF.x + INF.colDer - 8, y: HEADER + INF.y + 56 + DICT_Y + 4, w: INF.colW + 16, h: 222, f: [1018, 1032, 1052, 1068], z: 100 },
-  { x: SIDE + (PW - SIDE) / 2 - 436 - 6, y: HEADER + DASH.wf - 6, w: 884, h: 158, f: [1458, 1472, 1492, 1508], z: 100, hueco: "#060a12" },
+  { x: SIDE + oT.x - 8, y: HEADER + oT.y - 8, w: oT.ancho + 16, h: oT.alto + 12, f: [542, 554, 572, 586], z: 90 },
+  { x: SIDE + INF.x + INF.colDer - 8, y: HEADER + INF.y + 56 + DICT_Y + 4, w: INF.colW + 16, h: 222, f: [932, 946, 966, 982], z: 100 },
+  { x: SIDE + (PW - SIDE) / 2 - 436 - 6, y: HEADER + DASH.wf - 6, w: 884, h: 158, f: [1372, 1386, 1406, 1422], z: 100, hueco: "#060a12" },
 ];
 const SALTOS_CEL: Salto[] = [
   {
@@ -1623,10 +1617,10 @@ const SALTOS_CEL: Salto[] = [
     y: M_HEADER + M_GRILLA.y - 6,
     w: GRILLA_MOVIL.lw + GRILLA_MOVIL.gap + 7 * (GRILLA_MOVIL.cw + GRILLA_MOVIL.gap) + 9,
     h: 11 * (GRILLA_MOVIL.ch + GRILLA_MOVIL.gap) + 9,
-    f: [628, 640, 658, 672],
+    f: [542, 554, 572, 586],
     z: 90,
   },
-  { x: 6, y: M_HEADER + M_DASH.wf - 6, w: 378, h: 144, f: [1458, 1472, 1492, 1508], z: 100, hueco: "#060a12" },
+  { x: 6, y: M_HEADER + M_DASH.wf - 6, w: 378, h: 144, f: [1372, 1386, 1406, 1422], z: 100, hueco: "#060a12" },
 ];
 
 const Pantalla: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <PaginaTab frame={frame} /> : <PaginaMovil frame={frame} />);
