@@ -774,8 +774,8 @@ const EstadosTab: React.FC<{ frame: number }> = ({ frame }) => {
 const OSC = { fondo: "#0b111d", panel: "#111a2b", linea: "#22304a", texto: "#e5e9f0", texto2: "#9aa6b8", azul: "#4f7cac", verde: "#5f9e86" };
 const MESES = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"];
 const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct"];
-const ALTAS_OPS = [520, 680, 790, 940, 1010, 1120, 1080, 1260, 1340, 1430];
-const ALTAS_CAP = [54, 70, 84, 98, 108, 121, 116, 134, 146, 158];
+const ALTAS_OPS = [610, 840, 720, 1180, 960, 1350, 870, 1240, 1490, 1110];
+const ALTAS_CAP = [62, 96, 74, 128, 101, 152, 88, 139, 171, 118];
 const kpisCartera = (frame: number) => {
   const t = sube(frame, ESC.resumen[0] + 10, 36);
   return [
