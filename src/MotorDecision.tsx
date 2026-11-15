@@ -70,16 +70,23 @@ const TAP_GUARDAR_WF = 590;
 const TAP_NAV_MAT = 636;
 const TAP_GENERAR = 676;
 // Each tap pushes one cell a level worse, always next to (not diagonal from)
-// the zone of that color: orange to red, yellow to orange, green to yellow.
+// the zone of that color and to the previous cell of its group: four orange
+// to red, four yellow to orange, four green to yellow.
 const CAMBIOS = [
-  { r: 1, c: 3, f: 752 },
-  { r: 1, c: 2, f: 764 },
-  { r: 2, c: 3, f: 776 },
-  { r: 3, c: 4, f: 788 },
-  { r: 5, c: 3, f: 800 },
-  { r: 6, c: 3, f: 812 },
+  { r: 1, c: 3, f: 748 },
+  { r: 1, c: 2, f: 757 },
+  { r: 1, c: 1, f: 766 },
+  { r: 1, c: 0, f: 775 },
+  { r: 3, c: 4, f: 784 },
+  { r: 3, c: 3, f: 793 },
+  { r: 3, c: 2, f: 802 },
+  { r: 2, c: 3, f: 811 },
+  { r: 5, c: 3, f: 820 },
+  { r: 6, c: 3, f: 829 },
+  { r: 7, c: 3, f: 838 },
+  { r: 7, c: 4, f: 847 },
 ];
-const TAP_ACTUALIZAR = 832;
+const TAP_ACTUALIZAR = 866;
 const TAP_NAV_PR = 918;
 const TAP_MONTO = 962;
 const TIPEO_MONTO = [968, 990];
@@ -1603,7 +1610,7 @@ const TOMAS_CEL = tomasDe(false);
 type Salto = { x: number; y: number; w: number; h: number; f: [number, number, number, number]; z: number; hueco?: string };
 const oT = grillaOrigenTab();
 const SALTOS_TAB: Salto[] = [
-  { x: SIDE + oT.x - 8, y: HEADER + oT.y - 8, w: oT.ancho + 16, h: oT.alto + 12, f: [848, 862, 882, 898], z: 90 },
+  { x: SIDE + oT.x - 8, y: HEADER + oT.y - 8, w: oT.ancho + 16, h: oT.alto + 12, f: [872, 884, 902, 916], z: 90 },
   { x: SIDE + INF.x + INF.colDer - 8, y: HEADER + INF.y + 56 + DICT_Y + 4, w: INF.colW + 16, h: 222, f: [1250, 1264, 1284, 1300], z: 100 },
   { x: SIDE + (PW - SIDE) / 2 - 436 - 6, y: HEADER + DASH.wf - 6, w: 884, h: 158, f: [1690, 1704, 1724, 1740], z: 100, hueco: "#060a12" },
 ];
@@ -1613,7 +1620,7 @@ const SALTOS_CEL: Salto[] = [
     y: M_HEADER + M_GRILLA.y - 6,
     w: GRILLA_MOVIL.lw + GRILLA_MOVIL.gap + 7 * (GRILLA_MOVIL.cw + GRILLA_MOVIL.gap) + 9,
     h: 11 * (GRILLA_MOVIL.ch + GRILLA_MOVIL.gap) + 9,
-    f: [848, 862, 882, 898],
+    f: [872, 884, 902, 916],
     z: 90,
   },
   { x: 6, y: M_HEADER + M_DASH.wf - 6, w: 378, h: 144, f: [1690, 1704, 1724, 1740], z: 100, hueco: "#060a12" },
