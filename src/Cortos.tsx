@@ -52,8 +52,8 @@ const Corto: React.FC<Props & { C: React.ComponentType<Props>; tramos: Tramo[] }
 
 // Key moments of each video (source frames).
 export const CORTOS: Record<string, { C: React.ComponentType<Props>; tramos: Tramo[] }> = {
-  // Call room zoom, new template with its WhatsApp preview, dashboard KPIs.
-  ContactFlowCorto: { C: ContactFlowDinamico, tramos: [[0, 105], [330, 425], [880, 975]] },
+  // Call room zoom, flow editor building the strategy, case segmentation drill-down.
+  ContactFlowCorto: { C: ContactFlowDinamico, tramos: [[0, 100], [176, 270], [574, 690]] },
   // Flow diagram zoom, folder to Tesorería with the check, dashboard summary.
   BackOfficeCorto: { C: BackOfficeDinamico, tramos: [[0, 100], [170, 300], [456, 540]] },
   // Home with brand change, product, loan payment, confirmation.
