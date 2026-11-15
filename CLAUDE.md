@@ -51,7 +51,7 @@ Otras: `MarcaAxonia`, `LogoAxonia`, `DashboardAxonia`, `WorkflowAxonia`, `Matriz
 
 ## Versiones dinámicas
 
-Copias con cámara en movimiento, sin tocar el video original: `CollectionsDinamico`/`CollectionsDinamicoMovil`, `TiendaDinamico`/`TiendaDinamicoMovil`, `OnboardingDinamico`/`OnboardingDinamicoMovil` (mismo componente para 16:9 y 9:16, registradas en `src/Root.tsx`).
+Copias con cámara en movimiento, sin tocar el video original: `CollectionsDinamico`/`CollectionsDinamicoMovil`, `TiendaDinamico`/`TiendaDinamicoMovil`, `OnboardingDinamico`/`OnboardingDinamicoMovil`, `ContactFlowDinamico`/`ContactFlowDinamicoMovil` (en celular la sala va en 3 islas de puestos), `BackOfficeDinamico`/`BackOfficeDinamicoMovil` (mismo componente para 16:9 y 9:16, registradas en `src/Root.tsx`).
 
 - Cámara por keyframes (`TOMAS`: frame, zoom, punto de foco en px de pantalla, rotaciones, centro vertical), interpolada con `Easing.inOut(Easing.cubic)` y zoom en escala log.
 - Siempre libre el 20% de arriba: si el zoom sube el dispositivo, se baja (`arriba >= height * 0.23`). Abajo puede salir de cuadro.
