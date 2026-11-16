@@ -63,6 +63,25 @@ const PIEZAS: Pieza[] = [
 // Quick zoom on each piece (fast start, soft stop), alternating in and out, around the device centre
 // anchored on the 20% line so the device never climbs into the title area.
 const ZOOM = 0.12;
+// Voice-over phrases: [from, to] in the recording (s), and where they start
+// in the video (s).
+const VOZ: [number, number, number][] = [
+  // ¿Querés financiar la venta de tus productos o hacer crecer tu negocio de préstamos?
+  [0, 4.24, 0],
+  // Hoy es más simple de lo que imaginás:
+  [4.61, 6.59, 4.55],
+  // procesos automatizados, validaciones más robustas y cero papeles.
+  [6.96, 10.9, 6.85],
+  // Decidí mejor y más rápido, sin necesidad de un gran equipo de especialistas.
+  [11.28, 15.46, 11.3],
+  // Una suite creada por quienes gestionaron estos procesos durante años...
+  [15.73, 21.1, 16.1],
+  // Todo el ciclo del crédito, en una sola plataforma.
+  [21.41, 24.16, 22.6],
+  // Agendá una demo en axonia punto com punto ar.
+  [24.47, 27.33, 26.9],
+];
+
 const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: number; acerca: boolean | null }> = ({ p, props, entra, dur, acerca }) => {
   const f = useCurrentFrame();
   const o = entra ? interpolate(f, [0, FUNDIDO], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
@@ -92,6 +111,12 @@ export const Integral: React.FC<Props> = (props) => {
           </Sequence>
         );
       })}
+      {/* Voice-over, phrase by phrase, each placed on its scene. */}
+      {VOZ.map(([a, b, en], i) => (
+        <Sequence key={`voz-${i}`} from={Math.round(en * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6}>
+          <Audio src={staticFile("voz/locucion.mp3")} trimBefore={Math.round(a * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6} />
+        </Sequence>
+      ))}
       <Audio
         src={staticFile("musica/leave-the-key.mp3")}
         volume={(f) => interpolate(f, [INTEGRAL_FRAMES - 30, INTEGRAL_FRAMES], [0.15, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
