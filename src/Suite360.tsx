@@ -187,6 +187,13 @@ const AMPLIA: Escena = { ...HORIZONTAL, caja: [96, 300, 1824, 1040] };
 AMPLIA.general = generalDe(AMPLIA);
 const AMPLIA_V: Escena = { ...VERTICAL, caja: [60, 430, 1020, 1840] };
 AMPLIA_V.general = generalDe(AMPLIA_V);
+// Screen rectangles of the modules in the wide final overview (used by the
+// integral video's hook, where loose papers land on them).
+export const modulosEnGeneral = (vertical: boolean) => {
+  const e = vertical ? AMPLIA_V : AMPLIA;
+  const c = e.general;
+  return e.mods.map((m) => ({ x: e.W / 2 + (m.x - c.x) * c.z, y: e.H / 2 + (m.y - c.y) * c.z, w: m.w * c.z, h: m.h * c.z }));
+};
 
 const camara = (e: Escena, frame: number, sinAlejar = false): Cam => {
   const c0 = camDe(e, 0);

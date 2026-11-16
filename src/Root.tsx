@@ -22,6 +22,7 @@ import {
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
 import { INTEGRAL_FRAMES, Integral } from "./Integral";
+import { GANCHO_FRAMES, GanchoCaos } from "./GanchoCaos";
 import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
 import {
   ONBOARDING_FRAMES,
@@ -285,6 +286,26 @@ export const RemotionRoot: React.FC = () => {
         schema={suite360Schema}
         defaultProps={{ fondo: "ondas", paleta: "gris" }}
         durationInFrames={SUITE_CORTO_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // Hook of the integral video (chaos to order), 16:9
+        id="Gancho"
+        component={GanchoCaos}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={GANCHO_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Hook of the integral video (chaos to order), 9:16
+        id="GanchoMovil"
+        component={GanchoCaos}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={GANCHO_FRAMES}
         fps={30}
         width={1080}
         height={1920}
