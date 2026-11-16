@@ -1,4 +1,7 @@
-import { AbsoluteFill, Audio, Easing, Freeze, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Audio, Easing, Freeze, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/inter/800.css";
 import { BackOfficeDinamico } from "./BackOffice";
 import { CollectionsDinamico } from "./CollectionsAxonia";
 import { ContactFlowDinamico } from "./ContactFlow";
@@ -27,6 +30,7 @@ const FASE = 0.225 * FPS; // first downbeat
 const compas = (n: number) => FASE + n * COMPAS;
 export const INTEGRAL_FRAMES = 900;
 const FUNDIDO = 8;
+const NARANJA = "#FF8C42";
 
 // [component, source start frame, start bar, end bar]; bar 0 starts the video.
 type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: number; de: number; a: number; extra?: Record<string, unknown> };
@@ -82,6 +86,66 @@ const VOZ: [number, number, number][] = [
   [24.47, 27.33, 26.9],
 ];
 
+// On-screen titles in the free top band: [start bar, end bar, label, line].
+const TITULOS: [number, number, string, string][] = [
+  [2, 3, "TIENDA ONLINE", "Financiación en el checkout"],
+  [3, 5, "ONBOARDING DIGITAL", "Alta y validación de identidad"],
+  [5, 7, "MOTOR DE DECISIÓN", "Reglas y riesgo automatizados"],
+  [7, 7.5, "BACK OFFICE", "Operación sin papeles"],
+  [7.5, 9.5, "CORE LENDING", "Cuotas, cobros y recibos"],
+  [9.5, 10, "SUCURSAL VIRTUAL", "Autogestión del cliente"],
+  [10, 10.5, "COBRANZAS", "Gestión de la mora"],
+  [10.5, 12, "CONTACT FLOW", "Campañas automáticas"],
+];
+
+// Subtitles: each voice phrase split in chunks (timed by length).
+const TROZOS: string[][] = [
+  ["¿Querés financiar la venta de tus productos", "o hacer crecer tu negocio de préstamos?"],
+  ["Hoy es más simple de lo que imaginás:"],
+  ["procesos automatizados,", "validaciones más robustas y cero papeles."],
+  ["Decidí mejor y más rápido,", "sin necesidad de un gran equipo de especialistas."],
+  ["Una suite creada por quienes gestionaron estos procesos", "durante años en las principales entidades financieras."],
+  ["Todo el ciclo del crédito,", "en una sola plataforma."],
+  ["Agendá una demo en axonia.com.ar"],
+];
+const SUBS: { t: string; de: number; a: number }[] = VOZ.flatMap(([a, b, en], i) => {
+  const total = TROZOS[i].reduce((n, t) => n + t.length, 0);
+  let t0 = en;
+  return TROZOS[i].map((t) => {
+    const d = ((b - a) * t.length) / total;
+    const s = { t, de: Math.round(t0 * FPS), a: Math.round((t0 + d) * FPS) };
+    t0 += d;
+    return s;
+  });
+});
+
+const Titulo: React.FC<{ etiqueta: string; frase: string; dur: number }> = ({ etiqueta, frase, dur }) => {
+  const f = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const v = height > width;
+  const sale = interpolate(f, [dur - 6, dur], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const a = interpolate(f, [2, 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const b = interpolate(f, [5, 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  return (
+    <div style={{ position: "absolute", left: 0, right: 0, top: v ? 150 : 56, textAlign: "center", fontFamily: "Inter, sans-serif", opacity: sale }}>
+      <div style={{ color: NARANJA, fontSize: v ? 30 : 24, fontWeight: 700, letterSpacing: v ? 6 : 5, opacity: a, transform: `translateY(${(1 - a) * 10}px)` }}>{etiqueta}</div>
+      <div style={{ color: "white", fontSize: v ? 62 : 56, fontWeight: 800, letterSpacing: -0.5, marginTop: v ? 12 : 8, opacity: b, transform: `translateY(${(1 - b) * 14}px)`, textShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>{frase}</div>
+    </div>
+  );
+};
+
+const Subtitulo: React.FC<{ texto: string; dur: number }> = ({ texto, dur }) => {
+  const f = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const v = height > width;
+  const o = interpolate(f, [0, 3, dur - 3, dur], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: v ? 170 : 54, display: "flex", justifyContent: "center", opacity: o }}>
+      <div style={{ maxWidth: v ? 900 : 1500, padding: v ? "14px 28px" : "10px 26px", borderRadius: 14, background: "rgba(12,14,20,0.72)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: v ? 44 : 38, lineHeight: 1.3, textAlign: "center" }}>{texto}</div>
+    </div>
+  );
+};
+
 const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: number; acerca: boolean | null }> = ({ p, props, entra, dur, acerca }) => {
   const f = useCurrentFrame();
   const o = entra ? interpolate(f, [0, FUNDIDO], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
@@ -111,6 +175,20 @@ export const Integral: React.FC<Props> = (props) => {
           </Sequence>
         );
       })}
+      {TITULOS.map(([de, a, etiqueta, frase]) => {
+        const ini = Math.round(compas(de));
+        const fin = Math.round(compas(a));
+        return (
+          <Sequence key={etiqueta} from={ini} durationInFrames={fin - ini}>
+            <Titulo etiqueta={etiqueta} frase={frase} dur={fin - ini} />
+          </Sequence>
+        );
+      })}
+      {SUBS.map((s) => (
+        <Sequence key={s.t} from={s.de} durationInFrames={s.a - s.de}>
+          <Subtitulo texto={s.t} dur={s.a - s.de} />
+        </Sequence>
+      ))}
       {/* Voice-over, phrase by phrase, each placed on its scene. */}
       {VOZ.map(([a, b, en], i) => (
         <Sequence key={`voz-${i}`} from={Math.round(en * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6}>
