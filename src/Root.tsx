@@ -21,6 +21,7 @@ import {
   ConsolidacionDeudas,
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
+import { INTEGRAL_FRAMES, Integral } from "./Integral";
 import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
 import {
   ONBOARDING_FRAMES,
@@ -287,6 +288,16 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      <Composition
+        // npx remotion render Integral (25 s, Javier's journey with music)
+        id="Integral"
+        component={Integral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={INTEGRAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
       />
       <Composition
         // npx remotion render OnboardingApp
