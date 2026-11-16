@@ -23,6 +23,7 @@ import {
 } from "./ConsolidacionDeudas";
 import { INTEGRAL_FRAMES, Integral } from "./Integral";
 import { GANCHO_FRAMES, GanchoCaos } from "./GanchoCaos";
+import { GANCHO_FOTO_FRAMES, GanchoFoto } from "./GanchoFoto";
 import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
 import {
   ONBOARDING_FRAMES,
@@ -289,6 +290,56 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      <Composition
+        // Photo hook of the integral video, look "a" (16:9)
+        id="GanchoFotoA"
+        component={GanchoFoto}
+        defaultProps={{ variante: "a" as const }}
+        durationInFrames={GANCHO_FOTO_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Photo hook of the integral video, look "b" (16:9)
+        id="GanchoFotoB"
+        component={GanchoFoto}
+        defaultProps={{ variante: "b" as const }}
+        durationInFrames={GANCHO_FOTO_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Photo hook of the integral video, look "c" (16:9)
+        id="GanchoFotoC"
+        component={GanchoFoto}
+        defaultProps={{ variante: "c" as const }}
+        durationInFrames={GANCHO_FOTO_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Photo hook of the integral video, look "d" (16:9)
+        id="GanchoFotoD"
+        component={GanchoFoto}
+        defaultProps={{ variante: "d" as const }}
+        durationInFrames={GANCHO_FOTO_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Photo hook of the integral video, look "e" (16:9)
+        id="GanchoFotoE"
+        component={GanchoFoto}
+        defaultProps={{ variante: "e" as const }}
+        durationInFrames={GANCHO_FOTO_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
       />
       <Composition
         // Hook of the integral video (chaos to order), 16:9
