@@ -18,7 +18,7 @@ const Gancho: React.FC<Props> = () => (
     conVideo
     video="videos/escritorio.mp4"
     titulo="¿La mora sube y las ventas no acompañan?"
-    desdeBajada={93}
+    desdeBajada={46}
     bajada={
       <>
         Lo que antes te llevaba un mes, hoy lo resolvés <span style={{ color: NARANJA, fontWeight: 700 }}>en horas</span>.
