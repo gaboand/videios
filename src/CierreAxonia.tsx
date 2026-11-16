@@ -5,7 +5,7 @@ import { FondoAbstracto } from "./FondoAbstracto";
 
 // Brand closing for the integral video (16:9 or 9:16): the Axonia logo
 // arrives spinning from the background (as in LogoAxonia), moves up, the four
-// service pills appear and then the "Agendá una demo" button.
+// service pills appear and then the "Agendá una demo" button with the website.
 
 const LOGO_W = 2028;
 const LOGO_H = 693;
@@ -59,6 +59,7 @@ export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris" }> = ({ fon
   // Soft pulse once the button is in, inviting the click.
   const pulso = frame > BOTON + 20 ? 1 + 0.03 * Math.max(0, Math.sin((frame - BOTON - 20) / 7)) : 1;
   const halo = interpolate((frame - BOTON - 20) % 40, [0, 40], [0, 1], clamp);
+  const web = interpolate(frame, [BOTON + 14, BOTON + 30], [0, 1], clamp);
 
   return (
     <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
@@ -168,6 +169,24 @@ export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris" }> = ({ fon
           </svg>
           Agendá una demo
         </div>
+      </div>
+      {/* Website under the button. */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: L.botonY + L.botonH + (L.fila ? 34 : 44),
+          textAlign: "center",
+          color: "rgba(255,255,255,0.85)",
+          fontWeight: 600,
+          fontSize: L.fuenteBoton * 0.8,
+          letterSpacing: 2,
+          opacity: web,
+          transform: `translateY(${(1 - web) * 16}px)`,
+        }}
+      >
+        axonia.com.ar
       </div>
     </AbsoluteFill>
   );
