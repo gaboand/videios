@@ -94,7 +94,7 @@ export const Integral: React.FC<Props> = (props) => {
       })}
       <Audio
         src={staticFile("musica/leave-the-key.mp3")}
-        volume={(f) => interpolate(f, [INTEGRAL_FRAMES - 30, INTEGRAL_FRAMES], [0.5, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
+        volume={(f) => interpolate(f, [INTEGRAL_FRAMES - 30, INTEGRAL_FRAMES], [0.15, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
       />
     </AbsoluteFill>
   );
