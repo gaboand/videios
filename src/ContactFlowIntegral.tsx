@@ -67,27 +67,27 @@ const TITULOS: [number, number, string, string][] = [
 // Voice-over phrases: [from, to] in the recording (s), start in the video (s).
 const VOZ: [number, number, number][] = [
   // ¿Tu negocio ya no rinde como antes?
-  [0, 2.11, 0.3],
+  [0, 2.18, 0.3],
   // Hoy, podés contactar a miles de clientes en horas.
-  [2.53, 5.55, 2.75],
-  // Tenés que saber que ya cambió la manera de hablar con tus clientes.
-  [5.97, 9.02, 6.0],
+  [2.69, 5.65, 2.75],
+  // Tenés que saber que ya cambió la manera de hablar con tu cartera.
+  [6.11, 9.12, 6.0],
   // Antes necesitabas un call center con muchos agentes, tareas manuales...
-  [9.44, 15.75, 9.8],
+  [9.53, 16.02, 9.6],
   // Todo eso se acabó.
-  [16.11, 17.41, 16.6],
+  [16.44, 17.67, 16.6],
   // Lo que antes hacías en un mes, ahora lo hacés en horas.
-  [17.77, 20.69, 18.3],
+  [18.01, 21.01, 18.3],
   // Tus campañas se programan, tus procesos se automatizan y tus resultados mejoran...
-  [20.99, 26.17, 21.7],
+  [21.33, 26.43, 21.8],
   // Agendá una demo en axonia punto com punto ar.
-  [26.48, 29.39, 28.4],
+  [26.84, 29.48, 28.4],
 ];
 const TROZOS: string[][] = [
   ["¿Tu negocio ya no rinde como antes?"],
   ["Hoy, podés contactar a miles de clientes en horas."],
-  ["Tenés que saber que ya cambió", "la manera de hablar con tus clientes."],
-  ["Antes necesitabas un call center con muchos agentes,", "tareas manuales, muchos sistemas", "y procesos complejos."],
+  ["Tenés que saber que ya cambió", "la manera de hablar con tu cartera."],
+  ["Antes necesitabas un call center con muchos agentes,", "tareas manuales, distintos sistemas", "y procesos complejos."],
   ["Todo eso se acabó."],
   ["Lo que antes hacías en un mes,", "ahora lo hacés en horas."],
   ["Tus campañas se programan,", "tus procesos se automatizan", "y tus resultados mejoran más rápidamente."],
