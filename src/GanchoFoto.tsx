@@ -78,19 +78,25 @@ export const GanchoFoto: React.FC<{ variante: Variante }> = ({ variante }) => {
   }
 
   if (variante === "c") {
-    // Editorial: framed photo on the left, text column on the right.
-    const fw = width * 0.58;
-    const fh = fw * 0.62;
+    // Editorial: the photo framed on the current wavy background, with the
+    // text beside it (16:9) or below it (9:16).
+    const vertical = height > width;
+    const fw = vertical ? width - 120 : width * 0.56;
+    const fh = vertical ? fw * 0.66 : fw * 0.62;
+    const fx = vertical ? 60 : 100;
+    const fy = vertical ? 440 : (height - fh) / 2;
     return (
       <AbsoluteFill style={{ fontFamily: "Inter, sans-serif", opacity: entra }}>
         <FondoAbstracto paleta="gris" estilo="ondas" />
-        <div style={{ position: "absolute", left: 90, top: (height - fh) / 2 + 40, width: fw, height: fh, borderRadius: 22, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.15)" }}>
+        <div style={{ position: "absolute", left: fx, top: fy, width: fw, height: fh, borderRadius: 22, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.15)" }}>
           <Foto w={fw} h={fh} z={empuje * 1.05} ox={820} oy={460} />
         </div>
-        <div style={{ position: "absolute", left: 90 + fw + 70, right: 90, top: height / 2 - 120 }}>
-          <Entra desde={14} style={{ color: "white", fontSize: 54, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5 }}>{L1}</Entra>
-          <Entra desde={34} style={{ width: 70, height: 5, borderRadius: 3, background: NARANJA, margin: "26px 0" }}>{null}</Entra>
-          <Entra desde={48} style={{ color: "rgba(255,255,255,0.85)", fontSize: 36, fontWeight: 500, lineHeight: 1.3 }}>{L2}</Entra>
+        <div style={vertical ? { position: "absolute", left: 80, right: 80, top: fy + fh + 80 } : { position: "absolute", left: fx + fw + 80, right: 100, top: height / 2 - 150 }}>
+          <Entra desde={14} style={{ color: "white", fontSize: vertical ? 76 : 66, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>{L1}</Entra>
+          <Entra desde={34} style={{ width: 80, height: 6, borderRadius: 3, background: NARANJA, margin: "30px 0" }}>{null}</Entra>
+          <Entra desde={48} style={{ color: "rgba(255,255,255,0.9)", fontSize: vertical ? 50 : 44, fontWeight: 500, lineHeight: 1.25 }}>
+            Que el crédito <span style={{ color: NARANJA, fontWeight: 700 }}>no la frene</span>.
+          </Entra>
         </div>
       </AbsoluteFill>
     );

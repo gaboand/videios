@@ -6,7 +6,7 @@ import { CoreLendingDinamico } from "./CoreLending";
 import { MotorDinamico } from "./MotorDecision";
 import { OnboardingDinamico } from "./OnboardingApp";
 import { CierreAxonia } from "./CierreAxonia";
-import { GanchoCaos } from "./GanchoCaos";
+import { GanchoFoto } from "./GanchoFoto";
 import { Suite360 } from "./Suite360";
 import { SucursalDinamico } from "./SucursalVirtual";
 import { TiendaDinamico } from "./TiendaAxonia";
@@ -14,7 +14,7 @@ import { TiendaDinamico } from "./TiendaAxonia";
 // Integral video (30 s, 16:9 and 9:16): Javier Perez's journey through the suite, made
 // of pieces of the dynamic videos, cut on the bars of the music
 // ("Leave the Key", 129 BPM: a bar is 1.86 s, the drop lands at 22.54 s).
-// It opens with the chaos-to-order hook over the soft intro (two bars). Core
+// It opens with the point-of-sale photo hook over the soft intro (two bars). Core
 // products (onboarding, engine, core lending) get two bars, contact flow one
 // and a half, the store one and the rest half a bar; the Suite 360 pull-back
 // lands on the drop and the brand closing (logo, pills, "Agendá una demo")
@@ -31,8 +31,9 @@ const FUNDIDO = 8;
 // [component, source start frame, start bar, end bar]; bar 0 starts the video.
 type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: number; de: number; a: number; extra?: Record<string, unknown> };
 const PIEZAS: Pieza[] = [
-  // Hook: loose papers land on the Suite 360 map, "Todo el ciclo del crédito".
-  { C: GanchoCaos, desde: 0, de: 0, a: 2 },
+  // Hook: point-of-sale photo framed on the background, "La venta se define
+  // en el mostrador. Que el crédito no la frene."
+  { C: GanchoFoto, desde: 0, de: 0, a: 2, extra: { variante: "c" } },
   // Phone catalog (the product gets picked), then "Agregar al carrito".
   { C: TiendaDinamico, desde: 236, de: 2, a: 2.5 },
   { C: TiendaDinamico, desde: 300, de: 2.5, a: 3 },
@@ -87,7 +88,7 @@ export const Integral: React.FC<Props> = (props) => {
         const fin = p.a >= 99 ? INTEGRAL_FRAMES : Math.round(compas(p.a) + FUNDIDO / 2);
         return (
           <Sequence key={i} from={ini} durationInFrames={fin - ini}>
-            <Pedazo p={p} props={props} entra={i > 0} dur={fin - ini} acerca={p.C === Suite360 || p.C === CierreAxonia || p.C === GanchoCaos ? null : i % 2 === 0} />
+            <Pedazo p={p} props={props} entra={i > 0} dur={fin - ini} acerca={p.C === Suite360 || p.C === CierreAxonia || p.C === GanchoFoto ? null : i % 2 === 0} />
           </Sequence>
         );
       })}

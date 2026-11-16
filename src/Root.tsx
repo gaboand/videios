@@ -292,6 +292,16 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
       />
       <Composition
+        // Photo hook of the integral video, editorial look (9:16)
+        id="GanchoFotoCMovil"
+        component={GanchoFoto}
+        defaultProps={{ variante: "c" as const }}
+        durationInFrames={GANCHO_FOTO_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
         // Photo hook of the integral video, look "a" (16:9)
         id="GanchoFotoA"
         component={GanchoFoto}
