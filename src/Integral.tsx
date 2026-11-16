@@ -18,8 +18,7 @@ import { TiendaDinamico } from "./TiendaAxonia";
 // of pieces of the dynamic videos, cut on the bars of the music
 // ("Leave the Key", 129 BPM: a bar is 1.86 s, the drop lands at 22.54 s).
 // It opens with the point-of-sale photo hook over the soft intro (two bars). Core
-// products (onboarding, engine, core lending) get two bars, contact flow one
-// and a half, the store one and the rest half a bar; the Suite 360 pull-back
+// products get between one and two bars and the rest one bar each; the Suite 360 pull-back
 // lands on the drop and the brand closing (logo, pills, "Agendá una demo")
 // ends it.
 
@@ -35,32 +34,32 @@ const NARANJA = "#FF8C42";
 // [component, source start frame, start bar, end bar]; bar 0 starts the video.
 type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: number; de: number; a: number; extra?: Record<string, unknown> };
 const PIEZAS: Pieza[] = [
-  // Hook: point-of-sale photo framed on the background, "La venta se define
+  // Hook: point-of-sale clip framed on the background, "La venta se define
   // en el mostrador. Que el crédito no la frene."
   { C: GanchoEditorial, desde: 0, de: 0, a: 2 },
   // Phone catalog (the product gets picked), then "Agregar al carrito".
   { C: TiendaDinamico, desde: 236, de: 2, a: 2.5 },
   { C: TiendaDinamico, desde: 300, de: 2.5, a: 3 },
   // Data with the brand change, then the identity check ends with the check.
-  { C: OnboardingDinamico, desde: 20, de: 3, a: 4 },
-  { C: OnboardingDinamico, desde: 545, de: 4, a: 5 },
+  { C: OnboardingDinamico, desde: 20, de: 3, a: 3.75 },
+  { C: OnboardingDinamico, desde: 555, de: 3.75, a: 4.5 },
   // The engine: workflow building, then the risk matrix changes.
-  { C: MotorDinamico, desde: 300, de: 5, a: 6 },
-  { C: MotorDinamico, desde: 462, de: 6, a: 7 },
-  // His folder lands in Tesorería with the check.
-  { C: BackOfficeDinamico, desde: 238, de: 7, a: 7.5, extra: { sinSaltos: true } },
+  { C: MotorDinamico, desde: 300, de: 4.5, a: 5.5 },
+  { C: MotorDinamico, desde: 462, de: 5.5, a: 6.5 },
+  // The folder goes to Tesorería with the check.
+  { C: BackOfficeDinamico, desde: 215, de: 6.5, a: 7.5, extra: { sinSaltos: true } },
   // Payment plan, collection and receipt sent.
-  { C: CoreLendingDinamico, desde: 146, de: 7.5, a: 9.5 },
-  // His home banking with the loan and the insurance banner.
-  { C: SucursalDinamico, desde: 55, de: 9.5, a: 10 },
+  { C: CoreLendingDinamico, desde: 146, de: 7.5, a: 9 },
+  // Home banking with the loan and the insurance banner.
+  { C: SucursalDinamico, desde: 40, de: 9, a: 10 },
   // Collections: payment promise.
-  { C: CollectionsDinamico, desde: 305, de: 10, a: 10.5 },
+  { C: CollectionsDinamico, desde: 290, de: 10, a: 11 },
   // Contact Flow: call room, then segmentation.
-  { C: ContactFlowDinamico, desde: 40, de: 10.5, a: 11 },
-  { C: ContactFlowDinamico, desde: 570, de: 11, a: 12 },
+  { C: ContactFlowDinamico, desde: 40, de: 11, a: 11.5 },
+  { C: ContactFlowDinamico, desde: 570, de: 11.5, a: 12 },
   // Drop: pull-back to the whole suite.
   { C: Suite360, desde: 572, de: 12, a: 13, extra: { generalAmplio: true } },
-  // Brand closing: logo, service pills and "Agendá una demo".
+  // Brand closing: logo, service pills, "Agendá una demo" and the website.
   { C: CierreAxonia, desde: 0, de: 13, a: 99 },
 ];
 
@@ -89,13 +88,13 @@ const VOZ: [number, number, number][] = [
 // On-screen titles in the free top band: [start bar, end bar, label, line].
 const TITULOS: [number, number, string, string][] = [
   [2, 3, "TIENDA ONLINE", "Financiación en el checkout"],
-  [3, 5, "ONBOARDING DIGITAL", "Alta y validación de identidad"],
-  [5, 7, "MOTOR DE DECISIÓN", "Reglas y riesgo automatizados"],
-  [7, 7.5, "BACK OFFICE", "Operación sin papeles"],
-  [7.5, 9.5, "CORE LENDING", "Cuotas, cobros y recibos"],
-  [9.5, 10, "SUCURSAL VIRTUAL", "Autogestión del cliente"],
-  [10, 10.5, "COBRANZAS", "Gestión de la mora"],
-  [10.5, 12, "CONTACT FLOW", "Campañas automáticas"],
+  [3, 4.5, "ONBOARDING DIGITAL", "Ofertas personalizadas, validaciones y firma digital"],
+  [4.5, 6.5, "MOTOR DE DECISIÓN", "Matriz de segmentación, ofertas por riesgo y Champion Challenger"],
+  [6.5, 7.5, "BACK OFFICE", "Procesos automatizados y sin papeles"],
+  [7.5, 9, "CORE LENDING", "Multicartera, consolidaciones y contabilidad"],
+  [9, 10, "SUCURSAL VIRTUAL", "Autogestión del cliente"],
+  [10, 11, "COBRANZAS", "Segmentación y administración de todos los ciclos de mora"],
+  [11, 12, "CONTACT FLOW", "Campañas automáticas y agente de IA"],
 ];
 
 // Subtitles: each voice phrase split in chunks (timed by length).
@@ -129,7 +128,7 @@ const Titulo: React.FC<{ etiqueta: string; frase: string; dur: number }> = ({ et
   return (
     <div style={{ position: "absolute", left: 0, right: 0, top: v ? 150 : 56, textAlign: "center", fontFamily: "Inter, sans-serif", opacity: sale }}>
       <div style={{ color: NARANJA, fontSize: v ? 30 : 24, fontWeight: 700, letterSpacing: v ? 6 : 5, opacity: a, transform: `translateY(${(1 - a) * 10}px)` }}>{etiqueta}</div>
-      <div style={{ color: "white", fontSize: v ? 62 : 56, fontWeight: 800, letterSpacing: -0.5, marginTop: v ? 12 : 8, opacity: b, transform: `translateY(${(1 - b) * 14}px)`, textShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>{frase}</div>
+      <div style={{ color: "white", fontSize: v ? 50 : 46, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5, maxWidth: v ? 940 : 1500, margin: `${v ? 12 : 8}px auto 0`, opacity: b, transform: `translateY(${(1 - b) * 14}px)`, textShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>{frase}</div>
     </div>
   );
 };
