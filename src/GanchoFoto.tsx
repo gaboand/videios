@@ -4,9 +4,9 @@ import "@fontsource/inter/700.css";
 import "@fontsource/inter/800.css";
 import { FondoAbstracto } from "./FondoAbstracto";
 
-// Photo hook of the integral video: the moment of doubt at a store counter
-// (the customer looks at his wallet while the seller explains), with a slow
-// push-in and two lines of text. Five looks to choose from (variante a-e).
+// Photo hook of the integral video (B2B): a point of sale where the customer
+// hesitates, with a slow push-in and a two-beat line: "La venta se define en el
+// mostrador." / "Que el crédito no la frene.". Five looks to choose from (variante a-e).
 
 const NARANJA = "#FF8C42";
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -15,8 +15,8 @@ const FOTO_W = 1672;
 const FOTO_H = 941;
 export const GANCHO_FOTO_FRAMES = 118;
 
-const L1 = "Javier quiere llevarse algo hoy.";
-const L2 = "¿Tu entidad le puede dar el crédito en el momento?";
+const L1 = "La venta se define en el mostrador.";
+const L2 = "Que el crédito no la frene.";
 
 type Variante = "a" | "b" | "c" | "d" | "e";
 
@@ -67,8 +67,10 @@ export const GanchoFoto: React.FC<{ variante: Variante }> = ({ variante }) => {
         <div style={{ position: "absolute", left: 110, bottom: 110, display: "flex", gap: 28 }}>
           <div style={{ width: 6, borderRadius: 3, background: NARANJA, transform: `scaleY(${barra})`, transformOrigin: "top" }} />
           <div>
-            <Entra desde={14} style={{ color: "white", fontSize: 60, fontWeight: 800, letterSpacing: -0.5 }}>{L1}</Entra>
-            <Entra desde={48} style={{ color: "rgba(255,255,255,0.85)", fontSize: 40, fontWeight: 500, marginTop: 12 }}>{L2}</Entra>
+            <Entra desde={14} style={{ color: "white", fontSize: 84, fontWeight: 800, letterSpacing: -1.5, lineHeight: 1.05 }}>{L1}</Entra>
+            <Entra desde={48} style={{ color: "rgba(255,255,255,0.9)", fontSize: 56, fontWeight: 500, marginTop: 16, letterSpacing: -0.5 }}>
+              Que el crédito <span style={{ color: NARANJA, fontWeight: 700 }}>no la frene</span>.
+            </Entra>
           </div>
         </div>
       </AbsoluteFill>
@@ -107,7 +109,7 @@ export const GanchoFoto: React.FC<{ variante: Variante }> = ({ variante }) => {
         <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: barra, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ position: "absolute", color: "white", fontSize: 44, fontWeight: 500, opacity: sub1 }}>{L1}</div>
           <div style={{ position: "absolute", color: "white", fontSize: 44, fontWeight: 500, opacity: sub2 }}>
-            ¿Tu entidad le puede dar el crédito <span style={{ color: NARANJA, fontWeight: 700 }}>en el momento</span>?
+            Que el crédito <span style={{ color: NARANJA, fontWeight: 700 }}>no la frene</span>.
           </div>
         </div>
       </AbsoluteFill>
