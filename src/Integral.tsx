@@ -6,7 +6,7 @@ import { CoreLendingDinamico } from "./CoreLending";
 import { MotorDinamico } from "./MotorDecision";
 import { OnboardingDinamico } from "./OnboardingApp";
 import { CierreAxonia } from "./CierreAxonia";
-import { GanchoFoto } from "./GanchoFoto";
+import { GanchoEditorial } from "./GanchoFoto";
 import { Suite360 } from "./Suite360";
 import { SucursalDinamico } from "./SucursalVirtual";
 import { TiendaDinamico } from "./TiendaAxonia";
@@ -33,7 +33,7 @@ type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: n
 const PIEZAS: Pieza[] = [
   // Hook: point-of-sale photo framed on the background, "La venta se define
   // en el mostrador. Que el crédito no la frene."
-  { C: GanchoFoto, desde: 0, de: 0, a: 2, extra: { variante: "c" } },
+  { C: GanchoEditorial, desde: 0, de: 0, a: 2 },
   // Phone catalog (the product gets picked), then "Agregar al carrito".
   { C: TiendaDinamico, desde: 236, de: 2, a: 2.5 },
   { C: TiendaDinamico, desde: 300, de: 2.5, a: 3 },
@@ -88,7 +88,7 @@ export const Integral: React.FC<Props> = (props) => {
         const fin = p.a >= 99 ? INTEGRAL_FRAMES : Math.round(compas(p.a) + FUNDIDO / 2);
         return (
           <Sequence key={i} from={ini} durationInFrames={fin - ini}>
-            <Pedazo p={p} props={props} entra={i > 0} dur={fin - ini} acerca={p.C === Suite360 || p.C === CierreAxonia || p.C === GanchoFoto ? null : i % 2 === 0} />
+            <Pedazo p={p} props={props} entra={i > 0} dur={fin - ini} acerca={p.C === Suite360 || p.C === CierreAxonia || p.C === GanchoEditorial ? null : i % 2 === 0} />
           </Sequence>
         );
       })}

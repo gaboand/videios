@@ -139,3 +139,6 @@ export const GanchoFoto: React.FC<{ variante: Variante }> = ({ variante }) => {
     </AbsoluteFill>
   );
 };
+
+// Editorial look with the props of the other pieces (used by the integral video).
+export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () => <GanchoFoto variante="c" />;
