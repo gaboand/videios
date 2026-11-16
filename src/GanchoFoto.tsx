@@ -1,4 +1,4 @@
-import { AbsoluteFill, Easing, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Easing, Img, interpolate, OffthreadVideo, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/700.css";
 import "@fontsource/inter/800.css";
@@ -37,7 +37,9 @@ const Foto: React.FC<{ w: number; h: number; z: number; ox?: number; oy?: number
   return <Img src={FOTO} style={{ position: "absolute", left, top, width: FOTO_W * cubre, height: FOTO_H * cubre, maxWidth: "none", maxHeight: "none", filter: filtro }} />;
 };
 
-export const GanchoFoto: React.FC<{ variante: Variante }> = ({ variante }) => {
+// conVideo: the editorial look shows the store clip (first part, the doubt)
+// instead of the photo; the clip already has its own camera move.
+export const GanchoFoto: React.FC<{ variante: Variante; conVideo?: boolean }> = ({ variante, conVideo }) => {
   const frame = useCurrentFrame();
   const { width, height, durationInFrames } = useVideoConfig();
   const empuje = interpolate(frame, [0, durationInFrames], [1, 1.08], clamp);
@@ -89,7 +91,11 @@ export const GanchoFoto: React.FC<{ variante: Variante }> = ({ variante }) => {
       <AbsoluteFill style={{ fontFamily: "Inter, sans-serif", opacity: entra }}>
         <FondoAbstracto paleta="gris" estilo="ondas" />
         <div style={{ position: "absolute", left: fx, top: fy, width: fw, height: fh, borderRadius: 22, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.15)" }}>
-          <Foto w={fw} h={fh} z={empuje * 1.05} ox={820} oy={460} />
+          {conVideo ? (
+            <OffthreadVideo src={staticFile("videos/mostrador.mp4")} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <Foto w={fw} h={fh} z={empuje * 1.05} ox={820} oy={460} />
+          )}
         </div>
         <div style={vertical ? { position: "absolute", left: 80, right: 80, top: fy + fh + 80 } : { position: "absolute", left: fx + fw + 80, right: 100, top: height / 2 - 150 }}>
           <Entra desde={14} style={{ color: "white", fontSize: vertical ? 76 : 66, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>{L1}</Entra>
@@ -141,4 +147,4 @@ export const GanchoFoto: React.FC<{ variante: Variante }> = ({ variante }) => {
 };
 
 // Editorial look with the props of the other pieces (used by the integral video).
-export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () => <GanchoFoto variante="c" />;
+export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () => <GanchoFoto variante="c" conVideo />;
