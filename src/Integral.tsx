@@ -50,16 +50,16 @@ const PIEZAS: Pieza[] = [
   { C: Suite360, desde: 572, de: 12, a: 99, extra: { generalAmplio: true } },
 ];
 
-// Slow zoom on each piece, alternating in and out, around the device centre
-// (62% of the height) so the top stays free for titles.
-const ZOOM = 0.06;
+// Quick zoom on each piece (fast start, soft stop), alternating in and out, around the device centre
+// anchored on the 20% line so the device never climbs into the title area.
+const ZOOM = 0.12;
 const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: number; acerca: boolean | null }> = ({ p, props, entra, dur, acerca }) => {
   const f = useCurrentFrame();
   const o = entra ? interpolate(f, [0, FUNDIDO], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
-  const k = interpolate(f, [0, dur], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.sin) });
+  const k = interpolate(f, [0, dur * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const z = acerca === null ? 1 : 1 + ZOOM * (acerca ? k : 1 - k);
   return (
-    <AbsoluteFill style={{ opacity: o, transform: `scale(${z})`, transformOrigin: "50% 62%" }}>
+    <AbsoluteFill style={{ opacity: o, transform: `scale(${z})`, transformOrigin: "50% 20%" }}>
       <Freeze frame={0}>
         <Sequence from={-(p.desde + f)}>
           <p.C {...props} {...p.extra} />
