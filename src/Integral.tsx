@@ -24,10 +24,10 @@ export const INTEGRAL_FRAMES = 750;
 const FUNDIDO = 8;
 
 // [component, source start frame, start bar, end bar]; bar 0 starts the video.
-type Pieza = { C: React.ComponentType<Props>; desde: number; de: number; a: number };
+type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: number; de: number; a: number; extra?: Record<string, unknown> };
 const PIEZAS: Pieza[] = [
-  // Pays the phone with a loan, purchase confirmed.
-  { C: TiendaDinamico, desde: 478, de: 0, a: 1 },
+  // Chooses to pay the phone with a loan (without the purchase end).
+  { C: TiendaDinamico, desde: 418, de: 0, a: 1 },
   // Data with the brand change, then the identity check ends with the check.
   { C: OnboardingDinamico, desde: 20, de: 1, a: 2 },
   { C: OnboardingDinamico, desde: 545, de: 2, a: 3 },
@@ -35,7 +35,7 @@ const PIEZAS: Pieza[] = [
   { C: MotorDinamico, desde: 300, de: 3, a: 4 },
   { C: MotorDinamico, desde: 462, de: 4, a: 5 },
   // His folder goes to Tesorería with the check.
-  { C: BackOfficeDinamico, desde: 215, de: 5, a: 6 },
+  { C: BackOfficeDinamico, desde: 215, de: 5, a: 6, extra: { sinSaltos: true } },
   // Payment plan, collection and receipt sent.
   { C: CoreLendingDinamico, desde: 146, de: 6, a: 8 },
   // His home banking with the loan and the insurance banner.
@@ -46,7 +46,7 @@ const PIEZAS: Pieza[] = [
   { C: ContactFlowDinamico, desde: 30, de: 10, a: 11 },
   { C: ContactFlowDinamico, desde: 570, de: 11, a: 12 },
   // Drop: pull-back to the whole suite.
-  { C: Suite360, desde: 572, de: 12, a: 99 },
+  { C: Suite360, desde: 572, de: 12, a: 99, extra: { generalAmplio: true } },
 ];
 
 const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean }> = ({ p, props, entra }) => {
@@ -56,7 +56,7 @@ const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean }> = ({ p, props
     <AbsoluteFill style={{ opacity: o }}>
       <Freeze frame={0}>
         <Sequence from={-(p.desde + f)}>
-          <p.C {...props} />
+          <p.C {...props} {...p.extra} />
         </Sequence>
       </Freeze>
     </AbsoluteFill>
@@ -78,7 +78,7 @@ export const Integral: React.FC<Props> = (props) => {
       })}
       <Audio
         src={staticFile("musica/leave-the-key.mp3")}
-        volume={(f) => interpolate(f, [INTEGRAL_FRAMES - 30, INTEGRAL_FRAMES], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
+        volume={(f) => interpolate(f, [INTEGRAL_FRAMES - 30, INTEGRAL_FRAMES], [0.5, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
       />
     </AbsoluteFill>
   );

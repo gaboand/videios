@@ -1247,7 +1247,8 @@ const SALTOS_CEL: Salto[] = [{ x: 8, y: 436, w: 334, h: 84, f: [248, 262, 280, 2
 
 const PantallaBO: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <Pagina frame={frame} /> : <PaginaMovil frame={frame} />);
 
-export const BackOfficeDinamico: React.FC<z.infer<typeof backOfficeSchema>> = ({ fondo, paleta }) => {
+// sinSaltos: no card lifting out of the screen (used by the integral video).
+export const BackOfficeDinamico: React.FC<z.infer<typeof backOfficeSchema> & { sinSaltos?: boolean }> = ({ fondo, paleta, sinSaltos }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const tab = width > height;
@@ -1282,7 +1283,7 @@ export const BackOfficeDinamico: React.FC<z.infer<typeof backOfficeSchema>> = ({
             <PantallaBO frame={frame} tab={tab} />
           </Dispositivo>
           <div style={{ position: "absolute", left: MARCO, top: MARCO, width: w, height: h, transformStyle: "preserve-3d" }}>
-            {(tab ? SALTOS_TAB : SALTOS_CEL).map((s, i) => {
+            {(sinSaltos ? [] : tab ? SALTOS_TAB : SALTOS_CEL).map((s, i) => {
               if (frame <= s.f[0] || frame >= s.f[3]) {
                 return null;
               }
