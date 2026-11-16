@@ -22,6 +22,7 @@ import {
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
 import { INTEGRAL_FRAMES, Integral } from "./Integral";
+import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { GANCHO_FRAMES, GanchoCaos } from "./GanchoCaos";
 import { GANCHO_FOTO_FRAMES, GanchoFoto } from "./GanchoFoto";
 import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
@@ -367,6 +368,26 @@ export const RemotionRoot: React.FC = () => {
         component={GanchoCaos}
         defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
         durationInFrames={GANCHO_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // Contact Flow ad with hook, voice-over and closing (16:9)
+        id="ContactFlowIntegral"
+        component={ContactFlowIntegral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={CF_INTEGRAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Contact Flow ad with hook, voice-over and closing (9:16)
+        id="ContactFlowIntegralMovil"
+        component={ContactFlowIntegral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={CF_INTEGRAL_FRAMES}
         fps={30}
         width={1080}
         height={1920}

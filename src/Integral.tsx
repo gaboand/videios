@@ -22,17 +22,17 @@ import { TiendaDinamico } from "./TiendaAxonia";
 // lands on the drop and the brand closing (logo, pills, "Agendá una demo")
 // ends it.
 
-type Props = { fondo: "ondas"; paleta: "gris" };
-const FPS = 30;
+export type Props = { fondo: "ondas"; paleta: "gris" };
+export const FPS = 30;
 const COMPAS = (60 / 129.03) * 4 * FPS; // frames per bar
 const FASE = 0.225 * FPS; // first downbeat
-const compas = (n: number) => FASE + n * COMPAS;
+export const compas = (n: number) => FASE + n * COMPAS;
 export const INTEGRAL_FRAMES = 900;
-const FUNDIDO = 8;
+export const FUNDIDO = 8;
 const NARANJA = "#FF8C42";
 
 // [component, source start frame, start bar, end bar]; bar 0 starts the video.
-type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: number; de: number; a: number; extra?: Record<string, unknown> };
+export type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: number; de: number; a: number; extra?: Record<string, unknown> };
 const PIEZAS: Pieza[] = [
   // Hook: point-of-sale clip framed on the background, "La venta se define
   // en el mostrador. Que el crédito no la frene."
@@ -118,7 +118,7 @@ const SUBS: { t: string; de: number; a: number }[] = VOZ.flatMap(([a, b, en], i)
   });
 });
 
-const Titulo: React.FC<{ etiqueta: string; frase: string; dur: number }> = ({ etiqueta, frase, dur }) => {
+export const Titulo: React.FC<{ etiqueta: string; frase: string; dur: number }> = ({ etiqueta, frase, dur }) => {
   const f = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const v = height > width;
@@ -133,7 +133,7 @@ const Titulo: React.FC<{ etiqueta: string; frase: string; dur: number }> = ({ et
   );
 };
 
-const Subtitulo: React.FC<{ texto: string; dur: number }> = ({ texto, dur }) => {
+export const Subtitulo: React.FC<{ texto: string; dur: number }> = ({ texto, dur }) => {
   const f = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const v = height > width;
@@ -145,7 +145,7 @@ const Subtitulo: React.FC<{ texto: string; dur: number }> = ({ texto, dur }) => 
   );
 };
 
-const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: number; acerca: boolean | null }> = ({ p, props, entra, dur, acerca }) => {
+export const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: number; acerca: boolean | null }> = ({ p, props, entra, dur, acerca }) => {
   const f = useCurrentFrame();
   const o = entra ? interpolate(f, [0, FUNDIDO], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const k = interpolate(f, [0, dur * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });

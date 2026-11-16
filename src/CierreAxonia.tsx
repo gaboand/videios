@@ -27,7 +27,8 @@ const LAYOUT = {
   alto: { logoW: 900, logoY: 620, pillW: 560, pillH: 80, pillsY: 860, fila: false, gap: 28, botonY: 1330, botonW: 640, botonH: 116, fuente: 32, fuenteBoton: 44 },
 };
 
-export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris" }> = ({ fondo, paleta }) => {
+// pills: service pills to show (defaults to the four suite services).
+export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris"; pills?: string[] }> = ({ fondo, paleta, pills = PILLS }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const L = width > height ? LAYOUT.ancho : LAYOUT.alto;
@@ -52,7 +53,7 @@ export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris" }> = ({ fon
   // Pills: a row in 16:9, a column in 9:16.
   const pillPos = (i: number) =>
     L.fila
-      ? { left: (width - (PILLS.length * L.pillW + (PILLS.length - 1) * L.gap)) / 2 + i * (L.pillW + L.gap), top: L.pillsY }
+      ? { left: (width - (pills.length * L.pillW + (pills.length - 1) * L.gap)) / 2 + i * (L.pillW + L.gap), top: L.pillsY }
       : { left: (width - L.pillW) / 2, top: L.pillsY + i * (L.pillH + L.gap) };
 
   const boton = spring({ frame: frame - BOTON, fps, config: { damping: 12, stiffness: 120 } });
@@ -103,7 +104,7 @@ export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris" }> = ({ fon
           }}
         />
       </div>
-      {PILLS.map((texto, i) => {
+      {pills.map((texto, i) => {
         const a = spring({ frame: frame - PILLS_DESDE - i * ESCALON, fps, config: { damping: 14, stiffness: 110 } });
         return (
           <div

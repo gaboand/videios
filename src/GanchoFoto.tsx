@@ -39,7 +39,16 @@ const Foto: React.FC<{ w: number; h: number; z: number; ox?: number; oy?: number
 
 // conVideo: the editorial look shows the store clip (first part, the doubt)
 // instead of the photo; the clip already has its own camera move.
-export const GanchoFoto: React.FC<{ variante: Variante; conVideo?: boolean }> = ({ variante, conVideo }) => {
+// video / titulo / bajada / desdeBajada: optional overrides of the editorial
+// look (other clip and texts, used by other videos).
+export const GanchoFoto: React.FC<{
+  variante: Variante;
+  conVideo?: boolean;
+  video?: string;
+  titulo?: React.ReactNode;
+  bajada?: React.ReactNode;
+  desdeBajada?: number;
+}> = ({ variante, conVideo, video = "videos/mostrador.mp4", titulo, bajada, desdeBajada = 48 }) => {
   const frame = useCurrentFrame();
   const { width, height, durationInFrames } = useVideoConfig();
   const empuje = interpolate(frame, [0, durationInFrames], [1, 1.08], clamp);
@@ -92,16 +101,20 @@ export const GanchoFoto: React.FC<{ variante: Variante; conVideo?: boolean }> = 
         <FondoAbstracto paleta="gris" estilo="ondas" />
         <div style={{ position: "absolute", left: fx, top: fy, width: fw, height: fh, borderRadius: 22, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.15)" }}>
           {conVideo ? (
-            <OffthreadVideo src={staticFile("videos/mostrador.mp4")} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <OffthreadVideo src={staticFile(video)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <Foto w={fw} h={fh} z={empuje * 1.05} ox={820} oy={460} />
           )}
         </div>
         <div style={vertical ? { position: "absolute", left: 80, right: 80, top: fy + fh + 80 } : { position: "absolute", left: fx + fw + 80, right: 100, top: height / 2 - 150 }}>
-          <Entra desde={14} style={{ color: "white", fontSize: vertical ? 76 : 66, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>{L1}</Entra>
-          <Entra desde={34} style={{ width: 80, height: 6, borderRadius: 3, background: NARANJA, margin: "30px 0" }}>{null}</Entra>
-          <Entra desde={48} style={{ color: "rgba(255,255,255,0.9)", fontSize: vertical ? 50 : 44, fontWeight: 500, lineHeight: 1.25 }}>
-            Que el crédito <span style={{ color: NARANJA, fontWeight: 700 }}>no la frene</span>.
+          <Entra desde={14} style={{ color: "white", fontSize: vertical ? 76 : 66, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>{titulo ?? L1}</Entra>
+          <Entra desde={desdeBajada - 14} style={{ width: 80, height: 6, borderRadius: 3, background: NARANJA, margin: "30px 0" }}>{null}</Entra>
+          <Entra desde={desdeBajada} style={{ color: "rgba(255,255,255,0.9)", fontSize: vertical ? 50 : 44, fontWeight: 500, lineHeight: 1.25 }}>
+            {bajada ?? (
+              <>
+                Que el crédito <span style={{ color: NARANJA, fontWeight: 700 }}>no la frene</span>.
+              </>
+            )}
           </Entra>
         </div>
       </AbsoluteFill>
