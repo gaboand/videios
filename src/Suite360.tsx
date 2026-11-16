@@ -185,6 +185,8 @@ HORIZONTAL.general = generalDe(HORIZONTAL);
 VERTICAL.general = generalDe(VERTICAL);
 const AMPLIA: Escena = { ...HORIZONTAL, caja: [96, 300, 1824, 1040] };
 AMPLIA.general = generalDe(AMPLIA);
+const AMPLIA_V: Escena = { ...VERTICAL, caja: [60, 430, 1020, 1840] };
+AMPLIA_V.general = generalDe(AMPLIA_V);
 
 const camara = (e: Escena, frame: number, sinAlejar = false): Cam => {
   const c0 = camDe(e, 0);
@@ -1190,14 +1192,14 @@ const CONTENIDO: Record<Id, React.FC<{ t: number }>> = {
 
 // Extra options used by the short versions: camera without the mid-way
 // pull-back, camera fixed on one module, extra zoom factor, no background.
-// generalAmplio: a larger final overview, using the sides of the 16:9 frame.
+// generalAmplio: a larger final overview, using the whole width of the frame.
 type Extra = { sinAlejar?: boolean; camFija?: number; camZ?: number; sinFondo?: boolean; generalAmplio?: boolean };
 
 export const Suite360: React.FC<z.infer<typeof suite360Schema> & Extra> = ({ fondo, paleta, sinAlejar, camFija, camZ = 1, sinFondo, generalAmplio }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const e0 = height > width ? VERTICAL : HORIZONTAL;
-  const e = generalAmplio && e0 === HORIZONTAL ? AMPLIA : e0;
+  const e = generalAmplio ? (e0 === HORIZONTAL ? AMPLIA : AMPLIA_V) : e0;
   const base = camFija !== undefined && (camFija < N_MODULOS - 1 || frame < aparicion(camFija) + 30) ? camDe(e, camFija) : camara(e, frame, sinAlejar);
   const cam = { ...base, z: base.z * camZ };
   const general = interpolate(frame, [ALEJA, ALEJA_FIN], [0, 1], clamp);

@@ -9,7 +9,7 @@ import { Suite360 } from "./Suite360";
 import { SucursalDinamico } from "./SucursalVirtual";
 import { TiendaDinamico } from "./TiendaAxonia";
 
-// Integral video (25 s, 16:9): Javier Perez's journey through the suite, made
+// Integral video (25 s, 16:9 and 9:16): Javier Perez's journey through the suite, made
 // of pieces of the dynamic videos, cut on the bars of the music
 // ("Leave the Key", 129 BPM: a bar is 1.86 s, the drop lands at 22.54 s).
 // Core products (onboarding, engine, core lending, contact flow) get two bars,
