@@ -1,4 +1,4 @@
-import { AbsoluteFill, Audio, Freeze, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Audio, Easing, Freeze, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion";
 import { BackOfficeDinamico } from "./BackOffice";
 import { CollectionsDinamico } from "./CollectionsAxonia";
 import { ContactFlowDinamico } from "./ContactFlow";
@@ -26,8 +26,9 @@ const FUNDIDO = 8;
 // [component, source start frame, start bar, end bar]; bar 0 starts the video.
 type Pieza = { C: React.ComponentType<Props & Record<string, unknown>>; desde: number; de: number; a: number; extra?: Record<string, unknown> };
 const PIEZAS: Pieza[] = [
-  // Chooses to pay the phone with a loan (without the purchase end).
-  { C: TiendaDinamico, desde: 418, de: 0, a: 1 },
+  // Phone catalog (the product gets picked), then "Agregar al carrito".
+  { C: TiendaDinamico, desde: 236, de: 0, a: 0.5 },
+  { C: TiendaDinamico, desde: 300, de: 0.5, a: 1 },
   // Data with the brand change, then the identity check ends with the check.
   { C: OnboardingDinamico, desde: 20, de: 1, a: 2 },
   { C: OnboardingDinamico, desde: 545, de: 2, a: 3 },
@@ -49,11 +50,16 @@ const PIEZAS: Pieza[] = [
   { C: Suite360, desde: 572, de: 12, a: 99, extra: { generalAmplio: true } },
 ];
 
-const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean }> = ({ p, props, entra }) => {
+// Slow zoom on each piece, alternating in and out, around the device centre
+// (62% of the height) so the top stays free for titles.
+const ZOOM = 0.06;
+const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: number; acerca: boolean | null }> = ({ p, props, entra, dur, acerca }) => {
   const f = useCurrentFrame();
   const o = entra ? interpolate(f, [0, FUNDIDO], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
+  const k = interpolate(f, [0, dur], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.sin) });
+  const z = acerca === null ? 1 : 1 + ZOOM * (acerca ? k : 1 - k);
   return (
-    <AbsoluteFill style={{ opacity: o }}>
+    <AbsoluteFill style={{ opacity: o, transform: `scale(${z})`, transformOrigin: "50% 62%" }}>
       <Freeze frame={0}>
         <Sequence from={-(p.desde + f)}>
           <p.C {...props} {...p.extra} />
@@ -72,7 +78,7 @@ export const Integral: React.FC<Props> = (props) => {
         const fin = p.a >= 99 ? INTEGRAL_FRAMES : Math.round(compas(p.a) + FUNDIDO / 2);
         return (
           <Sequence key={i} from={ini} durationInFrames={fin - ini}>
-            <Pedazo p={p} props={props} entra={i > 0} />
+            <Pedazo p={p} props={props} entra={i > 0} dur={fin - ini} acerca={p.C === Suite360 ? null : i % 2 === 0} />
           </Sequence>
         );
       })}
