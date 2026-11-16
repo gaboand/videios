@@ -15,10 +15,10 @@ const PILLS = ["Gestión del Riesgo", "Automatizaciones", "Herramientas de Cobra
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 // Timeline (frames from the start of the closing).
-const SUBIDA = 52;
-const PILLS_DESDE = 70;
+const SUBIDA_N = 52;
+const PILLS_DESDE_N = 70;
 const ESCALON = 6;
-const BOTON = 100;
+const BOTON_N = 100;
 export const CIERRE_FRAMES = 168;
 
 // Layout per format.
@@ -28,7 +28,11 @@ const LAYOUT = {
 };
 
 // pills: service pills to show (defaults to the four suite services).
-export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris"; pills?: string[] }> = ({ fondo, paleta, pills = PILLS }) => {
+// rapido: logo rise, pills and button come in about a second earlier.
+export const CierreAxonia: React.FC<{ fondo: "ondas"; paleta: "gris"; pills?: string[]; rapido?: boolean }> = ({ fondo, paleta, pills = PILLS, rapido }) => {
+  const SUBIDA = rapido ? 38 : SUBIDA_N;
+  const PILLS_DESDE = rapido ? 50 : PILLS_DESDE_N;
+  const BOTON = rapido ? 66 : BOTON_N;
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const L = width > height ? LAYOUT.ancho : LAYOUT.alto;

@@ -4,13 +4,13 @@ import { ContactFlowDinamico } from "./ContactFlow";
 import { GanchoFoto } from "./GanchoFoto";
 import { compas, FPS, FUNDIDO, Pedazo, Pieza, Props, Subtitulo, Titulo } from "./Integral";
 
-// Contact Flow ad (35 s, 16:9 and 9:16), same recipe as the integral video:
+// Contact Flow ad (32.5 s, 16:9 and 9:16), same recipe as the integral video:
 // a hook with a framed clip ("¿La mora sube y las ventas no acompañan?"),
 // a voice-over that complements the screen texts instead of reading them,
 // pieces of the dynamic Contact Flow video cut on the bars of the music,
 // screen titles, subtitles of the voice-over and the brand closing.
 
-export const CF_INTEGRAL_FRAMES = 1050;
+export const CF_INTEGRAL_FRAMES = 975;
 const NARANJA = "#FF8C42";
 
 const Gancho: React.FC<Props> = () => (
@@ -28,7 +28,7 @@ const Gancho: React.FC<Props> = () => (
   />
 );
 
-const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Campañas automáticas", "Agente de IA", "Segmentación", "Dashboard de resultados"]} />;
+const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Campañas automáticas", "Agente de IA", "Segmentación", "Dashboard de resultados"]} rapido />;
 
 // [component, source start frame, start bar, end bar].
 const PIEZAS: Pieza[] = [
@@ -46,11 +46,11 @@ const PIEZAS: Pieza[] = [
   // Campaign set-up ("tus campañas se programan").
   { C: ContactFlowDinamico, desde: 440, de: 10, a: 12 },
   // Flow editor ("tus procesos se automatizan"), on the drop.
-  { C: ContactFlowDinamico, desde: 176, de: 12, a: 13.5 },
+  { C: ContactFlowDinamico, desde: 176, de: 12, a: 13 },
   // Reports ("tus resultados mejoran").
-  { C: ContactFlowDinamico, desde: 940, de: 13.5, a: 15 },
+  { C: ContactFlowDinamico, desde: 940, de: 13, a: 14.5 },
   // Brand closing with the Contact Flow pills.
-  { C: Cierre, desde: 0, de: 15, a: 99 },
+  { C: Cierre, desde: 0, de: 14.5, a: 99 },
 ];
 
 const TITULOS: [number, number, string, string][] = [
@@ -60,8 +60,8 @@ const TITULOS: [number, number, string, string][] = [
   [7, 8, "FRANJAS HORARIAS", "Contactá en el mejor momento"],
   [8, 10, "DASHBOARD", "Resultados medibles al instante"],
   [10, 12, "CAMPAÑAS", "Programadas y automáticas"],
-  [12, 13.5, "EDITOR DE FLUJOS", "Procesos automatizados sin programar"],
-  [13.5, 15, "REPORTES", "Seguimiento de cada campaña"],
+  [12, 13, "EDITOR DE FLUJOS", "Procesos automatizados sin programar"],
+  [13, 14.5, "REPORTES", "Seguimiento de cada campaña"],
 ];
 
 // Voice-over phrases: [from, to] in the recording (s), start in the video (s).
@@ -81,7 +81,7 @@ const VOZ: [number, number, number][] = [
   // Tus campañas se programan, tus procesos se automatizan y tus resultados mejoran...
   [20.99, 26.17, 21.7],
   // Agendá una demo en axonia punto com punto ar.
-  [26.48, 29.39, 31.6],
+  [26.48, 29.39, 28.4],
 ];
 const TROZOS: string[][] = [
   ["¿Tu negocio ya no rinde como antes?"],
