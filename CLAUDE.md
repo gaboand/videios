@@ -71,7 +71,7 @@ Tono B2B, de diseñador y publicista: le hablan a quien decide en una entidad o 
 
 - `Integral`/`IntegralMovil` (`src/Integral.tsx`, 30 s): gancho con video del mostrador (`GanchoFoto` variante "c", editorial, video enmarcado sobre el fondo), recorrido por los 8 productos cortado en compás de la música (`public/musica/leave-the-key.mp3`, 129 BPM, al 15%), títulos por producto arriba, subtítulos abajo, cierre `CierreAxonia` (logo, píldoras, botón "Agendá una demo" y axonia.com.ar).
 - `ContactFlowIntegral`/`ContactFlowIntegralMovil` (`src/ContactFlowIntegral.tsx`, 32,5 s): mismo esquema con `public/videos/escritorio.mp4`, locución `public/voz/locucion-contactflow.mp3` (voz Camila) y píldoras propias.
-- Locuciones de ElevenLabs las genera el usuario; entre frases nunca más de 1,3 s de silencio (el guion tiene que llenar el video); se ubican frase por frase (`VOZ`: [desde, hasta en la grabación, inicio en el video]) detectando silencios con `ffmpeg silencedetect`.
+- Locuciones de ElevenLabs las genera el usuario; entre frases nunca más de 1,3 s de silencio (el guion tiene que llenar el video); el guion se pasa en un solo bloque con pausas `<break time="0.8s" />` de ElevenLabs; se ubican frase por frase (`VOZ`: [desde, hasta en la grabación, inicio en el video]) detectando silencios con `ffmpeg silencedetect`.
 - Logo chico arriba a la derecha (`MarcaAgua`) hasta el cierre.
 - En 9:16 respetar el área segura de Reels/TikTok: títulos a 255 px de arriba, subtítulos a 400 px de abajo. El celular nunca pegado al borde (zoom de tramo 4% en 9:16; `dxExtraV` para centrar tomas que se van a un costado).
 
