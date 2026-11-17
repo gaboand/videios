@@ -58,3 +58,23 @@ Copias con cámara en movimiento, sin tocar el video original: `CollectionsDinam
 - Ritmo calmo y de buen gusto: pocos zooms (1,25–1,4), pausas largas, un solo movimiento por momento (zoom o cambio de inclinación, nunca seguidos). Nada de "zamba".
 - Elementos que salen de la pantalla: copia de un rectángulo de la pantalla en una capa `preserve-3d` (con un hueco gris debajo) que va hacia la cámara con `translate3d(0, y, z)` y vuelve, sin rotar ni bailar. Pocos y en momentos clave.
 - Evitar el destello blanco bajo el marco: fondo raíz de la pantalla del color del header y escenas con `clipPath: inset(HEADER px 0 0 0)`.
+
+## Otros videos dinámicos y cortos
+
+- `CoreLendingDinamico`, `MotorDinamico` (motor de decisión; nada de nombres de bureaus reales: "Bureau A", "Central de Deudores"), `SucursalDinamico` (home banking de Javier Perez, préstamo de 1.400.000 con 3 cuotas pagas).
+- Versiones cortas (≤10 s) en `src/Cortos.tsx` (`CORTOS`: tramos de frames del video dinámico con fundidos), registradas como `<Id>` y `<Id>Movil`.
+- `Suite360Corto`/`Suite360CortoMovil`: mismo tiempo por módulo, paneo directo entre módulos.
+
+## Videos publicitarios (con locución)
+
+Tono B2B, de diseñador y publicista: le hablan a quien decide en una entidad o retailer. Sin "historias" ni personajes (nada de "Javier quiere..."). Nunca leer literal el texto de pantalla en la voz.
+
+- `Integral`/`IntegralMovil` (`src/Integral.tsx`, 30 s): gancho con video del mostrador (`GanchoFoto` variante "c", editorial, video enmarcado sobre el fondo), recorrido por los 8 productos cortado en compás de la música (`public/musica/leave-the-key.mp3`, 129 BPM, al 15%), títulos por producto arriba, subtítulos abajo, cierre `CierreAxonia` (logo, píldoras, botón "Agendá una demo" y axonia.com.ar).
+- `ContactFlowIntegral`/`ContactFlowIntegralMovil` (`src/ContactFlowIntegral.tsx`, 32,5 s): mismo esquema con `public/videos/escritorio.mp4`, locución `public/voz/locucion-contactflow.mp3` (voz Camila) y píldoras propias.
+- Locuciones de ElevenLabs las genera el usuario; se ubican frase por frase (`VOZ`: [desde, hasta en la grabación, inicio en el video]) detectando silencios con `ffmpeg silencedetect`.
+- Logo chico arriba a la derecha (`MarcaAgua`) hasta el cierre.
+- En 9:16 respetar el área segura de Reels/TikTok: títulos a 255 px de arriba, subtítulos a 400 px de abajo. El celular nunca pegado al borde (zoom de tramo 4% en 9:16; `dxExtraV` para centrar tomas que se van a un costado).
+
+## Canal y marca
+
+- YouTube: canal Axonia `@axonia_global`, vinculado a Google Ads. Banner y foto de perfil: `BannerYouTube`/`AvatarYouTube` (`src/YouTubeMarca.tsx`).
