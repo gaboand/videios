@@ -63,8 +63,32 @@ const LATERALES: [number, number, string[], string[]][] = [
 
 const Lateral: React.FC<{ izq: string[]; der: string[]; dur: number }> = ({ izq, der, dur }) => {
   const f = useCurrentFrame();
-  const { height } = useVideoConfig();
+  const { width, height } = useVideoConfig();
   const sale = interpolate(f, [dur - 8, dur], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  if (height > width) {
+    // 9:16: no room beside the phone, so one centred column floating over its
+    // lower half (above the subtitles), left items first and right items after.
+    const grupos = [izq, der].filter((g) => g.length > 0);
+    const tramo = dur / grupos.length;
+    const g = Math.min(grupos.length - 1, Math.floor(f / tramo));
+    const fl = f - g * tramo;
+    const fuera = interpolate(fl, [tramo - 8, tramo], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+    return (
+      <AbsoluteFill>
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 610, display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          {grupos[g].map((t, i) => {
+            const a = interpolate(fl, [4 + i * 8, 16 + i * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+            return (
+              <div key={t} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 26px", borderRadius: 16, background: "rgba(12,14,20,0.86)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 10px 30px rgba(0,0,0,0.45)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: 34, lineHeight: 1.2, whiteSpace: "nowrap", opacity: a * fuera, transform: `translateY(${(1 - a) * 20}px)` }}>
+                <div style={{ width: 13, height: 13, borderRadius: 7, background: NARANJA, flexShrink: 0 }} />
+                {t.replace("\n", " ")}
+              </div>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
+    );
+  }
   const columna = (items: string[], lado: "left" | "right", base: number) => (
     <div style={{ position: "absolute", [lado]: 64, top: height * 0.62, transform: "translateY(-50%)", display: "flex", flexDirection: "column", alignItems: lado === "left" ? "flex-start" : "flex-end", gap: 16 }}>
       {items.map((t, i) => {

@@ -395,6 +395,16 @@ export const RemotionRoot: React.FC = () => {
         height={1080}
       />
       <Composition
+        // Core Lending ad with hook, voice-over and closing (9:16)
+        id="CoreLendingIntegralMovil"
+        component={CoreLendingIntegral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={CL_INTEGRAL_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
         // Contact Flow ad with hook, voice-over and closing (9:16)
         id="ContactFlowIntegralMovil"
         component={ContactFlowIntegral}
