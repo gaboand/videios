@@ -22,6 +22,7 @@ import {
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
 import { INTEGRAL_FRAMES, Integral } from "./Integral";
+import { AvatarYouTube, BannerYouTube } from "./YouTubeMarca";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { GANCHO_FRAMES, GanchoCaos } from "./GanchoCaos";
 import { GANCHO_FOTO_FRAMES, GanchoFoto } from "./GanchoFoto";
@@ -391,6 +392,24 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      <Composition
+        // YouTube channel banner: npx remotion still BannerYouTube
+        id="BannerYouTube"
+        component={BannerYouTube}
+        durationInFrames={1}
+        fps={30}
+        width={2560}
+        height={1440}
+      />
+      <Composition
+        // YouTube channel profile picture: npx remotion still AvatarYouTube
+        id="AvatarYouTube"
+        component={AvatarYouTube}
+        durationInFrames={1}
+        fps={30}
+        width={800}
+        height={800}
       />
       <Composition
         // npx remotion render Integral (25 s, Javier's journey with music)
