@@ -103,11 +103,11 @@ const VOZ: [number, number, number][] = [
 ];
 const TROZOS: string[][] = [
   ["¿Cuánto tiempo pierde tu equipo", "administrando préstamos a mano?"],
-  ["Con el core de Axonia definís las reglas de tu negocio:", "punitorios, bonificaciones y cuándo una operación pasa a non accrual."],
-  ["Cobrás por cualquier canal,", "y cada pago genera su recibo y lo envía solo."],
-  ["¿Un cliente con atrasos? Refinanciás o consolidás", "sus préstamos en tres clicks, con el contrato listo para enviar."],
+  ["Con el core de Axonia, vos definís las reglas:", "punitorios, bonificaciones y cuándo una operación pasa a non accrual."],
+  ["Simulás, das de alta y cobrás por cualquier canal,", "con el recibo enviado automáticamente."],
+  ["¿Un cliente con atrasos? Refinanciás, consolidás o reestructurás", "en tres clicks, con el contrato listo para enviar."],
   ["La contabilidad y los impuestos se calculan solos,", "integrados a tu sistema contable."],
-  ["Administrás varias carteras y medís su rentabilidad", "y su comportamiento con dashboards y reportes."],
+  ["Administrás varias carteras y medís su rentabilidad", "y su comportamiento en tiempo real."],
   ["Y como está cien por ciento apificado,", "se integra con todo tu ecosistema."],
   ["Agendá una demo en axonia.com.ar"],
 ];
