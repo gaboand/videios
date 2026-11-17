@@ -95,7 +95,7 @@ export const GanchoFoto: React.FC<{
     const fw = vertical ? width - 120 : width * 0.56;
     const fh = vertical ? fw * 0.66 : fw * 0.62;
     const fx = vertical ? 60 : 100;
-    const fy = vertical ? 440 : (height - fh) / 2;
+    const fy = vertical ? 300 : (height - fh) / 2;
     return (
       <AbsoluteFill style={{ fontFamily: "Inter, sans-serif", opacity: entra }}>
         <FondoAbstracto paleta="gris" estilo="ondas" />
@@ -106,7 +106,7 @@ export const GanchoFoto: React.FC<{
             <Foto w={fw} h={fh} z={empuje * 1.05} ox={820} oy={460} />
           )}
         </div>
-        <div style={vertical ? { position: "absolute", left: 80, right: 80, top: fy + fh + 80 } : { position: "absolute", left: fx + fw + 80, right: 100, top: height / 2 - 150 }}>
+        <div style={vertical ? { position: "absolute", left: 80, right: 80, top: fy + fh + 60 } : { position: "absolute", left: fx + fw + 80, right: 100, top: height / 2 - 150 }}>
           <Entra desde={14} style={{ color: "white", fontSize: vertical ? 76 : 66, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>{titulo ?? L1}</Entra>
           <Entra desde={desdeBajada - 14} style={{ width: 80, height: 6, borderRadius: 3, background: NARANJA, margin: "30px 0" }}>{null}</Entra>
           <Entra desde={desdeBajada} style={{ color: "rgba(255,255,255,0.9)", fontSize: vertical ? 50 : 44, fontWeight: 500, lineHeight: 1.25 }}>

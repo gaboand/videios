@@ -1,4 +1,4 @@
-import { AbsoluteFill, Audio, Easing, Freeze, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, Easing, Freeze, Img, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
 import "@fontsource/inter/800.css";
@@ -126,7 +126,7 @@ export const Titulo: React.FC<{ etiqueta: string; frase: string; dur: number }> 
   const a = interpolate(f, [2, 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const b = interpolate(f, [5, 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, top: v ? 150 : 56, textAlign: "center", fontFamily: "Inter, sans-serif", opacity: sale }}>
+    <div style={{ position: "absolute", left: 0, right: 0, top: v ? 300 : 56, textAlign: "center", fontFamily: "Inter, sans-serif", opacity: sale }}>
       <div style={{ color: NARANJA, fontSize: v ? 30 : 24, fontWeight: 700, letterSpacing: v ? 6 : 5, opacity: a, transform: `translateY(${(1 - a) * 10}px)` }}>{etiqueta}</div>
       <div style={{ color: "white", fontSize: v ? 50 : 46, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5, maxWidth: v ? 940 : 1500, margin: `${v ? 12 : 8}px auto 0`, opacity: b, transform: `translateY(${(1 - b) * 14}px)`, textShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>{frase}</div>
     </div>
@@ -139,7 +139,7 @@ export const Subtitulo: React.FC<{ texto: string; dur: number }> = ({ texto, dur
   const v = height > width;
   const o = interpolate(f, [0, 3, dur - 3, dur], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, bottom: v ? 170 : 54, display: "flex", justifyContent: "center", opacity: o }}>
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: v ? 400 : 54, display: "flex", justifyContent: "center", opacity: o }}>
       <div style={{ maxWidth: v ? 900 : 1500, padding: v ? "14px 28px" : "10px 26px", borderRadius: 14, background: "rgba(12,14,20,0.72)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: v ? 44 : 38, lineHeight: 1.3, textAlign: "center" }}>{texto}</div>
     </div>
   );
@@ -161,6 +161,23 @@ export const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: num
   );
 };
 
+// Small Axonia logo in the top right corner, until the brand closing
+// (hasta, in frames) where the big logo takes over.
+export const MarcaAgua: React.FC<{ hasta: number }> = ({ hasta }) => {
+  const f = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const v = height > width;
+  const o = interpolate(f, [6, 20, hasta - 10, hasta], [0, 0.92, 0.92, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const w = v ? 190 : 150;
+  const capa: React.CSSProperties = { position: "absolute", left: 0, top: 0, width: w, height: (w * 693) / 2028, maxWidth: "none" };
+  return (
+    <div style={{ position: "absolute", right: v ? 64 : 44, top: v ? 215 : 40, width: w, height: (w * 693) / 2028, opacity: o, filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.45))" }}>
+      <Img src={staticFile("axonia-letras.png")} style={capa} />
+      <Img src={staticFile("axonia-icono.png")} style={capa} />
+    </div>
+  );
+};
+
 export const Integral: React.FC<Props> = (props) => {
   return (
     <AbsoluteFill style={{ background: "#111" }}>
@@ -174,6 +191,7 @@ export const Integral: React.FC<Props> = (props) => {
           </Sequence>
         );
       })}
+      <MarcaAgua hasta={Math.round(compas(13))} />
       {TITULOS.map(([de, a, etiqueta, frase]) => {
         const ini = Math.round(compas(de));
         const fin = Math.round(compas(a));

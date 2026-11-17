@@ -2,7 +2,7 @@ import { AbsoluteFill, Audio, interpolate, Sequence, staticFile } from "remotion
 import { CierreAxonia } from "./CierreAxonia";
 import { ContactFlowDinamico } from "./ContactFlow";
 import { GanchoFoto } from "./GanchoFoto";
-import { compas, FPS, FUNDIDO, Pedazo, Pieza, Props, Subtitulo, Titulo } from "./Integral";
+import { compas, FPS, FUNDIDO, MarcaAgua, Pedazo, Pieza, Props, Subtitulo, Titulo } from "./Integral";
 
 // Contact Flow ad (32.5 s, 16:9 and 9:16), same recipe as the integral video:
 // a hook with a framed clip ("¿La mora sube y las ventas no acompañan?"),
@@ -115,6 +115,7 @@ export const ContactFlowIntegral: React.FC<Props> = (props) => (
         </Sequence>
       );
     })}
+    <MarcaAgua hasta={Math.round(compas(14.5))} />
     {TITULOS.map(([de, a, etiqueta, frase]) => {
       const ini = Math.round(compas(de));
       const fin = Math.round(compas(a));
