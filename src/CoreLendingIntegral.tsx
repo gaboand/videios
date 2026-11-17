@@ -30,7 +30,7 @@ const Gancho: React.FC<Props> = () => (
   />
 );
 
-const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Multicartera", "Operaciones especiales", "Contabilidad automática", "Reportes de gestión"]} rapido />;
+const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Multicartera", "Curing de cartera", "Contabilidad automática", "100% apificado"]} rapido />;
 
 const PIEZAS: { p: Pieza; ini: number; fin: number }[] = [
   { p: { C: Gancho, desde: 0, de: 0, a: 3 }, ini: 0, fin: INI + FUNDIDO },
@@ -52,10 +52,12 @@ const TITULOS: [number, number, string, string][] = [
 // Side texts beside the device, only while the camera is not zoomed in:
 // [from, to] in frames of the Core Lending video, left items, right items.
 const LATERALES: [number, number, string[], string[]][] = [
-  [110, 200, ["Non accrual y write off", "Punitorios y fees a medida", "Amortizaciones y vencimientos"], ["Simulador de préstamos", "Altas desde el onboarding", "Altas manuales"]],
+  [8, 96, [], ["Non accrual y write off", "Punitorios y fees a medida", "Bonificación última cuota", "Descuento por pago adelantado"]],
+  [110, 200, ["Simulador de préstamos", "Amortizaciones y vencimientos"], ["Altas automáticas\ndesde Onboarding", "Altas manuales"]],
   [205, 300, ["Pago batch y online", "Cajas propias y receptorías", "Débito automático"], ["Pago fecha valor", "Cancelaciones y condonaciones", "Reversas y anulaciones"]],
-  [476, 628, ["Baja de las operaciones", "Alta de la nueva operación", "Contrato generado y enviado"], ["Reestructuraciones", "Pronto pago", "Bonificación última cuota"]],
+  [476, 628, ["Baja y alta automática\nde las operaciones", "Contrato generado y enviado"], ["Reestructuraciones", "Ajuste de cuotas"]],
   [768, 890, ["Cálculos impositivos", "Integración contable"], ["Multicartera", "Venta de cartera"]],
+  [904, 1052, ["Vintage", "FPD"], ["Rentabilidad", "Análisis de\ncomportamiento"]],
   [1068, 1252, ["Avisos de vencimiento", "Carteras en mora", "Central de Deudores"], ["CRM con bitácora documental", "Comisiones por venta", "100% apificado"]],
 ];
 
@@ -69,7 +71,7 @@ const Lateral: React.FC<{ izq: string[]; der: string[]; dur: number }> = ({ izq,
         const a = interpolate(f, [base + i * 8, base + i * 8 + 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
         const dx = (1 - a) * (lado === "left" ? -30 : 30);
         return (
-          <div key={t} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", borderRadius: 14, background: "rgba(12,14,20,0.72)", border: "1px solid rgba(255,255,255,0.12)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: 24, opacity: a * sale, transform: `translateX(${dx}px)`, flexDirection: lado === "left" ? "row" : "row-reverse" }}>
+          <div key={t} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", borderRadius: 14, background: "rgba(12,14,20,0.72)", border: "1px solid rgba(255,255,255,0.12)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: 22, lineHeight: 1.25, whiteSpace: "pre-line", textAlign: lado === "left" ? "left" : "right", opacity: a * sale, transform: `translateX(${dx}px)`, flexDirection: lado === "left" ? "row" : "row-reverse" }}>
             <div style={{ width: 10, height: 10, borderRadius: 5, background: NARANJA, flexShrink: 0 }} />
             {t}
           </div>
@@ -101,11 +103,11 @@ const VOZ: [number, number, number][] = [
 ];
 const TROZOS: string[][] = [
   ["¿Cuánto tiempo pierde tu equipo", "administrando préstamos a mano?"],
-  ["Con el core de Axonia definís las reglas de tu negocio:", "punitorios, cargos y cuándo una operación pasa a non accrual."],
+  ["Con el core de Axonia definís las reglas de tu negocio:", "punitorios, bonificaciones y cuándo una operación pasa a non accrual."],
   ["Cobrás por cualquier canal,", "y cada pago genera su recibo y lo envía solo."],
   ["¿Un cliente con atrasos? Refinanciás o consolidás", "sus préstamos en tres clicks, con el contrato listo para enviar."],
   ["La contabilidad y los impuestos se calculan solos,", "integrados a tu sistema contable."],
-  ["Administrás varias carteras, incluso para venderlas,", "y medís todo con dashboards y reportes."],
+  ["Administrás varias carteras y medís su rentabilidad", "y su comportamiento con dashboards y reportes."],
   ["Y como está cien por ciento apificado,", "se integra con todo tu ecosistema."],
   ["Agendá una demo en axonia.com.ar"],
 ];
