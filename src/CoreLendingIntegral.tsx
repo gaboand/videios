@@ -87,28 +87,35 @@ const Lateral: React.FC<{ izq: string[]; der: string[]; dur: number }> = ({ izq,
   );
 };
 
-// Voice-over file (generated in ElevenLabs). While it is missing the subtitles
-// use the estimated times of GUION.
-const LOCUCION: string | null = null;
+// Voice-over (ElevenLabs, voice Camila), cut on its silences.
+const LOCUCION: string | null = "voz/locucion-corelending.mp3";
 // Voice-over phrases: [from, to] in the recording (s), start in the video (s).
 const VOZ: [number, number, number][] = [
-  [0, 4.4, 0.4],
-  [0, 6.0, 5.8],
-  [0, 4.6, 12.6],
-  [0, 8.6, 18.0],
-  [0, 4.6, 27.6],
-  [0, 6.4, 33.4],
-  [0, 7.0, 40.8],
-  [0, 2.8, 49.0],
+  [0, 4.53, 0.4],
+  [4.97, 7.42, 5.4],
+  [7.75, 11.73, 8.18],
+  [12.1, 15.27, 12.6],
+  [15.53, 17.63, 16.03],
+  [18.08, 19.25, 18.5],
+  [19.56, 23.57, 19.98],
+  [23.9, 28.33, 24.32],
+  [28.77, 33.24, 29.1],
+  [33.64, 39.87, 33.95],
+  [40.29, 47.7, 40.6],
+  [48.09, 50.99, 48.4],
 ];
 const TROZOS: string[][] = [
   ["¿Cuánto tiempo pierde tu equipo administrando préstamos", "con planillas y procesos manuales?"],
-  ["Con el core de Axonia, vos definís las reglas:", "punitorios, bonificaciones y cuándo una operación pasa a non accrual."],
-  ["Simulás, das de alta y cobrás por cualquier canal,", "con el recibo enviado automáticamente."],
-  ["¿Un cliente con atrasos? Refinanciás, consolidás o reestructurás", "sus préstamos en tres clicks: se dan de baja,", "se da de alta la nueva operación y el contrato sale listo para enviar."],
+  ["Con el core de Axonia, vos definís las reglas:"],
+  ["punitorios, bonificaciones y cuándo", "una operación pasa a non accrual."],
+  ["Simulás, das de alta y cobrás por cualquier canal,"],
+  ["con el recibo enviado automáticamente."],
+  ["¿Un cliente con atrasos?"],
+  ["Refinanciás, consolidás o reestructurás", "sus préstamos en tres clicks:"],
+  ["se dan de baja, se da de alta la nueva operación", "y el contrato sale listo para enviar."],
   ["La contabilidad y los impuestos se calculan solos,", "integrados a tu sistema contable."],
   ["Administrás varias carteras, seguís tesorería y comisiones,", "y medís la rentabilidad y el comportamiento de cada una."],
-  ["Los avisos de vencimiento y los informes de mora se generan solos,", "y como está cien por ciento apificado, se integra con todo tu ecosistema."],
+  ["Los avisos de vencimiento y los informes de mora se generan solos,", "y como está cien por ciento apificado,", "se integra con todo tu ecosistema."],
   ["Agendá una demo en axonia.com.ar"],
 ];
 const SUBS = VOZ.flatMap(([a, b, en], i) => {
