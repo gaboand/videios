@@ -38,7 +38,7 @@ const PIEZAS: Pieza[] = [
   // en el mostrador. Que el crédito no la frene."
   { C: GanchoEditorial, desde: 0, de: 0, a: 2 },
   // Phone catalog (the product gets picked), then "Agregar al carrito".
-  { C: TiendaDinamico, desde: 236, de: 2, a: 2.5 },
+  { C: TiendaDinamico, desde: 236, de: 2, a: 2.5, extra: { dxExtraV: 130 } },
   { C: TiendaDinamico, desde: 300, de: 2.5, a: 3 },
   // Data with the brand change, then the identity check ends with the check.
   { C: OnboardingDinamico, desde: 20, de: 3, a: 3.75 },
@@ -55,7 +55,7 @@ const PIEZAS: Pieza[] = [
   // Collections: payment promise.
   { C: CollectionsDinamico, desde: 290, de: 10, a: 11 },
   // Contact Flow: call room, then segmentation.
-  { C: ContactFlowDinamico, desde: 40, de: 11, a: 11.5 },
+  { C: ContactFlowDinamico, desde: 40, de: 11, a: 11.5, extra: { dxExtraV: 100 } },
   { C: ContactFlowDinamico, desde: 570, de: 11.5, a: 12 },
   // Drop: pull-back to the whole suite.
   { C: Suite360, desde: 572, de: 12, a: 13, extra: { generalAmplio: true } },
@@ -66,6 +66,7 @@ const PIEZAS: Pieza[] = [
 // Quick zoom on each piece (fast start, soft stop), alternating in and out, around the device centre
 // anchored on the 20% line so the device never climbs into the title area.
 const ZOOM = 0.12;
+const ZOOM_V = 0.04;
 // Voice-over phrases: [from, to] in the recording (s), and where they start
 // in the video (s).
 const VOZ: [number, number, number][] = [
@@ -147,9 +148,13 @@ export const Subtitulo: React.FC<{ texto: string; dur: number }> = ({ texto, dur
 
 export const Pedazo: React.FC<{ p: Pieza; props: Props; entra: boolean; dur: number; acerca: boolean | null }> = ({ p, props, entra, dur, acerca }) => {
   const f = useCurrentFrame();
+  const { width, height } = useVideoConfig();
   const o = entra ? interpolate(f, [0, FUNDIDO], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const k = interpolate(f, [0, dur * 0.7], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const z = acerca === null ? 1 : 1 + ZOOM * (acerca ? k : 1 - k);
+  // In 9:16 the phone already fills the width: a much softer zoom so it
+  // never touches the side edges.
+  const zoom = height > width ? ZOOM_V : ZOOM;
+  const z = acerca === null ? 1 : 1 + zoom * (acerca ? k : 1 - k);
   return (
     <AbsoluteFill style={{ opacity: o, transform: `scale(${z})`, transformOrigin: "50% 20%" }}>
       <Freeze frame={0}>

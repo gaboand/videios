@@ -34,7 +34,7 @@ const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Campañas a
 const PIEZAS: Pieza[] = [
   { C: Gancho, desde: 0, de: 0, a: 2 },
   // Call room with the live panel.
-  { C: ContactFlowDinamico, desde: 30, de: 2, a: 4 },
+  { C: ContactFlowDinamico, desde: 30, de: 2, a: 4, extra: { dxExtraV: 100 } },
   // Message templates.
   { C: ContactFlowDinamico, desde: 330, de: 4, a: 5 },
   // Segmentation with the drill-down.

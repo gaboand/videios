@@ -1963,7 +1963,9 @@ const Recortes: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => (
   </>
 );
 
-export const TiendaDinamico: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, paleta }) => {
+// dxExtraV: horizontal nudge of the phone in px, 9:16 only (used by the
+// integral video, where the catalog shot leaves the phone against the edge).
+export const TiendaDinamico: React.FC<z.infer<typeof tiendaSchema> & { dxExtraV?: number }> = ({ fondo, paleta, dxExtraV = 0 }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const m = height > width;
@@ -1977,7 +1979,7 @@ export const TiendaDinamico: React.FC<z.infer<typeof tiendaSchema>> = ({ fondo, 
   const SH = m ? MH : PH;
   // Device chrome offset (padding + border) so the overlay lines up with the screen.
   const MARCO = m ? 17 : 27;
-  const dx = -(c.px - SW / 2) * esc;
+  const dx = -(c.px - SW / 2) * esc + (m ? dxExtraV : 0);
   // Keep the top 20% of the video free (for titles), with a margin for the tilt.
   const dy0 = -(c.py - SH / 2) * esc;
   const arriba = height * c.cy + dy0 - (EH * esc) / 2;

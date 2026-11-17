@@ -1763,7 +1763,9 @@ const PantallaCF: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) =
   <Islas.Provider value>{tab ? <Pagina frame={frame} /> : <PaginaMovil frame={frame} />}</Islas.Provider>
 );
 
-export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema>> = ({ fondo, paleta }) => {
+// dxExtraV: horizontal nudge of the phone in px, 9:16 only (used by the ads,
+// where the call room shot leaves the phone against the left edge).
+export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema> & { dxExtraV?: number }> = ({ fondo, paleta, dxExtraV = 0 }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const tab = width > height;
@@ -1775,7 +1777,7 @@ export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema>> = 
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   // Device chrome offset (padding + border) so the overlay lines up with the screen.
   const MARCO = tab ? 27 : 17;
-  const dx = -(c.px - w / 2) * esc;
+  const dx = -(c.px - w / 2) * esc + (tab ? 0 : dxExtraV);
   // Keep the top 20% of the video free (for titles), with a margin for the tilt.
   const dy0 = -(c.py - h / 2) * esc;
   const arriba = height * c.cy + dy0 - (EH * esc) / 2;
