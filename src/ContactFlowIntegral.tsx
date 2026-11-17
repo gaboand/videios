@@ -64,25 +64,24 @@ const TITULOS: [number, number, string, string][] = [
   [13, 14.5, "REPORTES", "Seguimiento de cada campaña"],
 ];
 
-// Voice-over phrases (male voice): [from, to] in the recording (s), start in
-// the video (s).
+// Voice-over phrases: [from, to] in the recording (s), start in the video (s).
 const VOZ: [number, number, number][] = [
   // ¿Tu negocio ya no rinde como antes?
-  [0, 1.96, 0.3],
+  [0, 2.18, 0.3],
   // Hoy, podés contactar a miles de clientes en horas.
-  [2.44, 5.02, 2.75],
+  [2.69, 5.65, 2.75],
   // Tenés que saber que ya cambió la manera de hablar con tu cartera.
-  [5.4, 8.18, 6.0],
+  [6.11, 9.12, 6.0],
   // Antes necesitabas un call center con muchos agentes, tareas manuales...
-  [8.61, 14.8, 9.6],
+  [9.53, 16.02, 9.6],
   // Todo eso se acabó.
-  [15.25, 16.52, 16.6],
+  [16.44, 17.67, 16.6],
   // Lo que antes hacías en un mes, ahora lo hacés en horas.
-  [16.95, 19.73, 18.3],
+  [18.01, 21.01, 18.3],
   // Tus campañas se programan, tus procesos se automatizan y tus resultados mejoran...
-  [20.07, 25.14, 21.8],
+  [21.33, 26.43, 21.8],
   // Agendá una demo en axonia punto com punto ar.
-  [25.57, 28.19, 28.4],
+  [26.84, 29.48, 28.4],
 ];
 const TROZOS: string[][] = [
   ["¿Tu negocio ya no rinde como antes?"],
@@ -132,7 +131,7 @@ export const ContactFlowIntegral: React.FC<Props> = (props) => (
     ))}
     {VOZ.map(([a, b, en], i) => (
       <Sequence key={`voz-${i}`} from={Math.round(en * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6}>
-        <Audio src={staticFile("voz/locucion-contactflow-matias.mp3")} trimBefore={Math.round(a * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6} />
+        <Audio src={staticFile("voz/locucion-contactflow.mp3")} trimBefore={Math.round(a * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6} />
       </Sequence>
     ))}
     <Audio

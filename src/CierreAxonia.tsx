@@ -11,7 +11,7 @@ const LOGO_W = 2028;
 const LOGO_H = 693;
 const ICON_CENTER = { x: 921, y: 325 };
 const NARANJA = "#FF8C42";
-const PILLS = ["Gestión del Riesgo", "Automatizaciones", "Herramientas de Cobranzas", "Core Lending"];
+const PILLS = ["Onboarding Digital", "Gestor de Riesgo", "Core Lending", "Herramientas de Cobranzas"];
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 // Timeline (frames from the start of the closing).
