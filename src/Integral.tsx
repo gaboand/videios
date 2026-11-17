@@ -126,7 +126,7 @@ export const Titulo: React.FC<{ etiqueta: string; frase: string; dur: number }> 
   const a = interpolate(f, [2, 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const b = interpolate(f, [5, 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, top: v ? 300 : 56, textAlign: "center", fontFamily: "Inter, sans-serif", opacity: sale }}>
+    <div style={{ position: "absolute", left: 0, right: 0, top: v ? 255 : 56, textAlign: "center", fontFamily: "Inter, sans-serif", opacity: sale }}>
       <div style={{ color: NARANJA, fontSize: v ? 30 : 24, fontWeight: 700, letterSpacing: v ? 6 : 5, opacity: a, transform: `translateY(${(1 - a) * 10}px)` }}>{etiqueta}</div>
       <div style={{ color: "white", fontSize: v ? 50 : 46, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5, maxWidth: v ? 940 : 1500, margin: `${v ? 12 : 8}px auto 0`, opacity: b, transform: `translateY(${(1 - b) * 14}px)`, textShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>{frase}</div>
     </div>
@@ -171,7 +171,7 @@ export const MarcaAgua: React.FC<{ hasta: number }> = ({ hasta }) => {
   const w = v ? 190 : 150;
   const capa: React.CSSProperties = { position: "absolute", left: 0, top: 0, width: w, height: (w * 693) / 2028, maxWidth: "none" };
   return (
-    <div style={{ position: "absolute", right: v ? 64 : 44, top: v ? 215 : 40, width: w, height: (w * 693) / 2028, opacity: o, filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.45))" }}>
+    <div style={{ position: "absolute", right: v ? 64 : 44, top: v ? 170 : 40, width: w, height: (w * 693) / 2028, opacity: o, filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.45))" }}>
       <Img src={staticFile("axonia-letras.png")} style={capa} />
       <Img src={staticFile("axonia-icono.png")} style={capa} />
     </div>
