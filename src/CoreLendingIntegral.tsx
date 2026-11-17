@@ -30,7 +30,7 @@ const Gancho: React.FC<Props> = () => (
   />
 );
 
-const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Multicartera", "Curing de cartera", "Contabilidad automática", "100% apificado"]} rapido />;
+const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Procesos automáticos", "Multicartera", "Contabilidad integrada", "100% apificado"]} rapido />;
 
 const PIEZAS: { p: Pieza; ini: number; fin: number }[] = [
   { p: { C: Gancho, desde: 0, de: 0, a: 3 }, ini: 0, fin: INI + FUNDIDO },
