@@ -27,6 +27,7 @@ import { CarruselSuite } from "./CarruselSuite";
 import { CarruselContactFlow } from "./CarruselContactFlow";
 import { CarruselOnboarding } from "./CarruselOnboarding";
 import { CarruselMotor } from "./CarruselMotor";
+import { CarruselCoreLending } from "./CarruselCoreLending";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { CL_INTEGRAL_FRAMES, CoreLendingIntegral } from "./CoreLendingIntegral";
 import { OB_INTEGRAL_FRAMES, OnboardingIntegral } from "./OnboardingIntegral";
@@ -565,6 +566,26 @@ export const RemotionRoot: React.FC = () => {
         component={CarruselMotor}
         defaultProps={{ placa: 1 }}
         durationInFrames={1500}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        // Core Lending carousel (4:5)
+        id="CarruselCoreLending"
+        component={CarruselCoreLending}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1300}
+        fps={30}
+        width={1080}
+        height={1350}
+      />
+      <Composition
+        // Core Lending carousel (square)
+        id="CarruselCoreLendingCuadrado"
+        component={CarruselCoreLending}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1300}
         fps={30}
         width={1080}
         height={1080}
