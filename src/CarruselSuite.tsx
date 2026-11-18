@@ -1,25 +1,27 @@
-import { AbsoluteFill, Freeze, Img, staticFile } from "remotion";
+import { AbsoluteFill, Img, staticFile } from "remotion";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
 import "@fontsource/inter/800.css";
-import { CollectionsDinamico } from "./CollectionsAxonia";
-import { ContactFlowDinamico } from "./ContactFlow";
-import { CoreLendingDinamico } from "./CoreLending";
+import { PantallaCollections } from "./CollectionsAxonia";
+import { PantallaContactFlow } from "./ContactFlow";
+import { PantallaCore } from "./CoreLending";
+import { Dispositivo } from "./Dispositivos";
 import { FondoAbstracto } from "./FondoAbstracto";
-import { MotorDinamico } from "./MotorDecision";
-import { OnboardingDinamico } from "./OnboardingApp";
+import { PantallaMotor } from "./MotorDecision";
+import { PantallaOnboarding } from "./OnboardingApp";
+import { PantallaSucursal } from "./SucursalVirtual";
+import { PantallaTienda } from "./TiendaAxonia";
 
 // Suite carousel for LinkedIn / Instagram (1080x1350, 4:5): swipeable stills,
 // one idea per slide, same look as the ads (wavy grey background, orange
-// accent). Product slides show a frame of the dynamic video with the phone
-// moved right (apartaV) and three points on the left.
+// accent). Each product slide shows a real app screen in a phone (points on
+// the left), a tablet or a notebook (points under the device).
 // npx remotion still CarruselSuite out/carrusel-suite-1.png --props='{"placa":1}'
 
 const NARANJA = "#FF8C42";
 const LOGO_W = 2028;
 const LOGO_H = 693;
-type P = { fondo: "ondas"; paleta: "gris"; apartaV?: (f: number) => number };
 
 const Logo: React.FC<{ w: number }> = ({ w }) => {
   const capa: React.CSSProperties = { position: "absolute", left: 0, top: 0, width: w, height: (w * LOGO_H) / LOGO_W, maxWidth: "none" };
@@ -31,20 +33,24 @@ const Logo: React.FC<{ w: number }> = ({ w }) => {
   );
 };
 
+type Disp = "celular" | "tablet" | "notebook";
 type Producto = {
-  C: React.ComponentType<P>;
+  Pantalla: React.FC<{ frame: number; tab: boolean }>;
   frame: number;
+  disp: Disp;
   etiqueta: string;
   titulo: string;
   puntos: string[];
 };
 
 const PRODUCTOS: Producto[] = [
-  { C: OnboardingDinamico, frame: 560, etiqueta: "ONBOARDING DIGITAL", titulo: "Clientes nuevos en minutos", puntos: ["Validación de identidad con prueba de vida", "Ofertas personalizadas", "Firma desde el celular"] },
-  { C: MotorDinamico, frame: 540, etiqueta: "MOTOR DE DECISIÓN", titulo: "Riesgo y negocio, en la misma decisión", puntos: ["Riesgo por canal, producto y perfil", "Rentabilidad ajustada al riesgo", "Champion Challenger"] },
-  { C: CoreLendingDinamico, frame: 260, etiqueta: "CORE LENDING", titulo: "Todo el ciclo del préstamo, en un solo core", puntos: ["Multicartera", "Curing de cartera en 3 clicks", "Contabilidad integrada"] },
-  { C: CollectionsDinamico, frame: 560, etiqueta: "COBRANZAS", titulo: "Cada cliente, en su estrategia de mora", puntos: ["Segmentación de la cartera", "Promesas de pago", "Gestión de todos los ciclos de mora"] },
-  { C: ContactFlowDinamico, frame: 640, etiqueta: "CONTACT FLOW", titulo: "La productividad de un mes, en horas", puntos: ["Campañas automáticas", "Agentes de IA", "Segmentación de casos"] },
+  { Pantalla: PantallaOnboarding, frame: 560, disp: "celular", etiqueta: "ONBOARDING DIGITAL", titulo: "Clientes nuevos en minutos", puntos: ["Validación de identidad con prueba de vida", "Ofertas personalizadas", "Firma desde el celular"] },
+  { Pantalla: PantallaMotor, frame: 420, disp: "notebook", etiqueta: "MOTOR DE DECISIÓN", titulo: "Riesgo y negocio, en la misma decisión", puntos: ["Riesgo por canal, producto y perfil", "Rentabilidad ajustada al riesgo", "Champion Challenger"] },
+  { Pantalla: PantallaCore, frame: 260, disp: "tablet", etiqueta: "CORE LENDING", titulo: "Todo el ciclo del préstamo, en un solo core", puntos: ["Multicartera", "Curing de cartera en 3 clicks", "Contabilidad integrada"] },
+  { Pantalla: PantallaCollections, frame: 560, disp: "notebook", etiqueta: "COBRANZAS", titulo: "Cada cliente, en su estrategia de mora", puntos: ["Segmentación de la cartera", "Promesas de pago", "Todos los ciclos de mora"] },
+  { Pantalla: PantallaContactFlow, frame: 120, disp: "tablet", etiqueta: "CONTACT FLOW", titulo: "La productividad de un mes, en horas", puntos: ["Campañas automáticas", "Agentes de IA", "Segmentación de casos"] },
+  { Pantalla: PantallaSucursal, frame: 400, disp: "celular", etiqueta: "SUCURSAL VIRTUAL", titulo: "Tu cliente se autogestiona", puntos: ["Préstamos y cuotas al día", "Pagos y nuevos préstamos online", "Reclamos desde la app"] },
+  { Pantalla: PantallaTienda, frame: 460, disp: "notebook", etiqueta: "TIENDA ONLINE", titulo: "Financiación en el checkout", puntos: ["Catálogo con cuotas", "Préstamo al momento de pagar", "Aprobación al instante"] },
 ];
 export const CARRUSEL_SUITE_PLACAS = PRODUCTOS.length + 2;
 
@@ -81,30 +87,85 @@ const Portada: React.FC = () => (
   </AbsoluteFill>
 );
 
-const siempre = () => 1;
-const PlacaProducto: React.FC<{ p: Producto; n: number }> = ({ p, n }) => (
-  <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
-    <Freeze frame={p.frame}>
-      <p.C fondo="ondas" paleta="gris" apartaV={siempre} />
-    </Freeze>
-    <div style={{ position: "absolute", right: 56, top: 54 }}>
-      <Logo w={190} />
-    </div>
-    <div style={{ position: "absolute", left: 70, right: 300, top: 120 }}>
-      <div style={{ color: NARANJA, fontSize: 30, fontWeight: 700, letterSpacing: 6 }}>{p.etiqueta}</div>
-      <div style={{ color: "white", fontSize: 62, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1, marginTop: 14, textShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>{p.titulo}</div>
-    </div>
-    <div style={{ position: "absolute", left: 60, width: 430, top: 600, display: "flex", flexDirection: "column", gap: 22 }}>
-      {p.puntos.map((t) => (
-        <div key={t} style={{ display: "flex", alignItems: "center", gap: 16, padding: "20px 26px", borderRadius: 18, background: "rgba(12,14,20,0.86)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 10px 30px rgba(0,0,0,0.45)", color: "white", fontSize: 32, fontWeight: 600, lineHeight: 1.2 }}>
-          <div style={{ width: 14, height: 14, borderRadius: 7, background: NARANJA, flexShrink: 0 }} />
-          {t}
+// Device with the app screen. The tablet screen (1180x820) fills the
+// notebook screen (1280x800) by width; the bottom is cut.
+const Equipo: React.FC<{ p: Producto }> = ({ p }) => {
+  if (p.disp === "celular") {
+    return (
+      <Dispositivo tipo="celular" w={390} h={844}>
+        <p.Pantalla frame={p.frame} tab={false} />
+      </Dispositivo>
+    );
+  }
+  if (p.disp === "tablet") {
+    return (
+      <Dispositivo tipo="tablet" w={1180} h={820}>
+        <p.Pantalla frame={p.frame} tab />
+      </Dispositivo>
+    );
+  }
+  const k = 1280 / 1180;
+  return (
+    <Dispositivo tipo="notebook" w={1280} h={800}>
+      <div style={{ width: 1280, height: 800, overflow: "hidden" }}>
+        <div style={{ width: 1180, height: 820, transform: `scale(${k})`, transformOrigin: "0 0" }}>
+          <p.Pantalla frame={p.frame} tab />
         </div>
-      ))}
-    </div>
-    <Paginas n={n} />
-  </AbsoluteFill>
+      </div>
+    </Dispositivo>
+  );
+};
+
+const Punto: React.FC<{ t: string; chico?: boolean }> = ({ t, chico }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: 14, padding: chico ? "14px 22px" : "20px 26px", borderRadius: 18, background: "rgba(12,14,20,0.86)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 10px 30px rgba(0,0,0,0.45)", color: "white", fontSize: chico ? 27 : 32, fontWeight: 600, lineHeight: 1.2, whiteSpace: chico ? "nowrap" : undefined }}>
+    <div style={{ width: 13, height: 13, borderRadius: 7, background: NARANJA, flexShrink: 0 }} />
+    {t}
+  </div>
 );
+
+const PlacaProducto: React.FC<{ p: Producto; n: number }> = ({ p, n }) => {
+  const cel = p.disp === "celular";
+  return (
+    <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
+      <FondoAbstracto paleta="gris" estilo="ondas" />
+      <div style={{ position: "absolute", right: 56, top: 54 }}>
+        <Logo w={190} />
+      </div>
+      <div style={{ position: "absolute", left: 70, right: 300, top: 120 }}>
+        <div style={{ color: NARANJA, fontSize: 30, fontWeight: 700, letterSpacing: 6 }}>{p.etiqueta}</div>
+        <div style={{ color: "white", fontSize: 62, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1, marginTop: 14, textShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>{p.titulo}</div>
+      </div>
+      {cel ? (
+        <>
+          <div style={{ position: "absolute", right: 100, top: 420, perspective: 2400 }}>
+            <div style={{ transform: "scale(0.86) rotateY(-10deg) rotateX(4deg)", transformOrigin: "50% 0" }}>
+              <Equipo p={p} />
+            </div>
+          </div>
+          <div style={{ position: "absolute", left: 60, width: 440, top: 640, display: "flex", flexDirection: "column", gap: 22 }}>
+            {p.puntos.map((t) => (
+              <Punto key={t} t={t} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ position: "absolute", left: 0, right: 0, top: p.disp === "tablet" ? 420 : 430, display: "flex", justifyContent: "center", perspective: 2600 }}>
+            <div style={{ transform: `scale(${p.disp === "tablet" ? 0.76 : 0.64}) rotateX(6deg)`, transformOrigin: "50% 0" }}>
+              <Equipo p={p} />
+            </div>
+          </div>
+          <div style={{ position: "absolute", left: 60, right: 60, bottom: 110, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14 }}>
+            {p.puntos.map((t) => (
+              <Punto key={t} t={t} chico />
+            ))}
+          </div>
+        </>
+      )}
+      <Paginas n={n} />
+    </AbsoluteFill>
+  );
+};
 
 const Cierre: React.FC = () => (
   <AbsoluteFill style={{ fontFamily: "Inter, sans-serif", alignItems: "center" }}>

@@ -2009,3 +2009,6 @@ export const TiendaDinamico: React.FC<z.infer<typeof tiendaSchema> & { dxExtraV?
     </AbsoluteFill>
   );
 };
+
+// App screen alone (no device, no camera), used by the carousels.
+export const PantallaTienda: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <Pagina frame={frame} /> : <PaginaMovil frame={frame} />);

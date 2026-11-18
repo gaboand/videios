@@ -1721,3 +1721,6 @@ export const OnboardingDinamico: React.FC<z.infer<typeof onboardingSchema> & { a
     </AbsoluteFill>
   );
 };
+
+// App screen alone (no device, no camera), used by the carousels.
+export const PantallaOnboarding: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => <Pantalla frame={frame} tab={tab} w={tab ? 1180 : 390} h={tab ? 820 : 844} />;

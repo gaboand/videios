@@ -1827,3 +1827,6 @@ export const CoreLendingDinamico: React.FC<z.infer<typeof coreLendingSchema> & {
     </AbsoluteFill>
   );
 };
+
+// App screen alone (no device, no camera), used by the carousels.
+export const PantallaCore: React.FC<{ frame: number; tab: boolean }> = (p) => <Pantalla {...p} />;

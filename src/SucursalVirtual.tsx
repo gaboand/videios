@@ -775,3 +775,6 @@ export const SucursalDinamico: React.FC<z.infer<typeof sucursalSchema>> = ({ fon
     </AbsoluteFill>
   );
 };
+
+// App screen alone (no device, no camera), used by the carousels.
+export const PantallaSucursal: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => <Pagina frame={frame} d={tab ? TAB : CEL} />;

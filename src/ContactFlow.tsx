@@ -1825,3 +1825,6 @@ export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema> & {
     </AbsoluteFill>
   );
 };
+
+// App screen alone (no device, no camera), used by the carousels.
+export const PantallaContactFlow: React.FC<{ frame: number; tab: boolean }> = (p) => <PantallaCF {...p} />;

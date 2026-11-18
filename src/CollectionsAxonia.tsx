@@ -1537,3 +1537,6 @@ export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema> & {
     </AbsoluteFill>
   );
 };
+
+// App screen alone (no device, no camera), used by the carousels.
+export const PantallaCollections: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => <Pagina frame={frame} m={!tab} />;
