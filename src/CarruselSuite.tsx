@@ -7,6 +7,7 @@ import { PantallaCollections } from "./CollectionsAxonia";
 import { PantallaContactFlow } from "./ContactFlow";
 import { PantallaCore } from "./CoreLending";
 import { FondoAbstracto } from "./FondoAbstracto";
+import { Dispositivo } from "./Dispositivos";
 import { DispositivoFoto, NotebookFoto } from "./Mockups";
 import { PantallaMotor } from "./MotorDecision";
 import { PantallaOnboarding } from "./OnboardingApp";
@@ -92,9 +93,9 @@ const Portada: React.FC = () => (
 const Equipo: React.FC<{ p: Producto }> = ({ p }) => {
   if (p.disp === "celular") {
     return (
-      <DispositivoFoto tipo="celular" ancho={420}>
+      <Dispositivo tipo="celular" w={390} h={844}>
         <p.Pantalla frame={p.frame} tab={false} />
-      </DispositivoFoto>
+      </Dispositivo>
     );
   }
   if (p.disp === "tablet") {
@@ -135,8 +136,8 @@ const PlacaProducto: React.FC<{ p: Producto; n: number }> = ({ p, n }) => {
       </div>
       {cel ? (
         <>
-          <div style={{ position: "absolute", right: 70, top: 400 }}>
-            <div>
+          <div style={{ position: "absolute", right: 100, top: 420, perspective: 2400 }}>
+            <div style={{ transform: "scale(0.86) rotateY(-10deg) rotateX(4deg)", transformOrigin: "50% 0" }}>
               <Equipo p={p} />
             </div>
           </div>
