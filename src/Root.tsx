@@ -25,6 +25,7 @@ import { INTEGRAL_FRAMES, Integral } from "./Integral";
 import { AvatarYouTube, BannerYouTube } from "./YouTubeMarca";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { CL_INTEGRAL_FRAMES, CoreLendingIntegral } from "./CoreLendingIntegral";
+import { OB_INTEGRAL_FRAMES, OnboardingIntegral } from "./OnboardingIntegral";
 import { GANCHO_FRAMES, GanchoCaos } from "./GanchoCaos";
 import { GANCHO_FOTO_FRAMES, GanchoFoto } from "./GanchoFoto";
 import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
@@ -400,6 +401,26 @@ export const RemotionRoot: React.FC = () => {
         component={CoreLendingIntegral}
         defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
         durationInFrames={CL_INTEGRAL_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // Onboarding ad with hook, voice-over and closing
+        id="OnboardingIntegral"
+        component={OnboardingIntegral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={OB_INTEGRAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Onboarding ad with hook, voice-over and closing
+        id="OnboardingIntegralMovil"
+        component={OnboardingIntegral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={OB_INTEGRAL_FRAMES}
         fps={30}
         width={1080}
         height={1920}

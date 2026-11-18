@@ -1,42 +1,7 @@
-import { AbsoluteFill, Audio, Easing, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { CierreAxonia } from "./CierreAxonia";
 import { CORELENDING_FRAMES, CoreLendingDinamico } from "./CoreLending";
-import { GanchoFoto } from "./GanchoFoto";
-import { compas, FPS, FUNDIDO, MarcaAgua, Pedazo, Pieza, Props, Subtitulo, Titulo } from "./Integral";
+import { armarPublicitario, destacado } from "./Publicitario";
 
-// Core Lending ad (16:9 and 9:16), same recipe as the Contact Flow one: a hook with
-// a framed clip, the whole dynamic Core Lending video, section titles on top,
-// the voice-over with subtitles, the small logo in the corner and the brand closing.
-
-const NARANJA = "#FF8C42";
-// The dynamic video starts on bar 3 (after the hook) and plays whole.
-const INI = Math.round(compas(3) - FUNDIDO / 2);
-const FIN_VIDEO = INI + CORELENDING_FRAMES;
-const CIERRE = 160;
-export const CL_INTEGRAL_FRAMES = FIN_VIDEO + CIERRE;
-
-const Gancho: React.FC<Props> = () => (
-  <GanchoFoto
-    variante="c"
-    conVideo
-    video="videos/cartera.mp4"
-    titulo="¿Tu cartera crece más rápido que tu operación?"
-    desdeBajada={46}
-    bajada={
-      <>
-        Todo el ciclo del préstamo, <span style={{ color: NARANJA, fontWeight: 700 }}>en un solo core</span>.
-      </>
-    }
-  />
-);
-
-const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={["Procesos automáticos", "Multicartera", "Contabilidad integrada", "100% apificado"]} rapido />;
-
-const PIEZAS: { p: Pieza; ini: number; fin: number }[] = [
-  { p: { C: Gancho, desde: 0, de: 0, a: 3 }, ini: 0, fin: INI + FUNDIDO },
-  { p: { C: CoreLendingDinamico, desde: 0, de: 3, a: 99 }, ini: INI, fin: FIN_VIDEO + FUNDIDO },
-  { p: { C: Cierre, desde: 0, de: 99, a: 99 }, ini: FIN_VIDEO - FUNDIDO / 2, fin: CL_INTEGRAL_FRAMES },
-];
+// Core Lending ad (16:9 and 9:16, 53 s), built with the product ad recipe.
 
 // Section titles, in frames of the Core Lending video (its ESC table).
 const TITULOS: [number, number, string, string][] = [
@@ -49,8 +14,8 @@ const TITULOS: [number, number, string, string][] = [
   [1060, CORELENDING_FRAMES - 4, "INFORMACIÓN AUTOMÁTICA", "Reportes que se generan y se envían solos"],
 ];
 
-// Side texts beside the device, only while the camera is not zoomed in:
-// [from, to] in frames of the Core Lending video, left items, right items.
+// Side texts beside the device: [from, to] in frames of the Core Lending video,
+// left items, right items.
 const LATERALES: [number, number, string[], string[]][] = [
   [8, 96, [], ["Non accrual y write off", "Punitorios y fees a medida", "Bonificación última cuota", "Descuento por pago adelantado"]],
   [110, 200, ["Simulador de préstamos", "Amortizaciones y vencimientos"], ["Altas automáticas\ndesde Onboarding", "Altas manuales"]],
@@ -61,72 +26,8 @@ const LATERALES: [number, number, string[], string[]][] = [
   [1068, 1252, ["Avisos de vencimiento", "Carteras en mora", "Central de Deudores"], ["CRM con bitácora documental", "Comisiones por venta", "100% apificado"]],
 ];
 
-// 9:16 side texts: "costado" moves the phone right and uses the left column;
-// "banda" shows the texts as chips in the band under the title.
-export type ModoV = "costado" | "banda";
-const ventana = (v: number) =>
-  Math.max(0, ...LATERALES.map(([de, a]) => interpolate(v, [de - 14, de, a, a + 14], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) })));
-
-const Lateral: React.FC<{ izq: string[]; der: string[]; dur: number; modoV: ModoV }> = ({ izq, der, dur, modoV }) => {
-  const f = useCurrentFrame();
-  const { width, height } = useVideoConfig();
-  const sale = interpolate(f, [dur - 8, dur], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  if (height > width) {
-    // 9:16: no room beside the phone, so one centred column floating over its
-    // lower half (above the subtitles), left items first and right items after.
-    const grupos = [izq, der].filter((g) => g.length > 0);
-    const tramo = dur / grupos.length;
-    const g = Math.min(grupos.length - 1, Math.floor(f / tramo));
-    const fl = f - g * tramo;
-    const fuera = interpolate(fl, [tramo - 8, tramo], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-    const banda = modoV === "banda";
-    return (
-      <AbsoluteFill>
-        <div
-          style={
-            banda
-              ? { position: "absolute", left: 50, right: 50, top: 440, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14 }
-              : { position: "absolute", left: 40, width: 400, top: height * 0.6, transform: "translateY(-50%)", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 18 }
-          }
-        >
-          {grupos[g].map((t, i) => {
-            const a = interpolate(fl, [4 + i * 8, 16 + i * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-            return (
-              <div key={t} style={{ display: "flex", alignItems: "center", gap: 14, padding: banda ? "12px 22px" : "16px 24px", borderRadius: 16, background: "rgba(12,14,20,0.86)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 10px 30px rgba(0,0,0,0.45)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: banda ? 28 : 32, lineHeight: 1.2, whiteSpace: banda ? "nowrap" : "pre-line", opacity: a * fuera, transform: banda ? `translateY(${(1 - a) * 16}px)` : `translateX(${(1 - a) * -30}px)` }}>
-                <div style={{ width: 13, height: 13, borderRadius: 7, background: NARANJA, flexShrink: 0 }} />
-                {banda ? t.replace("\n", " ") : t}
-              </div>
-            );
-          })}
-        </div>
-      </AbsoluteFill>
-    );
-  }
-  const columna = (items: string[], lado: "left" | "right", base: number) => (
-    <div style={{ position: "absolute", [lado]: 64, top: height * 0.62, transform: "translateY(-50%)", display: "flex", flexDirection: "column", alignItems: lado === "left" ? "flex-start" : "flex-end", gap: 16 }}>
-      {items.map((t, i) => {
-        const a = interpolate(f, [base + i * 8, base + i * 8 + 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-        const dx = (1 - a) * (lado === "left" ? -30 : 30);
-        return (
-          <div key={t} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", borderRadius: 14, background: "rgba(12,14,20,0.72)", border: "1px solid rgba(255,255,255,0.12)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: 22, lineHeight: 1.25, whiteSpace: "pre-line", textAlign: lado === "left" ? "left" : "right", opacity: a * sale, transform: `translateX(${dx}px)`, flexDirection: lado === "left" ? "row" : "row-reverse" }}>
-            <div style={{ width: 10, height: 10, borderRadius: 5, background: NARANJA, flexShrink: 0 }} />
-            {t}
-          </div>
-        );
-      })}
-    </div>
-  );
-  return (
-    <AbsoluteFill>
-      {columna(izq, "left", 4)}
-      {columna(der, "right", 4 + izq.length * 8)}
-    </AbsoluteFill>
-  );
-};
-
-// Voice-over (ElevenLabs, voice Camila), cut on its silences.
-const LOCUCION: string | null = "voz/locucion-corelending.mp3";
-// Voice-over phrases: [from, to] in the recording (s), start in the video (s).
+// Voice-over (ElevenLabs, voice Camila), cut on its silences:
+// [from, to] in the recording (s), start in the video (s).
 const VOZ: [number, number, number][] = [
   [0, 4.53, 0.4],
   [4.97, 7.42, 5.4],
@@ -155,50 +56,21 @@ const TROZOS: string[][] = [
   ["Los avisos de vencimiento y los informes de mora se generan solos,", "y como está cien por ciento apificado,", "se integra con todo tu ecosistema."],
   ["Agendá una demo en axonia.com.ar"],
 ];
-const SUBS = VOZ.flatMap(([a, b, en], i) => {
-  const total = TROZOS[i].reduce((n, t) => n + t.length, 0);
-  let t0 = en;
-  return TROZOS[i].map((t) => {
-    const d = ((b - a) * t.length) / total;
-    const s = { t, de: Math.round(t0 * FPS), a: Math.round((t0 + d) * FPS) };
-    t0 += d;
-    return s;
-  });
-});
 
-export const CoreLendingIntegral: React.FC<Props & { modoV?: ModoV }> = ({ modoV = "costado", ...props }) => (
-  <AbsoluteFill style={{ background: "#111" }}>
-    {PIEZAS.map(({ p, ini, fin }, i) => (
-      <Sequence key={i} from={ini} durationInFrames={fin - ini}>
-        <Pedazo p={p.C === CoreLendingDinamico && modoV === "costado" ? { ...p, extra: { apartaV: ventana } } : p} props={props} entra={i > 0} dur={fin - ini} acerca={null} />
-      </Sequence>
-    ))}
-    <MarcaAgua hasta={FIN_VIDEO} />
-    {LATERALES.map(([de, a, izq, der]) => (
-      <Sequence key={de} from={INI + de} durationInFrames={a - de}>
-        <Lateral izq={izq} der={der} dur={a - de} modoV={modoV} />
-      </Sequence>
-    ))}
-    {TITULOS.map(([de, a, etiqueta, frase]) => (
-      <Sequence key={etiqueta} from={INI + de} durationInFrames={a - de}>
-        <Titulo etiqueta={etiqueta} frase={frase} dur={a - de} />
-      </Sequence>
-    ))}
-    {SUBS.map((s) => (
-      <Sequence key={s.t} from={s.de} durationInFrames={s.a - s.de}>
-        <Subtitulo texto={s.t} dur={s.a - s.de} />
-      </Sequence>
-    ))}
-    {LOCUCION
-      ? VOZ.map(([a, b, en], i) => (
-          <Sequence key={`voz-${i}`} from={Math.round(en * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6}>
-            <Audio src={staticFile(LOCUCION)} trimBefore={Math.round(a * FPS)} durationInFrames={Math.round((b - a) * FPS) + 6} />
-          </Sequence>
-        ))
-      : null}
-    <Audio
-      src={staticFile("musica/leave-the-key.mp3")}
-      volume={(f) => interpolate(f, [CL_INTEGRAL_FRAMES - 30, CL_INTEGRAL_FRAMES], [0.15, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
-    />
-  </AbsoluteFill>
-);
+const { Componente, frames } = armarPublicitario({
+  Video: CoreLendingDinamico,
+  frames: CORELENDING_FRAMES,
+  gancho: {
+    video: "videos/cartera.mp4",
+    titulo: "¿Tu cartera crece más rápido que tu operación?",
+    bajada: <>Todo el ciclo del préstamo, {destacado("en un solo core")}.</>,
+  },
+  pills: ["Procesos automáticos", "Multicartera", "Contabilidad integrada", "100% apificado"],
+  titulos: TITULOS,
+  laterales: LATERALES,
+  locucion: "voz/locucion-corelending.mp3",
+  voz: VOZ,
+  trozos: TROZOS,
+});
+export const CoreLendingIntegral = Componente;
+export const CL_INTEGRAL_FRAMES = frames;
