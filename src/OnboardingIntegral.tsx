@@ -58,7 +58,8 @@ const { Componente, frames } = armarPublicitario({
   Video: OnboardingDinamico,
   frames: ONBOARDING_FRAMES,
   gancho: {
-    video: "videos/mostrador.mp4",
+    video: "videos/firma.mp4",
+    velocidad: 0.7,
     titulo: "¿Cuántos clientes perdés antes de que firmen?",
     bajada: <>Onboarding 100% digital, {destacado("en minutos")}.</>,
   },

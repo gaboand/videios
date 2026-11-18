@@ -48,7 +48,9 @@ export const GanchoFoto: React.FC<{
   titulo?: React.ReactNode;
   bajada?: React.ReactNode;
   desdeBajada?: number;
-}> = ({ variante, conVideo, video = "videos/mostrador.mp4", titulo, bajada, desdeBajada = 48 }) => {
+  // velocidad: playback rate of the clip (below 1 to stretch a short clip).
+  velocidad?: number;
+}> = ({ variante, conVideo, video = "videos/mostrador.mp4", titulo, bajada, desdeBajada = 48, velocidad = 1 }) => {
   const frame = useCurrentFrame();
   const { width, height, durationInFrames } = useVideoConfig();
   const empuje = interpolate(frame, [0, durationInFrames], [1, 1.08], clamp);
@@ -101,7 +103,7 @@ export const GanchoFoto: React.FC<{
         <FondoAbstracto paleta="gris" estilo="ondas" />
         <div style={{ position: "absolute", left: fx, top: fy, width: fw, height: fh, borderRadius: 22, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.15)" }}>
           {conVideo ? (
-            <OffthreadVideo src={staticFile(video)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <OffthreadVideo src={staticFile(video)} muted playbackRate={velocidad} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <Foto w={fw} h={fh} z={empuje * 1.05} ox={820} oy={460} />
           )}

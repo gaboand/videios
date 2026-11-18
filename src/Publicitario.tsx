@@ -16,7 +16,7 @@ export type ConfigPublicitario = {
   // shrinks and moves right to leave the left column for the side texts).
   Video: React.ComponentType<Props & { apartaV?: (frame: number) => number }>;
   frames: number;
-  gancho: { video: string; titulo: string; bajada: React.ReactNode };
+  gancho: { video: string; titulo: string; bajada: React.ReactNode; velocidad?: number };
   pills: string[];
   // [from, to] in frames of the product video, label, line.
   titulos: [number, number, string, string][];
@@ -88,7 +88,7 @@ export const armarPublicitario = (cfg: ConfigPublicitario) => {
   const FIN_VIDEO = INI + cfg.frames;
   const total = FIN_VIDEO + CIERRE;
 
-  const Gancho: React.FC<Props> = () => <GanchoFoto variante="c" conVideo video={cfg.gancho.video} titulo={cfg.gancho.titulo} desdeBajada={46} bajada={cfg.gancho.bajada} />;
+  const Gancho: React.FC<Props> = () => <GanchoFoto variante="c" conVideo video={cfg.gancho.video} titulo={cfg.gancho.titulo} desdeBajada={46} bajada={cfg.gancho.bajada} velocidad={cfg.gancho.velocidad} />;
   const Cierre: React.FC<Props> = (p) => <CierreAxonia {...p} pills={cfg.pills} rapido />;
   const ventana = (v: number) =>
     Math.max(0, ...cfg.laterales.map(([de, a]) => interpolate(v, [de - 14, de, a, a + 14], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) })));
