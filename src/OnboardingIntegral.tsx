@@ -5,8 +5,8 @@ import { armarPublicitario, destacado } from "./Publicitario";
 
 // Section titles, in frames of the Onboarding video (its ESC table).
 const TITULOS: [number, number, string, string][] = [
-  [6, 146, "ONBOARDING DIGITAL", "Arranca con solo dos datos"],
-  [150, 300, "OFERTAS PERSONALIZADAS", "El recorrido y la oferta, según cada cliente"],
+  [6, 146, "ONBOARDING DIGITAL", "Comienza con solo dos datos"],
+  [150, 300, "ONBOARDING PERSONALIZADO", "Pasos y ofertas por perfil del cliente"],
   [304, 404, "VERIFICACIONES TEMPRANAS", "Email y teléfono validados desde el inicio"],
   [408, 602, "VALIDACIÓN DE IDENTIDAD", "Reconocimiento facial con prueba de vida"],
   [606, 756, "INTEGRACIONES", "Confirmaciones por SMS y WhatsApp"],
