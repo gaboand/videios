@@ -497,6 +497,16 @@ export const RemotionRoot: React.FC = () => {
         height={1350}
       />
       <Composition
+        // Suite carousel, square version (1080x1080)
+        id="CarruselSuiteCuadrado"
+        component={CarruselSuite}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1300}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
         // YouTube channel profile picture: npx remotion still AvatarYouTube
         id="AvatarYouTube"
         component={AvatarYouTube}
