@@ -7,7 +7,7 @@ import { armarPublicitario, destacado } from "./Publicitario";
 // Section titles, in frames of the Motor video (its ESC table).
 const TITULOS: [number, number, string, string][] = [
   [6, 252, "MOTOR DE DECISIÓN", "Variables y reglas configuradas por tu equipo"],
-  [256, 438, "WORKFLOW DE EVALUACIÓN", "Diseñá el circuito de aprobación sin programar"],
+  [256, 438, "WORKFLOW DE EVALUACIÓN", "El circuito de aprobación, en un editor visual"],
   [442, 608, "MATRIZ DE RIESGO", "Cada cliente en su segmento de riesgo"],
   [612, 788, "RISK PRICING", "Tasa, monto y plazo según el riesgo"],
   [792, 1038, "INFORME DE EVALUACIÓN", "Cada decisión, explicada paso a paso"],
@@ -19,11 +19,11 @@ const TITULOS: [number, number, string, string][] = [
 // left items, right items.
 const LATERALES: [number, number, string[], string[]][] = [
   [40, 246, [], ["Bureaus", "Central de Deudores", "AML", "Bases internas", "Bases negativas"]],
-  [258, 436, [], ["Editor visual sin código", "Cambios en tiempo real\n(time to market)", "Evolución manual de\ncasos observados", "Multi workflow", "Champion Challenger"]],
+  [258, 436, [], ["Editor visual", "Cambios en tiempo real\n(time to market)", "Evaluación manual de\ncasos observados", "Multi configuraciones", "Multi workflow", "Multi estrategias", "Champion Challenger"]],
   [446, 604, ["Score de bureau y propio", "Georreferencia", "Segmentos de renovadores\nautomáticos"], ["Riesgo por canal: presencial,\nonline y por sucursal", "Riesgo por perfil\n(clusterización)", "Riesgo por producto:\nconsumo, efectivo, moto"]],
   [616, 784, ["Tasa según riesgo", "Relación cuota ingreso", "Elasticidad de la oferta", "Rentabilidad ajustada\nal riesgo"], []],
   [800, 1034, ["Dictamen automático", "Trazabilidad de cada regla"], ["Análisis multiproducto", "Líneas globales,\nindividuales y BNPL"]],
-  [1046, 1254, ["Funnel de evaluación", "Rechazos por etapa", "Rechazos por servicio", "Costo por lead evaluado"], []],
+  [1046, 1254, ["Funnel de evaluación", "Dictamen por etapa", "Dictamen por servicio", "Costo por lead evaluado"], []],
   [1266, 1478, ["Tasa de aprobación", "Performance por workflow"], ["Online, en tiempo real\ny desde cualquier lugar", "100% apificado"]],
 ];
 
@@ -44,7 +44,7 @@ const VOZ: [number, number, number][] = [
 const TROZOS: string[][] = [
   ["¿Tu riesgo se mide solo en mora,", "o también en lo que dejás de ganar?"],
   ["Con el motor de decisión de Axonia combinás bureaus, bases internas", "y controles de AML con tus propias reglas."],
-  ["Armás tus circuitos de evaluación sin programar,", "y cada cambio sale a producción en el momento,", "administrado por tu equipo."],
+  ["Armás tus circuitos de evaluación en un editor visual,", "y cada cambio sale a producción en el momento,", "administrado por tu equipo."],
   ["Medís el riesgo por canal, por sucursal, por producto", "y por perfil de cliente,", "y los renovadores se segmentan solos."],
   ["La oferta se ajusta a la elasticidad de cada segmento", "para maximizar la rentabilidad ajustada al riesgo."],
   ["Administrás líneas globales e individuales,", "incluso para compras en cuotas con Buy Now Pay Later."],
