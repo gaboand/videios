@@ -81,4 +81,10 @@ Tono B2B, de diseñador y publicista: le hablan a quien decide en una entidad o 
 ## Canal y marca
 
 - LinkedIn: portadas `BannerLinkedIn` (página de empresa, 1128×191, sin logo: "PASIÓN POR LA TECNOLOGÍA", www.axonia.com.ar y píldoras; la esquina de abajo a la izquierda libre para el logo) y `BannerLinkedInPerfil` (1584×396). Fondo de los videos sin aplastar (`FondoAbstracto` con `tam` 1920×1080 escalado). Renderizar con `--scale=2`.
+- Links de "Agendá una demo" (caen en el formulario de cada landing; usarlos en descripciones de YouTube, posteos y CTAs):
+  - Onboarding: https://axonia.com.ar/landing/onboarding.html#demo
+  - Motor de decisión: https://axonia.com.ar/landing/motor-de-riesgo.html#demo
+  - Core Lending: https://axonia.com.ar/landing/core-lending.html#demo
+  - Contact Flow: https://axonia.com.ar/landing/contact-flow.html#demo
+  - Suite (Integral): https://axonia.com.ar/landing/suite-fintech.html#demo
 - YouTube: canal Axonia `@axonia_global`, vinculado a Google Ads. Banner y foto de perfil: `BannerYouTube`/`AvatarYouTube` (`src/YouTubeMarca.tsx`).
