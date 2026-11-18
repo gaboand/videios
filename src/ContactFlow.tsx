@@ -1765,7 +1765,9 @@ const PantallaCF: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) =
 
 // dxExtraV: horizontal nudge of the phone in px, 9:16 only (used by the ads,
 // where the call room shot leaves the phone against the left edge).
-export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema> & { dxExtraV?: number }> = ({ fondo, paleta, dxExtraV = 0 }) => {
+// apartaV (9:16 only, used by the ads and carousels): 0..1 per frame; the phone
+// shrinks a bit and moves right to leave a free column on the left.
+export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema> & { dxExtraV?: number; apartaV?: (frame: number) => number }> = ({ fondo, paleta, dxExtraV = 0, apartaV }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const tab = width > height;
@@ -1773,11 +1775,12 @@ export const ContactFlowDinamico: React.FC<z.infer<typeof contactFlowSchema> & {
   const { w, h } = pantallaDe(tipo, !tab);
   const { H: EH } = exteriorDe(tipo, w, h);
   const c = toma(frame, tab ? TOMAS_TAB : TOMAS_CEL);
-  const esc = ((height * 0.64) / EH) * c.z;
+  const ap = !tab && apartaV ? apartaV(frame) : 0;
+  const esc = ((height * 0.64) / EH) * c.z * (1 - 0.2 * ap);
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   // Device chrome offset (padding + border) so the overlay lines up with the screen.
   const MARCO = tab ? 27 : 17;
-  const dx = -(c.px - w / 2) * esc + (tab ? 0 : dxExtraV);
+  const dx = -(c.px - w / 2) * esc + (tab ? 0 : dxExtraV) + 190 * ap;
   // Keep the top 20% of the video free (for titles), with a margin for the tilt.
   const dy0 = -(c.py - h / 2) * esc;
   const arriba = height * c.cy + dy0 - (EH * esc) / 2;

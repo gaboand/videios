@@ -23,6 +23,7 @@ import {
 } from "./ConsolidacionDeudas";
 import { INTEGRAL_FRAMES, Integral } from "./Integral";
 import { AvatarYouTube, BannerLinkedIn, BannerYouTube } from "./YouTubeMarca";
+import { CarruselSuite } from "./CarruselSuite";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { CL_INTEGRAL_FRAMES, CoreLendingIntegral } from "./CoreLendingIntegral";
 import { OB_INTEGRAL_FRAMES, OnboardingIntegral } from "./OnboardingIntegral";
@@ -484,6 +485,16 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1584}
         height={396}
+      />
+      <Composition
+        // Suite carousel (LinkedIn / Instagram, 4:5): one still per slide (placa 1..7)
+        id="CarruselSuite"
+        component={CarruselSuite}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1300}
+        fps={30}
+        width={1080}
+        height={1350}
       />
       <Composition
         // YouTube channel profile picture: npx remotion still AvatarYouTube

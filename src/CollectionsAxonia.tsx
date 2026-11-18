@@ -1487,7 +1487,9 @@ const Saltos: React.FC<{ frame: number; m: boolean }> = ({ frame, m }) => {
   return <>{piezas}</>;
 };
 
-export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema>> = ({ fondo, paleta }) => {
+// apartaV (9:16 only, used by the ads and carousels): 0..1 per frame; the phone
+// shrinks a bit and moves right to leave a free column on the left.
+export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema> & { apartaV?: (frame: number) => number }> = ({ fondo, paleta, apartaV }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const m = height > width;
@@ -1497,11 +1499,12 @@ export const CollectionsDinamico: React.FC<z.infer<typeof collectionsSchema>> = 
   const c = toma(frame, m ? TOMAS_M : TOMAS);
   const SW = m ? MW : PW;
   const SH = m ? MH : PH;
-  const esc = ((height * 0.64) / EH) * c.z;
+  const ap = m && apartaV ? apartaV(frame) : 0;
+  const esc = ((height * 0.64) / EH) * c.z * (1 - 0.2 * ap);
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   // Device chrome offset (padding + border) so the overlay lines up with the screen.
   const MARCO = m ? 17 : 27;
-  const dx = -(c.px - SW / 2) * esc;
+  const dx = -(c.px - SW / 2) * esc + 190 * ap;
   // Keep the top 20% of the video free (for titles): if the zoom pushes the
   // device above that line, move it down (with a margin for the tilt).
   const dy0 = -(c.py - SH / 2) * esc;
