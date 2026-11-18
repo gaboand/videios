@@ -1,5 +1,7 @@
 import { AbsoluteFill, Img, staticFile } from "remotion";
 import "@fontsource/inter/600.css";
+import "@fontsource/montserrat/300.css";
+import "@fontsource/montserrat/400.css";
 import "@fontsource/inter/800.css";
 import { FondoAbstracto } from "./FondoAbstracto";
 
@@ -56,6 +58,19 @@ export const AvatarYouTube: React.FC = () => {
 // the bottom left corner). "perfil": personal profile (1584x396; the profile
 // photo covers the bottom left, so the content goes to the right).
 // Rendered at --scale=2 for sharpness.
+// The video background (16:9, 1920x1080) scaled to the banner width and
+// centred, so it keeps the same few lines as the videos.
+const FondoVideo: React.FC<{ w: number; h: number }> = ({ w, h }) => {
+  const k = w / 1920;
+  return (
+    <AbsoluteFill style={{ overflow: "hidden", background: "#1f2227" }}>
+      <div style={{ position: "absolute", left: 0, top: (h - 1080 * k) / 2, width: 1920, height: 1080, transform: `scale(${k})`, transformOrigin: "0 0" }}>
+        <FondoAbstracto paleta="gris" estilo="ondas" tam={{ width: 1920, height: 1080 }} />
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 const PRODUCTOS = ["Onboarding", "Motor de decisión", "Core Lending", "Cobranzas", "Contact Flow"];
 export const BannerLinkedIn: React.FC<{ tipo: "empresa" | "perfil" }> = ({ tipo }) => {
   const e = tipo === "empresa";
@@ -70,23 +85,23 @@ export const BannerLinkedIn: React.FC<{ tipo: "empresa" | "perfil" }> = ({ tipo 
     </div>
   );
   if (e) {
-    // The page logo already shows Axonia: only the company line, the site
-    // and the products.
+    // Same layout as the current cover: the page logo covers the bottom left,
+    // so that corner only has background; the line and the site sit on the
+    // right, light and small.
     return (
-      <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
-        <FondoAbstracto paleta="gris" estilo="ondas" />
-        <div style={{ position: "absolute", top: 0, bottom: 0, left: 250, right: 70, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-          <div style={{ color: "white", fontSize: 40, fontWeight: 800, letterSpacing: 4 }}>PASIÓN POR LA TECNOLOGÍA</div>
-          <div style={{ width: 46, height: 3, borderRadius: 2, background: NARANJA, margin: "12px 0 10px" }} />
-          <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, fontWeight: 600, letterSpacing: 3 }}>www.axonia.com.ar</div>
-          {pildoras}
+      <AbsoluteFill style={{ fontFamily: "Montserrat, sans-serif" }}>
+        <FondoVideo w={1128} h={191} />
+        <div style={{ position: "absolute", left: 600, right: 70, top: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: 18 }}>
+          <div style={{ color: "rgba(255,255,255,0.92)", fontSize: 24, fontWeight: 400, letterSpacing: 1.5, whiteSpace: "nowrap" }}>PASIÓN POR LA TECNOLOGÍA</div>
+          <div style={{ width: 34, height: 2, borderRadius: 1, background: NARANJA, margin: "9px 0 8px" }} />
+          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 300, letterSpacing: 2.5 }}>www.axonia.com.ar</div>
         </div>
       </AbsoluteFill>
     );
   }
   return (
     <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
-      <FondoAbstracto paleta="gris" estilo="ondas" />
+      <FondoVideo w={1584} h={396} />
       <div style={{ position: "absolute", top: 0, bottom: 0, right: 90, left: 520, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 60 * k }}>
         <Logo w={420 * k} />
         <div style={{ width: 3 * k, height: 190 * k, background: "rgba(255,255,255,0.25)" }} />

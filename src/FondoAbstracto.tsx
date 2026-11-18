@@ -39,9 +39,12 @@ const BLOBS = [
 
 type Paleta = keyof typeof PALETAS;
 
-const FondoOndas: React.FC<{ paleta: Paleta }> = ({ paleta }) => {
+// tam: draw as if the frame had this size (used by the still banners, which
+// show a 16:9 background scaled down instead of squashing all the lines).
+const FondoOndas: React.FC<{ paleta: Paleta; tam?: { width: number; height: number } }> = ({ paleta, tam }) => {
   const frame = useCurrentFrame();
-  const { width, height } = useVideoConfig();
+  const cfg = useVideoConfig();
+  const { width, height } = tam ?? cfg;
   const p = PALETAS[paleta];
   // Designed at 1080x1920; blobs and lines stretch to any other format so
   // they cover the whole frame in 16:9 too.
@@ -312,7 +315,8 @@ export type EstiloFondo = "ondas" | "red" | "aurora" | "geometrico";
 export const FondoAbstracto: React.FC<{
   paleta: Paleta;
   estilo?: EstiloFondo;
-}> = ({ paleta, estilo = "ondas" }) => {
+  tam?: { width: number; height: number };
+}> = ({ paleta, estilo = "ondas", tam }) => {
   switch (estilo) {
     case "red":
       return <FondoRed paleta={paleta} />;
@@ -321,6 +325,6 @@ export const FondoAbstracto: React.FC<{
     case "geometrico":
       return <FondoGeometrico paleta={paleta} />;
     default:
-      return <FondoOndas paleta={paleta} />;
+      return <FondoOndas paleta={paleta} tam={tam} />;
   }
 };
