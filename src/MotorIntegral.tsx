@@ -11,19 +11,19 @@ const TITULOS: [number, number, string, string][] = [
   [442, 608, "MATRIZ DE RIESGO", "Cada cliente en su segmento de riesgo"],
   [612, 788, "RISK PRICING", "Tasa, monto y plazo según el riesgo"],
   [792, 1038, "INFORME DE EVALUACIÓN", "Cada decisión, explicada paso a paso"],
-  [1042, 1258, "ANÁLISIS DE RECHAZOS", "Detectá dónde se caen tus solicitudes"],
+  [1042, 1258, "ANÁLISIS DE EVALUACIONES", "Cada evaluación medida, etapa por etapa"],
   [1262, MOTOR_FRAMES - 4, "DASHBOARD", "Aprobación y performance en tiempo real"],
 ];
 
 // Side texts beside the device: [from, to] in frames of the Motor video,
 // left items, right items.
 const LATERALES: [number, number, string[], string[]][] = [
-  [40, 246, ["Bureau A", "Central de Deudores"], ["Bases internas", "Bases negativas"]],
-  [258, 436, [], ["Editor visual sin código", "Gates manuales", "Varios workflows", "Champion Challenger"]],
-  [446, 604, ["Score de bureau y propio", "Ingreso inferido"], ["Segmentos por producto", "Cambios en tiempo real"]],
-  [616, 784, ["Tasa según riesgo", "Montos y plazos", "Ofertas por segmento"], []],
-  [800, 1034, ["Dictamen automático", "Trazabilidad de cada regla"], ["Ingreso inferido", "Relación cuota ingreso"]],
-  [1046, 1254, ["Funnel de evaluación", "Rechazos por etapa"], ["Rechazos por servicio"]],
+  [40, 246, [], ["Bureaus", "Central de Deudores", "AML", "Bases internas", "Bases negativas"]],
+  [258, 436, [], ["Editor visual sin código", "Evolución manual de\ncasos observados", "Multi workflow", "Champion Challenger"]],
+  [446, 604, ["Score de bureau y propio", "Ingreso inferido", "Georreferencia"], ["Riesgo por cliente,\ncanal y producto", "Cambios en tiempo real"]],
+  [616, 784, ["Tasa según riesgo", "Montos y plazos", "Ofertas por segmento", "Relación cuota ingreso"], []],
+  [800, 1034, ["Dictamen automático", "Trazabilidad de cada regla"], ["Análisis multiproducto", "Líneas globales\ne individuales"]],
+  [1046, 1254, ["Funnel de evaluación", "Rechazos por etapa", "Rechazos por servicio", "Costo por lead evaluado"], []],
   [1266, 1478, ["Tasa de aprobación", "Performance por workflow"], ["Distribución por riesgo", "100% apificado"]],
 ];
 
