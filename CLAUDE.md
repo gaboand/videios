@@ -87,4 +87,5 @@ Tono B2B, de diseñador y publicista: le hablan a quien decide en una entidad o 
   - Core Lending: https://axonia.com.ar/landing/core-lending.html#demo
   - Contact Flow: https://axonia.com.ar/landing/contact-flow.html#demo
   - Suite (Integral): https://axonia.com.ar/landing/suite-fintech.html#demo
+- Hashtags en todas las descripciones de YouTube: #CoreDePrestamos #SistemaDePrestamos #SoftwareDePrestamos #CoreDeCreditos #SistemaDeCreditos #SoftwareDeCreditos, más los del producto (máximo 15 en total; YouTube muestra los 3 primeros arriba del título).
 - YouTube: canal Axonia `@axonia_global`, vinculado a Google Ads. Banner y foto de perfil: `BannerYouTube`/`AvatarYouTube` (`src/YouTubeMarca.tsx`).
