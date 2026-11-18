@@ -195,8 +195,9 @@ const Cierre: React.FC<{ c: ConfigCarrusel["cierre"]; total: number }> = ({ c, t
 export const NARANJA_CARRUSEL = NARANJA;
 export const armarCarrusel = (cfg: ConfigCarrusel) => {
   const total = cfg.placas.length + 2;
-  const Componente: React.FC<{ placa: number }> = ({ placa }) => {
-    if (placa <= 1) return <Portada c={cfg.portada} total={total} />;
+  // foto: optional override of the cover photo (to try alternatives).
+  const Componente: React.FC<{ placa: number; foto?: string }> = ({ placa, foto }) => {
+    if (placa <= 1) return <Portada c={foto ? { ...cfg.portada, foto } : cfg.portada} total={total} />;
     if (placa >= total) return <Cierre c={cfg.cierre} total={total} />;
     return <PlacaProducto p={cfg.placas[placa - 2]} n={placa} total={total} />;
   };
