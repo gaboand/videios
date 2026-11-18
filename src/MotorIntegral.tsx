@@ -27,19 +27,19 @@ const LATERALES: [number, number, string[], string[]][] = [
   [1266, 1478, ["Tasa de aprobación", "Performance por workflow"], ["Online, en tiempo real\ny desde cualquier lugar", "100% apificado"]],
 ];
 
-// Voice-over: draft script with estimated times until the recording arrives.
+// Voice-over (ElevenLabs, voice Camila), cut on its silences:
 // [from, to] in the recording (s), start in the video (s).
 const VOZ: [number, number, number][] = [
-  [0, 4.0, 0.4],
-  [0, 6.5, 5.0],
-  [0, 7.0, 12.2],
-  [0, 7.0, 19.9],
-  [0, 6.0, 27.6],
-  [0, 6.0, 34.3],
-  [0, 6.0, 41.0],
-  [0, 4.5, 47.7],
-  [0, 3.0, 52.9],
-  [0, 2.8, 56.6],
+  [0, 3.72, 0.4],
+  [4.21, 10.57, 5.2],
+  [10.93, 17.78, 12.4],
+  [18.18, 24.76, 20.1],
+  [25.06, 30.6, 27.4],
+  [30.96, 36.26, 33.7],
+  [36.6, 41.66, 39.9],
+  [41.96, 45.88, 45.9],
+  [46.18, 49.0, 50.8],
+  [49.28, 52.11, 54.9],
 ];
 const TROZOS: string[][] = [
   ["¿Tu riesgo se mide solo en mora,", "o también en lo que dejás de ganar?"],
@@ -65,7 +65,7 @@ const { Componente, frames } = armarPublicitario({
   pills: ["Riesgo por canal y producto", "Rentabilidad ajustada al riesgo", "Time to market", "Champion Challenger"],
   titulos: TITULOS,
   laterales: LATERALES,
-  locucion: null,
+  locucion: "voz/locucion-motor.mp3",
   voz: VOZ,
   trozos: TROZOS,
 });
