@@ -5,47 +5,52 @@ import { armarPublicitario, destacado } from "./Publicitario";
 
 // Section titles, in frames of the Onboarding video (its ESC table).
 const TITULOS: [number, number, string, string][] = [
-  [6, 146, "ONBOARDING DIGITAL", "Tu cliente se registra en minutos, desde donde esté"],
-  [150, 300, "OFERTAS PERSONALIZADAS", "El motor decide y ofrece en tiempo real"],
-  [304, 404, "VALIDACIÓN DE EMAIL", "Código de verificación automático"],
-  [408, 602, "IDENTIDAD DIGITAL", "DNI y selfie validados al instante"],
-  [606, 756, "VALIDACIÓN DE TELÉFONO", "Confirmación por WhatsApp"],
-  [760, 856, "RESUMEN DE LA OPERACIÓN", "Cuotas, tasas y costos claros desde el inicio"],
-  [860, 1056, "FIRMA DIGITAL", "Firma con el dedo, con validez legal"],
-  [1060, ONBOARDING_FRAMES - 4, "CONTRATO DIGITAL", "Firmado y enviado al instante"],
+  [6, 146, "ONBOARDING DIGITAL", "Arranca con solo dos datos"],
+  [150, 300, "OFERTAS PERSONALIZADAS", "El recorrido y la oferta, según cada cliente"],
+  [304, 404, "VERIFICACIONES TEMPRANAS", "Email y teléfono validados desde el inicio"],
+  [408, 602, "VALIDACIÓN DE IDENTIDAD", "Reconocimiento facial con prueba de vida"],
+  [606, 756, "INTEGRACIONES", "Confirmaciones por SMS y WhatsApp"],
+  [760, 856, "RESUMEN DE LA OFERTA", "Datos adicionales y la oferta elegida"],
+  [860, 1056, "FIRMA DIGITAL", "El cliente firma con el dedo desde su celular"],
+  [1060, ONBOARDING_FRAMES - 4, "CONTRATO DIGITAL", "Firmado y guardado en su legajo"],
 ];
 
 // Side texts beside the device: [from, to] in frames of the Onboarding video,
 // left items, right items.
 const LATERALES: [number, number, string[], string[]][] = [
-  [20, 140, [], ["Prellenado con DNI", "Consulta a bureaus", "Multiproducto"]],
-  [176, 296, ["Motor de decisión", "Ofertas según riesgo"], ["Montos y plazos a medida", "Champion Challenger"]],
-  [450, 598, ["DNI frente y dorso", "Selfie con prueba de vida"], ["Validación biométrica", "Prevención de fraude"]],
-  [1070, 1320, ["Alta automática en el core", "Legajo digital"], ["Cero papeles", "100% apificado"]],
+  [20, 146, [], ["Carga inicial: DNI y género", "Normalización de\nnombre y apellido", "Aceptación de\ntérminos y condiciones"]],
+  [176, 298, ["Políticas por producto", "Pasos según el\nperfil del cliente"], ["Ofertas personalizadas\npor cliente"]],
+  [310, 402, [], ["Verificación de email", "Verificación telefónica", "Verificaciones tempranas"]],
+  [450, 598, ["Validación de identidad", "Reconocimiento facial"], ["Selfie con prueba de vida", "Prevención de fraude"]],
+  [640, 752, ["Integración con SMS"], ["Integración con WhatsApp"]],
+  [768, 852, ["Captura de datos adicionales"], ["Resumen de la\noferta seleccionada"]],
+  [1070, 1320, ["Contrato digital firmado", "Cero papeles"], ["Legajo digital del cliente"]],
 ];
 
 // Voice-over: draft script with estimated times until the recording arrives.
 // [from, to] in the recording (s), start in the video (s).
 const VOZ: [number, number, number][] = [
-  [0, 4.4, 0.4],
-  [0, 5.8, 5.8],
-  [0, 5.6, 12.0],
-  [0, 5.2, 18.0],
-  [0, 6.4, 23.6],
-  [0, 5.4, 30.4],
-  [0, 6.2, 36.2],
-  [0, 6.4, 42.8],
-  [0, 2.8, 50.4],
+  [0, 4.0, 0.4],
+  [0, 5.6, 5.2],
+  [0, 5.6, 11.5],
+  [0, 5.2, 17.8],
+  [0, 6.0, 23.6],
+  [0, 4.0, 30.2],
+  [0, 4.4, 34.8],
+  [0, 6.6, 39.8],
+  [0, 4.4, 47.0],
+  [0, 2.8, 52.0],
 ];
 const TROZOS: string[][] = [
-  ["¿Cuántos clientes se te caen", "antes de terminar de pedir un préstamo?"],
-  ["Con el onboarding de Axonia, se registran en minutos,", "desde el celular y sin pisar una sucursal."],
-  ["El motor de decisión evalúa al instante", "y les muestra solo las ofertas que podés aprobar."],
-  ["Validamos email, identidad y teléfono", "con biometría y prueba de vida."],
-  ["Así reducís el fraude", "sin sumar fricción para tu cliente."],
-  ["Antes de firmar, ve con claridad", "cuotas, tasas y costos."],
-  ["Firma con el dedo, con validez legal,", "y el contrato le llega al instante."],
-  ["Y la operación se da de alta sola en tu core,", "sin papeles ni carga manual."],
+  ["¿Cuántos clientes abandonan", "antes de terminar de pedir un préstamo?"],
+  ["Con el onboarding de Axonia empiezan con solo dos datos,", "y el resto se completa y se ordena solo."],
+  ["Según tus políticas y el perfil de cada cliente,", "el recorrido cambia y las ofertas son a su medida."],
+  ["Email y teléfono se verifican desde el primer momento,", "para no perder tiempo con datos falsos."],
+  ["La identidad se valida con reconocimiento facial y prueba de vida,", "frenando el fraude antes de que entre."],
+  ["Todo se integra con SMS y WhatsApp,", "los canales que tu cliente ya usa."],
+  ["Antes de firmar, completa lo que falta", "y revisa su oferta con total claridad."],
+  ["Firma con el dedo desde su propio celular,", "y el contrato digital queda guardado en su legajo,", "sin un solo papel."],
+  ["Más clientes que terminan el proceso,", "con menos riesgo y cero carga operativa."],
   ["Agendá una demo en axonia.com.ar"],
 ];
 
@@ -54,10 +59,10 @@ const { Componente, frames } = armarPublicitario({
   frames: ONBOARDING_FRAMES,
   gancho: {
     video: "videos/mostrador.mp4",
-    titulo: "¿Cuántos clientes perdés en el camino al préstamo?",
+    titulo: "¿Cuántos clientes perdés antes de que firmen?",
     bajada: <>Onboarding 100% digital, {destacado("en minutos")}.</>,
   },
-  pills: ["100% digital", "Validación de identidad", "Firma electrónica", "Ofertas a medida"],
+  pills: ["100% digital", "Ofertas personalizadas", "Validación de identidad", "Cero papeles"],
   titulos: TITULOS,
   laterales: LATERALES,
   locucion: null,
