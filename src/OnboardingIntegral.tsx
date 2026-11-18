@@ -27,19 +27,20 @@ const LATERALES: [number, number, string[], string[]][] = [
   [1070, 1320, ["Contrato digital firmado", "Cero papeles"], ["Legajo digital del cliente"]],
 ];
 
-// Voice-over: draft script with estimated times until the recording arrives.
+// Voice-over (ElevenLabs, voice Camila), cut on its silences:
 // [from, to] in the recording (s), start in the video (s).
 const VOZ: [number, number, number][] = [
-  [0, 4.0, 0.4],
-  [0, 5.6, 5.2],
-  [0, 5.6, 11.5],
-  [0, 5.2, 17.8],
-  [0, 6.0, 23.6],
-  [0, 4.0, 30.2],
-  [0, 4.4, 34.8],
-  [0, 6.6, 39.8],
-  [0, 4.4, 47.0],
-  [0, 2.8, 52.0],
+  [0, 3.34, 0.4],
+  [3.8, 9.44, 4.6],
+  [9.84, 15.02, 10.64],
+  [15.41, 20.11, 16.22],
+  [20.47, 25.88, 21.32],
+  [26.2, 28.49, 27.13],
+  [28.81, 30.54, 29.74],
+  [30.89, 35.06, 32.4],
+  [35.47, 41.48, 37.5],
+  [41.83, 46.02, 44.6],
+  [46.32, 49.16, 50.0],
 ];
 const TROZOS: string[][] = [
   ["¿Cuántos clientes abandonan", "antes de terminar de pedir un préstamo?"],
@@ -47,7 +48,8 @@ const TROZOS: string[][] = [
   ["Según tus políticas y el perfil de cada cliente,", "el recorrido cambia y las ofertas son a su medida."],
   ["Email y teléfono se verifican desde el primer momento,", "para no perder tiempo con datos falsos."],
   ["La identidad se valida con reconocimiento facial y prueba de vida,", "frenando el fraude antes de que entre."],
-  ["Todo se integra con SMS y WhatsApp,", "los canales que tu cliente ya usa."],
+  ["Todo se integra con SMS y WhatsApp,"],
+  ["los canales que tu cliente ya usa."],
   ["Antes de firmar, completa lo que falta", "y revisa su oferta con total claridad."],
   ["Firma con el dedo desde su propio celular,", "y el contrato digital queda guardado en su legajo,", "sin un solo papel."],
   ["Más clientes que terminan el proceso,", "con menos riesgo y cero carga operativa."],
@@ -66,7 +68,7 @@ const { Componente, frames } = armarPublicitario({
   pills: ["100% digital", "Ofertas personalizadas", "Validación de identidad", "Cero papeles"],
   titulos: TITULOS,
   laterales: LATERALES,
-  locucion: null,
+  locucion: "voz/locucion-onboarding.mp3",
   voz: VOZ,
   trozos: TROZOS,
 });
