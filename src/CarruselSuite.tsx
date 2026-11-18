@@ -6,9 +6,8 @@ import "@fontsource/inter/800.css";
 import { PantallaCollections } from "./CollectionsAxonia";
 import { PantallaContactFlow } from "./ContactFlow";
 import { PantallaCore } from "./CoreLending";
-import { Dispositivo } from "./Dispositivos";
 import { FondoAbstracto } from "./FondoAbstracto";
-import { NotebookFoto, TabletReal } from "./Mockups";
+import { DispositivoFoto, NotebookFoto } from "./Mockups";
 import { PantallaMotor } from "./MotorDecision";
 import { PantallaOnboarding } from "./OnboardingApp";
 import { PantallaSucursal } from "./SucursalVirtual";
@@ -93,16 +92,16 @@ const Portada: React.FC = () => (
 const Equipo: React.FC<{ p: Producto }> = ({ p }) => {
   if (p.disp === "celular") {
     return (
-      <Dispositivo tipo="celular" w={390} h={844}>
+      <DispositivoFoto tipo="celular" ancho={420}>
         <p.Pantalla frame={p.frame} tab={false} />
-      </Dispositivo>
+      </DispositivoFoto>
     );
   }
   if (p.disp === "tablet") {
     return (
-      <TabletReal w={1180} h={820}>
+      <DispositivoFoto tipo="tablet" ancho={880}>
         <p.Pantalla frame={p.frame} tab />
-      </TabletReal>
+      </DispositivoFoto>
     );
   }
   const k = 1280 / 1180;
@@ -136,8 +135,8 @@ const PlacaProducto: React.FC<{ p: Producto; n: number }> = ({ p, n }) => {
       </div>
       {cel ? (
         <>
-          <div style={{ position: "absolute", right: 100, top: 420, perspective: 2400 }}>
-            <div style={{ transform: "scale(0.86) rotateY(-10deg) rotateX(4deg)", transformOrigin: "50% 0" }}>
+          <div style={{ position: "absolute", right: 70, top: 400 }}>
+            <div>
               <Equipo p={p} />
             </div>
           </div>
@@ -149,8 +148,8 @@ const PlacaProducto: React.FC<{ p: Producto; n: number }> = ({ p, n }) => {
         </>
       ) : (
         <>
-          <div style={{ position: "absolute", left: 0, right: 0, top: p.disp === "tablet" ? 420 : 400, display: "flex", justifyContent: "center", perspective: 2600 }}>
-            <div style={{ transform: `scale(${p.disp === "tablet" ? 0.74 : 1})`, transformOrigin: "50% 0" }}>
+          <div style={{ position: "absolute", left: 0, right: 0, top: p.disp === "tablet" ? 410 : 400, display: "flex", justifyContent: "center", perspective: 2600 }}>
+            <div style={{ transform: `scale(1)`, transformOrigin: "50% 0" }}>
               <Equipo p={p} />
             </div>
           </div>

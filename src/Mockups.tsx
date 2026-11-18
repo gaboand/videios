@@ -60,6 +60,28 @@ export const NotebookFoto: React.FC<{ ancho: number; children: React.ReactNode }
   );
 };
 
+// Generic version for the other product photos (background removed): the
+// app screen (sw x sh) is mapped onto the photo's screen with a matrix.
+const FOTOS = {
+  celular: { src: "carrusel/celular.png", W: 317, H: 610, sw: 390, sh: 844, radio: 46, m: "matrix3d(0.57993286, -0.054422704, 0, -0.00010829838, 0.00078716672, 0.61202717, 0, -9.2480791e-06, 0, 0, 1, 0, 42, 49, 0, 1)" },
+  tablet: { src: "carrusel/tablet.png", W: 653, H: 488, sw: 1180, sh: 820, radio: 34, m: "matrix3d(0.33689473, -0.068017862, 0, -0.00018501761, -0.034751472, 0.37606338, 0, -1.5924476e-05, 0, 0, 1, 0, 66, 117, 0, 1)" },
+};
+export const DispositivoFoto: React.FC<{ tipo: keyof typeof FOTOS; ancho: number; children: React.ReactNode }> = ({ tipo, ancho, children }) => {
+  const f = FOTOS[tipo];
+  const k = ancho / f.W;
+  return (
+    <div style={{ position: "relative", width: ancho, height: f.H * k }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: f.W, height: f.H, transform: `scale(${k})`, transformOrigin: "0 0" }}>
+        <Img src={staticFile(f.src)} style={{ position: "absolute", left: 0, top: 0, width: f.W, height: f.H }} />
+        <div style={{ position: "absolute", left: 0, top: 0, width: f.sw, height: f.sh, overflow: "hidden", borderRadius: f.radio, transformOrigin: "0 0", transform: f.m }}>
+          {children}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 40%)" }} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Notebook seen from the front and a little above: the lid upright and the
 // base drawn as a trapezoid (keyboard, trackpad and front lip), the whole
 // laptop turned slightly in perspective.
