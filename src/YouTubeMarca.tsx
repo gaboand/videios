@@ -91,7 +91,7 @@ export const BannerLinkedIn: React.FC<{ tipo: "empresa" | "perfil" }> = ({ tipo 
     return (
       <AbsoluteFill style={{ fontFamily: "Montserrat, sans-serif" }}>
         <FondoVideo w={1128} h={191} />
-        <div style={{ position: "absolute", left: 600, right: 70, top: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: 10 }}>
+        <div style={{ position: "absolute", left: 520, right: 170, top: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: 10 }}>
           <div style={{ color: "rgba(255,255,255,0.92)", fontSize: 27.6, fontWeight: 400, letterSpacing: 1.7, whiteSpace: "nowrap" }}>PASIÓN POR LA TECNOLOGÍA</div>
           <div style={{ width: 46, height: 3, borderRadius: 2, background: NARANJA, margin: "10px 0 9px" }} />
           <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12.6, fontWeight: 300, letterSpacing: 2.9 }}>www.axonia.com.ar</div>
