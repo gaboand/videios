@@ -40,60 +40,52 @@ export const TabletReal: React.FC<{ w: number; h: number; ry?: number; rx?: numb
   );
 };
 
-// Notebook: lid with a thin bezel and camera, slightly tilted back, and the
-// base (keyboard and trackpad) lying flat towards the viewer.
-export const NotebookReal: React.FC<{ w: number; h: number; ry?: number; rx?: number; children: React.ReactNode }> = ({ w, h, ry = -16, rx = 14, children }) => {
+// Notebook seen from the front and a little above: the lid upright and the
+// base drawn as a trapezoid (keyboard, trackpad and front lip), the whole
+// laptop turned slightly in perspective.
+export const NotebookReal: React.FC<{ w: number; h: number; ry?: number; rx?: number; children: React.ReactNode }> = ({ w, h, ry = -12, rx = 6, children }) => {
   const B = 16;
   const W = w + 2 * B;
-  const H = h + B + 30;
-  const baseW = W * 1.1;
-  const baseD = H * 0.72;
+  const H = h + B + 26;
+  const baseW = W * 1.16;
+  const baseH = H * 0.2;
+  const lado = ((baseW - W * 0.98) / 2 / baseW) * 100;
   return (
-    <div style={{ position: "relative", width: W, height: H + baseD * 0.55 + 40, perspective: 3600 }}>
-      <div style={sombraPiso(baseW, H + baseD * 0.35, 0.6)} />
-      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: H, transformStyle: "preserve-3d", transform: `rotateX(${rx}deg) rotateY(${ry}deg)`, transformOrigin: "50% 100%" }}>
-        {/* Base, hinged at the bottom of the lid. */}
-        <div
-          style={{
-            position: "absolute",
-            left: (W - baseW) / 2,
-            top: H,
-            width: baseW,
-            height: baseD,
-            transformOrigin: "50% 0",
-            transform: "rotateX(-80deg)",
-            borderRadius: "10px 10px 26px 26px",
-            background: "linear-gradient(180deg, #4a4e55, #2e3136)",
-            boxShadow: "inset 0 2px 0 rgba(255,255,255,0.15), inset 0 -6px 0 #1d1f23",
-          }}
-        >
-          {/* Keyboard. */}
-          <div
-            style={{
-              position: "absolute",
-              left: "9%",
-              right: "9%",
-              top: "8%",
-              height: "46%",
-              borderRadius: 10,
-              background: "#16181b",
-              backgroundImage:
-                "repeating-linear-gradient(90deg, transparent 0 3px, #2a2d32 3px 34px, transparent 34px 38px), repeating-linear-gradient(0deg, transparent 0 4px, rgba(0,0,0,0) 4px 30px, #16181b 30px 36px)",
-              opacity: 0.95,
-            }}
-          />
-          {/* Trackpad. */}
-          <div style={{ position: "absolute", left: "33%", right: "33%", top: "60%", height: "30%", borderRadius: 12, background: "#3a3e44", boxShadow: "inset 0 0 0 2px #2b2e33" }} />
-        </div>
+    <div style={{ position: "relative", width: baseW, height: H + baseH + 70, perspective: 3600 }}>
+      <div style={sombraPiso(baseW, H + baseH - 6, 0.6)} />
+      <div style={{ position: "absolute", left: 0, top: 0, width: baseW, transform: `rotateY(${ry}deg) rotateX(${rx}deg)`, transformOrigin: "50% 100%" }}>
         {/* Lid. */}
-        <div style={{ position: "absolute", inset: 0, borderRadius: "24px 24px 8px 8px", padding: 3, background: "linear-gradient(135deg, #7d8796, #2b3038 45%, #5c6676)", boxShadow: "0 40px 90px rgba(0,0,0,0.5)" }}>
-          <div style={{ width: "100%", height: "100%", borderRadius: "21px 21px 6px 6px", background: "#0b0d10", boxSizing: "border-box", padding: `${B}px ${B}px 0`, position: "relative" }}>
+        <div style={{ marginLeft: (baseW - W) / 2, width: W, height: H, borderRadius: "22px 22px 6px 6px", padding: 3, boxSizing: "border-box", background: "linear-gradient(135deg, #7d8796, #2b3038 45%, #5c6676)", boxShadow: "0 30px 70px rgba(0,0,0,0.45)" }}>
+          <div style={{ width: "100%", height: "100%", borderRadius: "19px 19px 4px 4px", background: "#0b0d10", boxSizing: "border-box", padding: `${B}px ${B}px 0`, position: "relative" }}>
             <div style={{ position: "absolute", left: "50%", top: 5, width: 7, height: 7, marginLeft: -3.5, borderRadius: "50%", background: "#26324a" }} />
             <div style={{ width: w, height: h, borderRadius: 6, overflow: "hidden", position: "relative" }}>
               {children}
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%)" }} />
             </div>
           </div>
+        </div>
+        {/* Hinge. */}
+        <div style={{ marginLeft: (baseW - W * 0.98) / 2, width: W * 0.98, height: 8, background: "linear-gradient(#1a1c20, #3a3e45)" }} />
+        {/* Base: keyboard deck in perspective. */}
+        <div style={{ position: "relative", width: baseW, height: baseH, clipPath: `polygon(${lado}% 0, ${100 - lado}% 0, 100% 100%, 0 100%)`, background: "linear-gradient(180deg, #555a62, #3a3e45 70%, #2c2f34)" }}>
+          <div
+            style={{
+              position: "absolute",
+              left: `${lado + 6}%`,
+              right: `${lado + 6}%`,
+              top: "10%",
+              height: "52%",
+              clipPath: "polygon(2% 0, 98% 0, 100% 100%, 0 100%)",
+              background: "#17191c",
+              backgroundImage: "repeating-linear-gradient(90deg, #2b2e33 0 30px, #17191c 30px 35px), repeating-linear-gradient(0deg, transparent 0 22px, #17191c 22px 27px)",
+              backgroundBlendMode: "darken",
+            }}
+          />
+          <div style={{ position: "absolute", left: "40%", right: "40%", top: "68%", height: "24%", borderRadius: 6, background: "#474b52", boxShadow: "inset 0 0 0 2px #3a3d43" }} />
+        </div>
+        {/* Front lip. */}
+        <div style={{ width: baseW, height: 16, borderRadius: "0 0 18px 18px", background: "linear-gradient(#9aa0a9, #5d626a)", position: "relative" }}>
+          <div style={{ position: "absolute", left: "44%", right: "44%", top: 0, height: 7, borderRadius: "0 0 8px 8px", background: "#4a4e55" }} />
         </div>
       </div>
     </div>

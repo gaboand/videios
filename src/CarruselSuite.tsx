@@ -51,7 +51,7 @@ const PRODUCTOS: Producto[] = [
   { Pantalla: PantallaCollections, frame: 560, disp: "notebook", etiqueta: "COBRANZAS", titulo: "Cada cliente, en su estrategia de mora", puntos: ["Segmentación de la cartera", "Promesas de pago", "Todos los ciclos de mora"] },
   { Pantalla: PantallaContactFlow, frame: 120, disp: "tablet", etiqueta: "CONTACT FLOW", titulo: "La productividad de un mes, en horas", puntos: ["Campañas automáticas", "Agentes de IA", "Segmentación de casos"] },
   { Pantalla: PantallaSucursal, frame: 400, disp: "celular", etiqueta: "SUCURSAL VIRTUAL", titulo: "Tu cliente se autogestiona", puntos: ["Préstamos y cuotas al día", "Pagos y nuevos préstamos online", "Reclamos desde la app"] },
-  { Pantalla: PantallaTienda, frame: 460, disp: "notebook", etiqueta: "TIENDA ONLINE", titulo: "Financiación en el checkout", puntos: ["Catálogo con cuotas", "Préstamo al momento de pagar", "Aprobación al instante"] },
+  { Pantalla: PantallaTienda, frame: 220, disp: "notebook", etiqueta: "TIENDA ONLINE", titulo: "Financiación en el checkout", puntos: ["Catálogo con cuotas", "Préstamo al momento de pagar", "Aprobación al instante"] },
 ];
 export const CARRUSEL_SUITE_PLACAS = PRODUCTOS.length + 2;
 
@@ -150,7 +150,7 @@ const PlacaProducto: React.FC<{ p: Producto; n: number }> = ({ p, n }) => {
       ) : (
         <>
           <div style={{ position: "absolute", left: 0, right: 0, top: p.disp === "tablet" ? 420 : 430, display: "flex", justifyContent: "center", perspective: 2600 }}>
-            <div style={{ transform: `scale(${p.disp === "tablet" ? 0.74 : 0.62})`, transformOrigin: "50% 0" }}>
+            <div style={{ transform: `scale(${p.disp === "tablet" ? 0.74 : 0.58})`, transformOrigin: "50% 0" }}>
               <Equipo p={p} />
             </div>
           </div>
