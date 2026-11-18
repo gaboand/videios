@@ -60,34 +60,40 @@ const PRODUCTOS = ["Onboarding", "Motor de decisión", "Core Lending", "Cobranza
 export const BannerLinkedIn: React.FC<{ tipo: "empresa" | "perfil" }> = ({ tipo }) => {
   const e = tipo === "empresa";
   const k = e ? 0.48 : 0.72;
+  const pildoras = (
+    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: e ? "center" : "flex-start", gap: 10 * k, marginTop: 22 * k }}>
+      {PRODUCTOS.map((p) => (
+        <div key={p} style={{ padding: `${7 * k}px ${16 * k}px`, borderRadius: 999, border: "1px solid rgba(255,255,255,0.22)", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.9)", fontSize: 19 * k, fontWeight: 600 }}>
+          {p}
+        </div>
+      ))}
+    </div>
+  );
+  if (e) {
+    // The page logo already shows Axonia: only the company line, the site
+    // and the products.
+    return (
+      <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
+        <FondoAbstracto paleta="gris" estilo="ondas" />
+        <div style={{ position: "absolute", top: 0, bottom: 0, left: 250, right: 70, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <div style={{ color: "white", fontSize: 40, fontWeight: 800, letterSpacing: 4 }}>PASIÓN POR LA TECNOLOGÍA</div>
+          <div style={{ width: 46, height: 3, borderRadius: 2, background: NARANJA, margin: "12px 0 10px" }} />
+          <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, fontWeight: 600, letterSpacing: 3 }}>www.axonia.com.ar</div>
+          {pildoras}
+        </div>
+      </AbsoluteFill>
+    );
+  }
   return (
     <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
       <FondoAbstracto paleta="gris" estilo="ondas" />
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          right: e ? 70 : 90,
-          left: e ? 250 : 520,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: e ? "center" : "flex-end",
-          gap: 60 * k,
-        }}
-      >
+      <div style={{ position: "absolute", top: 0, bottom: 0, right: 90, left: 520, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 60 * k }}>
         <Logo w={420 * k} />
         <div style={{ width: 3 * k, height: 190 * k, background: "rgba(255,255,255,0.25)" }} />
         <div>
           <div style={{ color: "white", fontSize: 54 * k, fontWeight: 800, lineHeight: 1.1, letterSpacing: -1 * k }}>Todo el ciclo del crédito.</div>
           <div style={{ color: NARANJA, fontSize: 54 * k, fontWeight: 800, lineHeight: 1.1, letterSpacing: -1 * k }}>En una sola plataforma.</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 * k, marginTop: 22 * k }}>
-            {PRODUCTOS.map((p) => (
-              <div key={p} style={{ padding: `${7 * k}px ${16 * k}px`, borderRadius: 999, border: "1px solid rgba(255,255,255,0.22)", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.9)", fontSize: 19 * k, fontWeight: 600 }}>
-                {p}
-              </div>
-            ))}
-          </div>
+          {pildoras}
           <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 22 * k, fontWeight: 600, marginTop: 16 * k, letterSpacing: 2 * k }}>axonia.com.ar</div>
         </div>
       </div>
