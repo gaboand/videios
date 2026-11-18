@@ -91,10 +91,17 @@ export const BannerLinkedIn: React.FC<{ tipo: "empresa" | "perfil" }> = ({ tipo 
     return (
       <AbsoluteFill style={{ fontFamily: "Montserrat, sans-serif" }}>
         <FondoVideo w={1128} h={191} />
-        <div style={{ position: "absolute", left: 600, right: 70, top: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: 18 }}>
-          <div style={{ color: "rgba(255,255,255,0.92)", fontSize: 24, fontWeight: 400, letterSpacing: 1.5, whiteSpace: "nowrap" }}>PASIÓN POR LA TECNOLOGÍA</div>
-          <div style={{ width: 34, height: 2, borderRadius: 1, background: NARANJA, margin: "9px 0 8px" }} />
-          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 300, letterSpacing: 2.5 }}>www.axonia.com.ar</div>
+        <div style={{ position: "absolute", left: 600, right: 70, top: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: 10 }}>
+          <div style={{ color: "rgba(255,255,255,0.92)", fontSize: 27.6, fontWeight: 400, letterSpacing: 1.7, whiteSpace: "nowrap" }}>PASIÓN POR LA TECNOLOGÍA</div>
+          <div style={{ width: 46, height: 3, borderRadius: 2, background: NARANJA, margin: "10px 0 9px" }} />
+          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12.6, fontWeight: 300, letterSpacing: 2.9 }}>www.axonia.com.ar</div>
+          <div style={{ display: "flex", gap: 7, marginTop: 14 }}>
+            {["Onboarding", "Motor de decisión", "Core Lending", "Cobranzas"].map((t) => (
+              <div key={t} style={{ padding: "4px 11px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.22)", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.88)", fontSize: 10, fontWeight: 400, letterSpacing: 0.3, whiteSpace: "nowrap" }}>
+                {t}
+              </div>
+            ))}
+          </div>
         </div>
       </AbsoluteFill>
     );
