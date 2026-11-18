@@ -22,7 +22,7 @@ import {
   consolidacionSchema,
 } from "./ConsolidacionDeudas";
 import { INTEGRAL_FRAMES, Integral } from "./Integral";
-import { AvatarYouTube, BannerYouTube } from "./YouTubeMarca";
+import { AvatarYouTube, BannerLinkedIn, BannerYouTube } from "./YouTubeMarca";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { CL_INTEGRAL_FRAMES, CoreLendingIntegral } from "./CoreLendingIntegral";
 import { OB_INTEGRAL_FRAMES, OnboardingIntegral } from "./OnboardingIntegral";
@@ -464,6 +464,26 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={2560}
         height={1440}
+      />
+      <Composition
+        // LinkedIn company page cover: npx remotion still BannerLinkedIn --scale=2
+        id="BannerLinkedIn"
+        component={BannerLinkedIn}
+        defaultProps={{ tipo: "empresa" as const }}
+        durationInFrames={1}
+        fps={30}
+        width={1128}
+        height={191}
+      />
+      <Composition
+        // LinkedIn personal profile cover: npx remotion still BannerLinkedInPerfil --scale=2
+        id="BannerLinkedInPerfil"
+        component={BannerLinkedIn}
+        defaultProps={{ tipo: "perfil" as const }}
+        durationInFrames={1}
+        fps={30}
+        width={1584}
+        height={396}
       />
       <Composition
         // YouTube channel profile picture: npx remotion still AvatarYouTube
