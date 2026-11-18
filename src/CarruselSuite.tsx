@@ -62,16 +62,20 @@ const Paginas: React.FC<{ n: number }> = ({ n }) => (
   </>
 );
 
+// Cover: short text on the left and a photo panel bleeding off the right
+// edge (the usual carousel opening), cropped to fill, never stretched.
 const Portada: React.FC = () => (
   <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
     <FondoAbstracto paleta="gris" estilo="ondas" />
-    <div style={{ position: "absolute", left: 90, right: 90, top: 300 }}>
-      <Logo w={560} />
-      <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 30, fontWeight: 600, letterSpacing: 6, marginTop: 26 }}>SUITE DE CRÉDITOS</div>
-      <div style={{ width: 90, height: 7, borderRadius: 4, background: NARANJA, margin: "70px 0 50px" }} />
-      <div style={{ color: "white", fontSize: 84, fontWeight: 800, lineHeight: 1.05, letterSpacing: -2 }}>Todo el ciclo del crédito.</div>
-      <div style={{ color: NARANJA, fontSize: 84, fontWeight: 800, lineHeight: 1.05, letterSpacing: -2, marginTop: 6 }}>En una sola plataforma.</div>
-      <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 34, fontWeight: 500, marginTop: 60 }}>Deslizá y conocé cada módulo →</div>
+    <div style={{ position: "absolute", right: -40, top: 110, bottom: 150, width: 440, borderRadius: 32, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.12)" }}>
+      <Img src={staticFile("carrusel/portada-matriz.jpg")} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "60% 50%" }} />
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(20,22,26,0.35), rgba(20,22,26,0) 40%)" }} />
+    </div>
+    <div style={{ position: "absolute", left: 80, width: 520, top: 330 }}>
+      <Logo w={400} />
+      <div style={{ width: 80, height: 7, borderRadius: 4, background: NARANJA, margin: "64px 0 44px" }} />
+      <div style={{ color: "white", fontSize: 72, fontWeight: 800, lineHeight: 1.05, letterSpacing: -1.5 }}>Todo el ciclo del crédito.</div>
+      <div style={{ color: NARANJA, fontSize: 72, fontWeight: 800, lineHeight: 1.05, letterSpacing: -1.5, marginTop: 8 }}>En una sola plataforma.</div>
     </div>
     <Paginas n={1} />
   </AbsoluteFill>
@@ -111,7 +115,6 @@ const Cierre: React.FC = () => (
       <div style={{ color: "white", fontSize: 64, fontWeight: 800, lineHeight: 1.1, letterSpacing: -1, marginTop: 80 }}>
         Completamos el proceso <span style={{ color: NARANJA }}>que te falta</span>.
       </div>
-      <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 34, fontWeight: 500, lineHeight: 1.35, marginTop: 36 }}>Desarrollada por quienes gestionaron procesos de crédito en las principales entidades financieras.</div>
       <div style={{ marginTop: 80, padding: "26px 60px", borderRadius: 999, background: NARANJA, color: "white", fontSize: 40, fontWeight: 700, boxShadow: "0 12px 40px rgba(255,140,66,0.45)" }}>Agendá una demo</div>
       <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 32, fontWeight: 600, letterSpacing: 2, marginTop: 30 }}>axonia.com.ar</div>
     </div>
