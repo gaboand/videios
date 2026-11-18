@@ -170,10 +170,10 @@ export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () 
     variante="c"
     conVideo
     textoV={0.84}
-    titulo="¿Y si todo el ciclo del crédito estuviera en un solo lugar?"
+    titulo="¿Cuántas ventas perdés por no poder financiarlas?"
     bajada={
       <>
-        Originación, gestión y cobranza, <span style={{ color: NARANJA, fontWeight: 700 }}>en una plataforma</span>.
+        Sumá crédito a tu negocio, <span style={{ color: NARANJA, fontWeight: 700 }}>con el módulo que necesitás</span>.
       </>
     }
   />
