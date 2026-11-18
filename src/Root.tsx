@@ -26,6 +26,7 @@ import { AvatarYouTube, BannerLinkedIn, BannerYouTube } from "./YouTubeMarca";
 import { CarruselSuite } from "./CarruselSuite";
 import { CarruselContactFlow } from "./CarruselContactFlow";
 import { CarruselOnboarding } from "./CarruselOnboarding";
+import { CarruselMotor } from "./CarruselMotor";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { CL_INTEGRAL_FRAMES, CoreLendingIntegral } from "./CoreLendingIntegral";
 import { OB_INTEGRAL_FRAMES, OnboardingIntegral } from "./OnboardingIntegral";
@@ -544,6 +545,26 @@ export const RemotionRoot: React.FC = () => {
         component={CarruselOnboarding}
         defaultProps={{ placa: 1 }}
         durationInFrames={1300}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        // Decision engine carousel (4:5)
+        id="CarruselMotor"
+        component={CarruselMotor}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1500}
+        fps={30}
+        width={1080}
+        height={1350}
+      />
+      <Composition
+        // Decision engine carousel (square)
+        id="CarruselMotorCuadrado"
+        component={CarruselMotor}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1500}
         fps={30}
         width={1080}
         height={1080}
