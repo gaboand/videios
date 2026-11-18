@@ -73,10 +73,12 @@ Tono B2B, de diseñador y publicista: le hablan a quien decide en una entidad o 
 - `ContactFlowIntegral`/`ContactFlowIntegralMovil` (`src/ContactFlowIntegral.tsx`, 32,5 s): mismo esquema con `public/videos/escritorio.mp4`, locución `public/voz/locucion-contactflow.mp3` (voz Camila) y píldoras propias.
 - `CoreLendingIntegral`/`CoreLendingIntegralMovil` (`src/CoreLendingIntegral.tsx`, 53 s): gancho con `public/videos/cartera.mp4`, el `CoreLendingDinamico` entero, títulos por sección, textos laterales (`LATERALES`) con los temas del producto, locución `public/voz/locucion-corelending.mp3` (Camila). En 9:16 el celular se achica y se corre a la derecha (`apartaV`) y los textos van en columna a la izquierda.
 - `OnboardingIntegral`/`OnboardingIntegralMovil` (`src/OnboardingIntegral.tsx`, 55 s): misma receta (`src/Publicitario.tsx`, `armarPublicitario`) con `public/videos/firma.mp4` (al 70%) y locución `public/voz/locucion-onboarding.mp3`. No decir "validez legal" de la firma.
+- `MotorIntegral`/`MotorIntegralMovil` (`src/MotorIntegral.tsx`, 60 s): misma receta con `public/videos/matriz.mp4` (al 85%) y locución `public/voz/locucion-motor.mp3`. Nada de "sin programar"/"sin código": "editor visual". En 9:16 los laterales salen de a 3 como máximo.
 - Locuciones de ElevenLabs las genera el usuario; entre frases nunca más de 1,3 s de silencio (el guion tiene que llenar el video); el guion se pasa en un solo bloque con pausas `<break time="0.8s" />` de ElevenLabs; se ubican frase por frase (`VOZ`: [desde, hasta en la grabación, inicio en el video]) detectando silencios con `ffmpeg silencedetect`.
 - Logo chico arriba a la derecha (`MarcaAgua`) hasta el cierre.
 - En 9:16 respetar el área segura de Reels/TikTok: títulos a 255 px de arriba, subtítulos a 400 px de abajo. El celular nunca pegado al borde (zoom de tramo 4% en 9:16; `dxExtraV` para centrar tomas que se van a un costado).
 
 ## Canal y marca
 
+- LinkedIn: portadas `BannerLinkedIn` (página de empresa, 1128×191, sin logo: "PASIÓN POR LA TECNOLOGÍA", www.axonia.com.ar y píldoras; la esquina de abajo a la izquierda libre para el logo) y `BannerLinkedInPerfil` (1584×396). Fondo de los videos sin aplastar (`FondoAbstracto` con `tam` 1920×1080 escalado). Renderizar con `--scale=2`.
 - YouTube: canal Axonia `@axonia_global`, vinculado a Google Ads. Banner y foto de perfil: `BannerYouTube`/`AvatarYouTube` (`src/YouTubeMarca.tsx`).
