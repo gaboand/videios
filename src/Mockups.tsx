@@ -1,3 +1,4 @@
+import { Img, staticFile } from "remotion";
 // Realistic device mockups for stills (carousels): a tablet and a notebook
 // seen in perspective, with thin bezels, metal rims, a visible edge and a
 // soft shadow on the floor. The screen content is passed as children at its
@@ -34,6 +35,25 @@ export const TabletReal: React.FC<{ w: number; h: number; ry?: number; rx?: numb
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 35%)" }} />
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Notebook from a product photo (public/carrusel/notebook.png, 1084x670,
+// background removed): the app screen (1280x800) is mapped onto the photo's
+// screen with a perspective matrix, so it sits exactly on the glass.
+const NB_MATRIZ = "matrix3d(0.36369052, -0.086443191, 0, -0.00018382784, -0.059204887, 0.44207602, 0, -3.0362164e-05, 0, 0, 1, 0, 303, 142, 0, 1)";
+export const NotebookFoto: React.FC<{ ancho: number; children: React.ReactNode }> = ({ ancho, children }) => {
+  const k = ancho / 1084;
+  return (
+    <div style={{ position: "relative", width: ancho, height: 670 * k }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: 1084, height: 670, transform: `scale(${k})`, transformOrigin: "0 0" }}>
+        <Img src={staticFile("carrusel/notebook.png")} style={{ position: "absolute", left: 0, top: 0, width: 1084, height: 670 }} />
+        <div style={{ position: "absolute", left: 0, top: 0, width: 1280, height: 800, overflow: "hidden", transformOrigin: "0 0", transform: NB_MATRIZ }}>
+          {children}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 40%)" }} />
         </div>
       </div>
     </div>
