@@ -9,11 +9,11 @@ const { Componente, total } = armarCarrusel({
     foto: "carrusel/portada-matriz.jpg",
     posicion: "60% 50%",
     etiqueta: "MOTOR DE DECISIÓN",
-    linea1: "¿Tu riesgo se mide en mora o en rentabilidad?",
-    tamano: 0.82,
+    linea1: "¿Gestionás el riesgo para bajar la mora o maximizar la rentabilidad?",
+    tamano: 0.74,
     bajada: (
       <>
-        Riesgo y negocio, <span style={{ color: NARANJA_CARRUSEL, fontWeight: 700 }}>en la misma decisión</span>.
+        Hacé las dos cosas, <span style={{ color: NARANJA_CARRUSEL, fontWeight: 700 }}>en la misma decisión</span>.
       </>
     ),
   },
