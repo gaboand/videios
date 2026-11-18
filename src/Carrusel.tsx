@@ -38,7 +38,7 @@ export type Placa = {
 };
 export type ConfigCarrusel = {
   // linea2 (orange) or bajada (lighter line with its own highlight); tamano scales the title font.
-  portada: { foto: string; posicion?: string; etiqueta?: string; linea1: string; linea2?: string; bajada?: React.ReactNode; tamano?: number };
+  portada: { foto: string; posicion?: string; etiqueta?: string; linea1: string; linea2?: string; bajada?: React.ReactNode; tamano?: number; espejo?: boolean };
   placas: Placa[];
   cierre: { etiqueta: string; titulo: React.ReactNode; puntos?: string[] };
 };
@@ -70,7 +70,7 @@ const Portada: React.FC<{ c: ConfigCarrusel["portada"]; total: number }> = ({ c,
   <AbsoluteFill style={{ fontFamily: "Inter, sans-serif" }}>
     <FondoAbstracto paleta="gris" estilo="ondas" />
     <div style={{ position: "absolute", right: -40, top: q ? 90 : 110, bottom: q ? 120 : 150, width: q ? 400 : 440, borderRadius: 32, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.12)" }}>
-      <Img src={staticFile(c.foto)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: c.posicion ?? "50% 50%" }} />
+      <Img src={staticFile(c.foto)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: c.posicion ?? "50% 50%", transform: c.espejo ? "scaleX(-1)" : undefined }} />
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(20,22,26,0.35), rgba(20,22,26,0) 40%)" }} />
     </div>
     <div style={{ position: "absolute", left: 80, width: 520, top: q ? 230 : 330 }}>

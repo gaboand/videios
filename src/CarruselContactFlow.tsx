@@ -8,6 +8,8 @@ const { Componente, total } = armarCarrusel({
   portada: {
     foto: "carrusel/portada-contactflow.jpg",
     posicion: "45% 50%",
+    // Mirrored so the person looks towards the text.
+    espejo: true,
     etiqueta: "CONTACT FLOW",
     linea1: "¿La mora sube y las ventas no acompañan?",
     tamano: 0.82,
