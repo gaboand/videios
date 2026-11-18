@@ -50,7 +50,10 @@ export const GanchoFoto: React.FC<{
   desdeBajada?: number;
   // velocidad: playback rate of the clip (below 1 to stretch a short clip).
   velocidad?: number;
-}> = ({ variante, conVideo, video = "videos/mostrador.mp4", titulo, bajada, desdeBajada = 48, velocidad = 1 }) => {
+  // textoV: scale of the title and line in 9:16 (for long texts that would
+  // reach the subtitles).
+  textoV?: number;
+}> = ({ variante, conVideo, video = "videos/mostrador.mp4", titulo, bajada, desdeBajada = 48, velocidad = 1, textoV = 1 }) => {
   const frame = useCurrentFrame();
   const { width, height, durationInFrames } = useVideoConfig();
   const empuje = interpolate(frame, [0, durationInFrames], [1, 1.08], clamp);
@@ -109,9 +112,9 @@ export const GanchoFoto: React.FC<{
           )}
         </div>
         <div style={vertical ? { position: "absolute", left: 80, right: 80, top: fy + fh + 60 } : { position: "absolute", left: fx + fw + 80, right: 100, top: height / 2 - 150 }}>
-          <Entra desde={14} style={{ color: "white", fontSize: vertical ? 76 : 66, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>{titulo ?? L1}</Entra>
+          <Entra desde={14} style={{ color: "white", fontSize: vertical ? 76 * textoV : 66, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>{titulo ?? L1}</Entra>
           <Entra desde={desdeBajada - 14} style={{ width: 80, height: 6, borderRadius: 3, background: NARANJA, margin: "30px 0" }}>{null}</Entra>
-          <Entra desde={desdeBajada} style={{ color: "rgba(255,255,255,0.9)", fontSize: vertical ? 50 : 44, fontWeight: 500, lineHeight: 1.25 }}>
+          <Entra desde={desdeBajada} style={{ color: "rgba(255,255,255,0.9)", fontSize: vertical ? 50 * textoV : 44, fontWeight: 500, lineHeight: 1.25 }}>
             {bajada ?? (
               <>
                 Que el crédito <span style={{ color: NARANJA, fontWeight: 700 }}>no la frene</span>.
@@ -162,4 +165,16 @@ export const GanchoFoto: React.FC<{
 };
 
 // Editorial look with the props of the other pieces (used by the integral video).
-export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () => <GanchoFoto variante="c" conVideo />;
+export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () => (
+  <GanchoFoto
+    variante="c"
+    conVideo
+    textoV={0.84}
+    titulo="¿Y si todo el ciclo del crédito estuviera en un solo lugar?"
+    bajada={
+      <>
+        Originación, gestión y cobranza, <span style={{ color: NARANJA, fontWeight: 700 }}>en una plataforma</span>.
+      </>
+    }
+  />
+);
