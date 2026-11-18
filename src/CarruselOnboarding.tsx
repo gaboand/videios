@@ -18,8 +18,8 @@ const { Componente, total } = armarCarrusel({
     ),
   },
   placas: [
-    { Pantalla: P, frame: 120, disp: "celular", etiqueta: "CARGA INICIAL", titulo: "Arranca con solo dos datos", puntos: ["DNI y género", "Normalización de nombre y apellido", "Aceptación de términos y condiciones"] },
-    { Pantalla: P, frame: 270, disp: "tablet", etiqueta: "OFERTAS PERSONALIZADAS", titulo: "La oferta justa para cada cliente", puntos: ["Políticas por producto", "Pasos según el perfil", "Ofertas personalizadas"] },
+    { Pantalla: P, frame: 120, disp: "celular", etiqueta: "CARGA INICIAL", titulo: "Comienza con solo dos datos", puntos: ["DNI y género", "Normalización de nombre y apellido", "Aceptación de términos y condiciones"] },
+    { Pantalla: P, frame: 270, disp: "tablet", etiqueta: "ONBOARDING PERSONALIZADO", titulo: "Pasos y ofertas por perfil del cliente", puntos: ["Políticas por producto", "Pasos según el perfil", "Ofertas personalizadas"] },
     { Pantalla: P, frame: 380, disp: "celular", etiqueta: "VERIFICACIONES TEMPRANAS", titulo: "Email y teléfono validados desde el inicio", puntos: ["Verificación de email", "Verificación telefónica", "Datos confiables desde el primer paso"] },
     { Pantalla: P, frame: 560, disp: "tablet", etiqueta: "VALIDACIÓN DE IDENTIDAD", titulo: "Reconocimiento facial con prueba de vida", puntos: ["DNI frente y dorso", "Selfie con prueba de vida", "Prevención de fraude"] },
     { Pantalla: P, frame: 700, disp: "celular", etiqueta: "INTEGRACIONES", titulo: "Confirmaciones por SMS y WhatsApp", puntos: ["Integración con SMS", "Integración con WhatsApp", "Los canales que tu cliente ya usa"] },
