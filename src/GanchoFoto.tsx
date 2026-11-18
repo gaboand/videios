@@ -173,7 +173,7 @@ export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () 
     titulo="¿Cuántas ventas perdés por no poder financiarlas?"
     bajada={
       <>
-        Sumá crédito a tu negocio, <span style={{ color: NARANJA, fontWeight: 700 }}>con el módulo que necesitás</span>.
+        Sumá crédito a tu negocio, <span style={{ color: NARANJA, fontWeight: 700 }}>con los módulos que necesites</span>.
       </>
     }
   />
