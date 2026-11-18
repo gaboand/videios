@@ -37,7 +37,8 @@ export type Placa = {
   puntos: string[];
 };
 export type ConfigCarrusel = {
-  portada: { foto: string; posicion?: string; etiqueta?: string; linea1: string; linea2: string };
+  // linea2 (orange) or bajada (lighter line with its own highlight); tamano scales the title font.
+  portada: { foto: string; posicion?: string; etiqueta?: string; linea1: string; linea2?: string; bajada?: React.ReactNode; tamano?: number };
   placas: Placa[];
   cierre: { etiqueta: string; titulo: React.ReactNode; puntos?: string[] };
 };
@@ -76,8 +77,9 @@ const Portada: React.FC<{ c: ConfigCarrusel["portada"]; total: number }> = ({ c,
       <Logo w={400} />
       {c.etiqueta ? <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 30, fontWeight: 700, letterSpacing: 6, marginTop: 22 }}>{c.etiqueta}</div> : null}
       <div style={{ width: 80, height: 7, borderRadius: 4, background: NARANJA, margin: q ? "48px 0 34px" : "64px 0 44px" }} />
-      <div style={{ color: "white", fontSize: q ? 64 : 72, fontWeight: 800, lineHeight: 1.05, letterSpacing: -1.5 }}>{c.linea1}</div>
-      <div style={{ color: NARANJA, fontSize: q ? 64 : 72, fontWeight: 800, lineHeight: 1.05, letterSpacing: -1.5, marginTop: 8 }}>{c.linea2}</div>
+      <div style={{ color: "white", fontSize: (q ? 64 : 72) * (c.tamano ?? 1), fontWeight: 800, lineHeight: 1.05, letterSpacing: -1.5 }}>{c.linea1}</div>
+      {c.linea2 ? <div style={{ color: NARANJA, fontSize: (q ? 64 : 72) * (c.tamano ?? 1), fontWeight: 800, lineHeight: 1.05, letterSpacing: -1.5, marginTop: 8 }}>{c.linea2}</div> : null}
+      {c.bajada ? <div style={{ color: "rgba(255,255,255,0.9)", fontSize: q ? 34 : 38, fontWeight: 500, lineHeight: 1.3, marginTop: q ? 26 : 34 }}>{c.bajada}</div> : null}
     </div>
     <Paginas n={1} total={total} />
   </AbsoluteFill>

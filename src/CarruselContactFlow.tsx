@@ -5,7 +5,18 @@ import { PantallaContactFlow } from "./ContactFlow";
 // npx remotion still CarruselContactFlow out/carrusel-contactflow/placa-1.png --props='{"placa":1}'
 const P = PantallaContactFlow;
 const { Componente, total } = armarCarrusel({
-  portada: { foto: "carrusel/portada-contactflow.jpg", posicion: "45% 50%", etiqueta: "CONTACT FLOW", linea1: "Contactá primero.", linea2: "Cobrá más." },
+  portada: {
+    foto: "carrusel/portada-contactflow.jpg",
+    posicion: "45% 50%",
+    etiqueta: "CONTACT FLOW",
+    linea1: "¿La mora sube y las ventas no acompañan?",
+    tamano: 0.82,
+    bajada: (
+      <>
+        Lo que antes te llevaba un mes, hoy lo resolvés <span style={{ color: NARANJA_CARRUSEL, fontWeight: 700 }}>en horas</span>.
+      </>
+    ),
+  },
   placas: [
     { Pantalla: P, frame: 120, disp: "tablet", etiqueta: "SALA DE CONTACTO", titulo: "Toda la operación, en tiempo real", puntos: ["Agentes humanos y de IA", "Estado de cada campaña", "Contactabilidad en vivo"] },
     { Pantalla: P, frame: 284, disp: "notebook", etiqueta: "EDITOR DE FLUJOS", titulo: "Tu flujo de gestión, automatizado", puntos: ["Editor visual", "Reglas y reintentos", "Flujos multicanal"] },
