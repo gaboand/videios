@@ -7,7 +7,7 @@ const P = PantallaCore;
 const { Componente, total } = armarCarrusel({
   portada: {
     foto: "carrusel/portada-corelending.jpg",
-    posicion: "14% 50%",
+    posicion: "30% 50%",
     etiqueta: "CORE LENDING",
     linea1: "¿Tu cartera crece más rápido que tu operación?",
     tamano: 0.82,
