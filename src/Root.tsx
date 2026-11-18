@@ -24,6 +24,7 @@ import {
 import { INTEGRAL_FRAMES, Integral } from "./Integral";
 import { AvatarYouTube, BannerLinkedIn, BannerYouTube } from "./YouTubeMarca";
 import { CarruselSuite } from "./CarruselSuite";
+import { CarruselContactFlow } from "./CarruselContactFlow";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { CL_INTEGRAL_FRAMES, CoreLendingIntegral } from "./CoreLendingIntegral";
 import { OB_INTEGRAL_FRAMES, OnboardingIntegral } from "./OnboardingIntegral";
@@ -500,6 +501,26 @@ export const RemotionRoot: React.FC = () => {
         // Suite carousel, square version (1080x1080)
         id="CarruselSuiteCuadrado"
         component={CarruselSuite}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1300}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        // Contact Flow carousel (4:5)
+        id="CarruselContactFlow"
+        component={CarruselContactFlow}
+        defaultProps={{ placa: 1 }}
+        durationInFrames={1300}
+        fps={30}
+        width={1080}
+        height={1350}
+      />
+      <Composition
+        // Contact Flow carousel (square)
+        id="CarruselContactFlowCuadrado"
+        component={CarruselContactFlow}
         defaultProps={{ placa: 1 }}
         durationInFrames={1300}
         fps={30}
