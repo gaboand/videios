@@ -58,7 +58,8 @@ const { Componente, frames } = armarPublicitario({
   Video: MotorDinamico,
   frames: MOTOR_FRAMES,
   gancho: {
-    video: "videos/escritorio.mp4",
+    video: "videos/matriz.mp4",
+    velocidad: 0.85,
     titulo: "¿Tu riesgo se mide en mora o en rentabilidad?",
     bajada: <>Riesgo y negocio, {destacado("en la misma decisión")}.</>,
   },
