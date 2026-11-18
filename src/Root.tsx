@@ -26,6 +26,7 @@ import { AvatarYouTube, BannerYouTube } from "./YouTubeMarca";
 import { CF_INTEGRAL_FRAMES, ContactFlowIntegral } from "./ContactFlowIntegral";
 import { CL_INTEGRAL_FRAMES, CoreLendingIntegral } from "./CoreLendingIntegral";
 import { OB_INTEGRAL_FRAMES, OnboardingIntegral } from "./OnboardingIntegral";
+import { MOTOR_INTEGRAL_FRAMES, MotorIntegral } from "./MotorIntegral";
 import { GANCHO_FRAMES, GanchoCaos } from "./GanchoCaos";
 import { GANCHO_FOTO_FRAMES, GanchoFoto } from "./GanchoFoto";
 import { SUITE_CORTO_FRAMES, SUITE_FRAMES, Suite360, Suite360Corto, suite360Schema } from "./Suite360";
@@ -421,6 +422,26 @@ export const RemotionRoot: React.FC = () => {
         component={OnboardingIntegral}
         defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
         durationInFrames={OB_INTEGRAL_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        // Decision engine ad with hook, voice-over and closing
+        id="MotorIntegral"
+        component={MotorIntegral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={MOTOR_INTEGRAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        // Decision engine ad with hook, voice-over and closing
+        id="MotorIntegralMovil"
+        component={MotorIntegral}
+        defaultProps={{ fondo: "ondas" as const, paleta: "gris" as const }}
+        durationInFrames={MOTOR_INTEGRAL_FRAMES}
         fps={30}
         width={1080}
         height={1920}
