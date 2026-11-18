@@ -9,7 +9,7 @@ const { Componente, total } = armarCarrusel({
     foto: "carrusel/portada-onboarding-facial.jpg",
     posicion: "50% 40%",
     etiqueta: "ONBOARDING DIGITAL",
-    linea1: "¿Cuánto te cuesta dar de alta cada cliente?",
+    linea1: "¿Cuánto esfuerzo te lleva dar de alta cada cliente?",
     tamano: 0.82,
     bajada: (
       <>
