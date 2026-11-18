@@ -62,7 +62,7 @@ const { Componente, frames } = armarPublicitario({
   gancho: {
     video: "videos/firma.mp4",
     velocidad: 0.7,
-    titulo: "¿Cuánto te cuesta dar de alta cada cliente?",
+    titulo: "¿Cuánto esfuerzo te lleva dar de alta cada cliente?",
     bajada: <>Automatizalo {destacado("de punta a punta")}.</>,
   },
   pills: ["100% digital", "Ofertas personalizadas", "Validación de identidad", "Cero papeles"],
