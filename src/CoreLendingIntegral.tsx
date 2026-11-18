@@ -61,7 +61,13 @@ const LATERALES: [number, number, string[], string[]][] = [
   [1068, 1252, ["Avisos de vencimiento", "Carteras en mora", "Central de Deudores"], ["CRM con bitácora documental", "Comisiones por venta", "100% apificado"]],
 ];
 
-const Lateral: React.FC<{ izq: string[]; der: string[]; dur: number }> = ({ izq, der, dur }) => {
+// 9:16 side texts: "costado" moves the phone right and uses the left column;
+// "banda" shows the texts as chips in the band under the title.
+export type ModoV = "costado" | "banda";
+const ventana = (v: number) =>
+  Math.max(0, ...LATERALES.map(([de, a]) => interpolate(v, [de - 14, de, a, a + 14], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) })));
+
+const Lateral: React.FC<{ izq: string[]; der: string[]; dur: number; modoV: ModoV }> = ({ izq, der, dur, modoV }) => {
   const f = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const sale = interpolate(f, [dur - 8, dur], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -73,15 +79,22 @@ const Lateral: React.FC<{ izq: string[]; der: string[]; dur: number }> = ({ izq,
     const g = Math.min(grupos.length - 1, Math.floor(f / tramo));
     const fl = f - g * tramo;
     const fuera = interpolate(fl, [tramo - 8, tramo], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+    const banda = modoV === "banda";
     return (
       <AbsoluteFill>
-        <div style={{ position: "absolute", left: 0, right: 0, bottom: 610, display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+        <div
+          style={
+            banda
+              ? { position: "absolute", left: 50, right: 50, top: 440, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14 }
+              : { position: "absolute", left: 40, width: 400, top: height * 0.6, transform: "translateY(-50%)", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 18 }
+          }
+        >
           {grupos[g].map((t, i) => {
             const a = interpolate(fl, [4 + i * 8, 16 + i * 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
             return (
-              <div key={t} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 26px", borderRadius: 16, background: "rgba(12,14,20,0.86)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 10px 30px rgba(0,0,0,0.45)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: 34, lineHeight: 1.2, whiteSpace: "nowrap", opacity: a * fuera, transform: `translateY(${(1 - a) * 20}px)` }}>
+              <div key={t} style={{ display: "flex", alignItems: "center", gap: 14, padding: banda ? "12px 22px" : "16px 24px", borderRadius: 16, background: "rgba(12,14,20,0.86)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 10px 30px rgba(0,0,0,0.45)", color: "white", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: banda ? 28 : 32, lineHeight: 1.2, whiteSpace: banda ? "nowrap" : "pre-line", opacity: a * fuera, transform: banda ? `translateY(${(1 - a) * 16}px)` : `translateX(${(1 - a) * -30}px)` }}>
                 <div style={{ width: 13, height: 13, borderRadius: 7, background: NARANJA, flexShrink: 0 }} />
-                {t.replace("\n", " ")}
+                {banda ? t.replace("\n", " ") : t}
               </div>
             );
           })}
@@ -153,17 +166,17 @@ const SUBS = VOZ.flatMap(([a, b, en], i) => {
   });
 });
 
-export const CoreLendingIntegral: React.FC<Props> = (props) => (
+export const CoreLendingIntegral: React.FC<Props & { modoV?: ModoV }> = ({ modoV = "costado", ...props }) => (
   <AbsoluteFill style={{ background: "#111" }}>
     {PIEZAS.map(({ p, ini, fin }, i) => (
       <Sequence key={i} from={ini} durationInFrames={fin - ini}>
-        <Pedazo p={p} props={props} entra={i > 0} dur={fin - ini} acerca={null} />
+        <Pedazo p={p.C === CoreLendingDinamico && modoV === "costado" ? { ...p, extra: { apartaV: ventana } } : p} props={props} entra={i > 0} dur={fin - ini} acerca={null} />
       </Sequence>
     ))}
     <MarcaAgua hasta={FIN_VIDEO} />
     {LATERALES.map(([de, a, izq, der]) => (
       <Sequence key={de} from={INI + de} durationInFrames={a - de}>
-        <Lateral izq={izq} der={der} dur={a - de} />
+        <Lateral izq={izq} der={der} dur={a - de} modoV={modoV} />
       </Sequence>
     ))}
     {TITULOS.map(([de, a, etiqueta, frase]) => (

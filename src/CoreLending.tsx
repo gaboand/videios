@@ -1767,7 +1767,9 @@ const SALTOS_CEL: Salto[] = [
 
 const Pantalla: React.FC<{ frame: number; tab: boolean }> = ({ frame, tab }) => (tab ? <PaginaTab frame={frame} /> : <PaginaMovil frame={frame} />);
 
-export const CoreLendingDinamico: React.FC<z.infer<typeof coreLendingSchema>> = ({ fondo, paleta }) => {
+// apartaV (9:16 only, used by the ad): 0..1 per frame; the phone shrinks a bit
+// and moves right to leave a free column on the left for side texts.
+export const CoreLendingDinamico: React.FC<z.infer<typeof coreLendingSchema> & { apartaV?: (frame: number) => number }> = ({ fondo, paleta, apartaV }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const tab = width > height;
@@ -1775,11 +1777,12 @@ export const CoreLendingDinamico: React.FC<z.infer<typeof coreLendingSchema>> = 
   const { w, h } = pantallaDe(tipo, !tab);
   const { H: EH } = exteriorDe(tipo, w, h);
   const c = toma(frame, tab ? TOMAS_TAB : TOMAS_CEL);
-  const esc = ((height * 0.64) / EH) * c.z;
+  const ap = !tab && apartaV ? apartaV(frame) : 0;
+  const esc = ((height * 0.64) / EH) * c.z * (1 - 0.2 * ap);
   const t = spring({ frame, fps, config: { damping: 18, stiffness: 80 } });
   // Device chrome offset (padding + border) so the overlay lines up with the screen.
   const MARCO = tab ? 27 : 17;
-  const dx = -(c.px - w / 2) * esc;
+  const dx = -(c.px - w / 2) * esc + 190 * ap;
   // Keep the top 20% of the video free (for titles), with a margin for the tilt.
   const dy0 = -(c.py - h / 2) * esc;
   const arriba = height * c.cy + dy0 - (EH * esc) / 2;
