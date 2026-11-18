@@ -8,6 +8,7 @@ import { PantallaContactFlow } from "./ContactFlow";
 import { PantallaCore } from "./CoreLending";
 import { Dispositivo } from "./Dispositivos";
 import { FondoAbstracto } from "./FondoAbstracto";
+import { NotebookReal, TabletReal } from "./Mockups";
 import { PantallaMotor } from "./MotorDecision";
 import { PantallaOnboarding } from "./OnboardingApp";
 import { PantallaSucursal } from "./SucursalVirtual";
@@ -99,20 +100,18 @@ const Equipo: React.FC<{ p: Producto }> = ({ p }) => {
   }
   if (p.disp === "tablet") {
     return (
-      <Dispositivo tipo="tablet" w={1180} h={820}>
+      <TabletReal w={1180} h={820}>
         <p.Pantalla frame={p.frame} tab />
-      </Dispositivo>
+      </TabletReal>
     );
   }
   const k = 1280 / 1180;
   return (
-    <Dispositivo tipo="notebook" w={1280} h={800}>
-      <div style={{ width: 1280, height: 800, overflow: "hidden" }}>
-        <div style={{ width: 1180, height: 820, transform: `scale(${k})`, transformOrigin: "0 0" }}>
-          <p.Pantalla frame={p.frame} tab />
-        </div>
+    <NotebookReal w={1280} h={800}>
+      <div style={{ width: 1180, height: 820, transform: `scale(${k})`, transformOrigin: "0 0" }}>
+        <p.Pantalla frame={p.frame} tab />
       </div>
-    </Dispositivo>
+    </NotebookReal>
   );
 };
 
@@ -151,7 +150,7 @@ const PlacaProducto: React.FC<{ p: Producto; n: number }> = ({ p, n }) => {
       ) : (
         <>
           <div style={{ position: "absolute", left: 0, right: 0, top: p.disp === "tablet" ? 420 : 430, display: "flex", justifyContent: "center", perspective: 2600 }}>
-            <div style={{ transform: `scale(${p.disp === "tablet" ? 0.76 : 0.64}) rotateX(6deg)`, transformOrigin: "50% 0" }}>
+            <div style={{ transform: `scale(${p.disp === "tablet" ? 0.74 : 0.62})`, transformOrigin: "50% 0" }}>
               <Equipo p={p} />
             </div>
           </div>
