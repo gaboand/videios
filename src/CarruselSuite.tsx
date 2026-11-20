@@ -10,7 +10,7 @@ import { PantallaTienda } from "./TiendaAxonia";
 // Suite carousel (9 slides), built with the carousel recipe.
 // npx remotion still CarruselSuite out/carrusel-suite/placa-1.png --props='{"placa":1}'
 const { Componente, total } = armarCarrusel({
-  portada: { foto: "carrusel/portada-matriz.jpg", posicion: "60% 50%", linea1: "Todo el ciclo del crédito.", linea2: "En una sola plataforma." },
+  portada: { foto: "carrusel/portada-suite.jpg", posicion: "80% 50%", espejo: true, linea1: "Todo el ciclo del crédito.", linea2: "En una sola plataforma." },
   placas: [
     { Pantalla: PantallaOnboarding, frame: 560, disp: "celular", etiqueta: "ONBOARDING DIGITAL", titulo: "Clientes nuevos en minutos", puntos: ["Validación de identidad con prueba de vida", "Ofertas personalizadas", "Firma desde el celular"] },
     { Pantalla: PantallaMotor, frame: 420, disp: "notebook", etiqueta: "MOTOR DE DECISIÓN", titulo: "Riesgo y negocio, en la misma decisión", puntos: ["Riesgo por canal, producto y perfil", "Rentabilidad ajustada al riesgo", "Champion Challenger"] },
