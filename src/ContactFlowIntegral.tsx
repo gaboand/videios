@@ -17,7 +17,7 @@ const Gancho: React.FC<Props> = () => (
   <GanchoFoto
     variante="c"
     conVideo
-    video="videos/escritorio.mp4"
+    video="videos/pensando.mp4"
     titulo="¿La mora sube y las ventas no acompañan?"
     desdeBajada={46}
     bajada={

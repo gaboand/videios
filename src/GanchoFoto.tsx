@@ -169,7 +169,6 @@ export const GanchoEditorial: React.FC<{ fondo: "ondas"; paleta: "gris" }> = () 
   <GanchoFoto
     variante="c"
     conVideo
-    video="videos/pensando.mp4"
     textoV={0.84}
     titulo="¿Cuántas ventas perdés por no poder financiarlas?"
     bajada={

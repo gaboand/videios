@@ -6,8 +6,8 @@ import { PantallaContactFlow } from "./ContactFlow";
 const P = PantallaContactFlow;
 const { Componente, total } = armarCarrusel({
   portada: {
-    foto: "carrusel/portada-contactflow.jpg",
-    posicion: "45% 50%",
+    foto: "carrusel/portada-pensando.jpg",
+    posicion: "80% 50%",
     // Mirrored so the person looks towards the text.
     espejo: true,
     etiqueta: "CONTACT FLOW",
